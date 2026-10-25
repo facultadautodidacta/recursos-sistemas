@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listas enlazadas con Java | Recursos de Sistemas</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Prism.js para resaltar código Java -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.7;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            border-radius: 0 0 20px 20px;
+            margin-bottom: 40px;
+        }
+
+        .hero h1 {
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .section-card h2 {
+            color: #1e3c72;
+            border-bottom: 3px solid #2a5298;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        .section-card h3 {
+            color: #2a5298;
+            margin-top: 25px;
+            font-weight: 600;
+        }
+
+        .section-card h4 {
+            color: #34495e;
+            margin-top: 20px;
+            font-weight: 600;
+        }
+
+        /* Estilo para bloques de código */
+        pre[class*="language-"] {
+            border-radius: 10px;
+            font-size: 0.95rem;
+            padding: 20px !important;
+            margin: 15px 0;
+            border-left: 5px solid #2a5298;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+        }
+
+        code[class*="language-"] {
+            font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+        }
+
+        /* Código inline */
+        p code, li code, td code {
+            background-color: #ffe6e6;
+            color: #c7254e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        /* Cajas de notas */
+        .nota {
+            background: #e7f3ff;
+            border-left: 5px solid #2196F3;
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+
+        .advertencia {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+
+        .exito {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+
+        /* Diagramas ASCII */
+        .diagrama {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Fira Code', monospace;
+            white-space: pre;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin: 15px 0;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+        }
+
+        /* Tablas */
+        table.table {
+            background: white;
+        }
+
+        table.table thead {
+            background: #1e3c72;
+            color: white;
+        }
+
+        /* Índice lateral pegajoso */
+        .indice {
+            position: sticky;
+            top: 20px;
+        }
+
+        .indice .list-group-item {
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .indice .list-group-item:hover {
+            border-left-color: #2a5298;
+            background-color: #e7f3ff;
+        }
+
+        /* Badges de complejidad */
+        .badge-o1 { background-color: #28a745 !important; }
+        .badge-on { background-color: #ffc107 !important; color: #000 !important; }
+        .badge-on2 { background-color: #dc3545 !important; }
+
+        /* Términos destacados */
+        .termino {
+            background: linear-gradient(transparent 60%, #ffe066 60%);
+            font-weight: 600;
+            padding: 0 2px;
+        }
+
+        footer {
+            background: #1e3c72;
+            color: white;
+            padding: 30px;
+            text-align: center;
+            margin-top: 50px;
+        }
+    </style>
+    <link rel="stylesheet" href="../../public/guide.css">
+    <link rel="stylesheet" href="../../public/linked-list-guide.css">
+</head>
+<body class="guide-page linked-list-page">
+
+<nav class="guide-site-header" aria-label="Navegación principal">
+    <a class="guide-brand" href="../../index.html">
+        <span class="guide-brand-mark" aria-hidden="true">RS</span>
+        <span>Recursos de Sistemas</span>
+    </a>
+    <a class="guide-back-link" href="../../index.html#recursos">← Volver al catálogo</a>
+</nav>
+
+<!-- ============ HERO ============ -->
+<div class="hero">
+    <div class="container">
+        <p class="guide-eyebrow">ESTRUCTURAS DE DATOS · JAVA</p>
+        <h1>Listas enlazadas, paso a paso</h1>
+        <p class="lead mb-0">Comprende los nodos y sus enlaces antes de construir una lista en Java.</p>
+    </div>
+</div>
+
+<main class="guide-content">
+<div class="container-fluid mb-5">
+
+    <div class="row">
+        <!-- ============ ÍNDICE LATERAL ============ -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="indice">
+                <div class="list-group shadow-sm">
+                    <a class="list-group-item list-group-item-action fw-bold bg-light" href="#parte1">📖 En esta guía</a>
+                    <a class="list-group-item list-group-item-action" href="#parte1">1. ¿Qué es una lista enlazada?</a>
+                    <a class="list-group-item list-group-item-action" href="#parte2">2. Ventajas y desventajas</a>
+                    <a class="list-group-item list-group-item-action" href="#parte3">3. Nodo, clase y constructor</a>
+                    <a class="list-group-item list-group-item-action" href="#parte4">4. Construir la lista</a>
+                    <a class="list-group-item list-group-item-action" href="#parte5">5. Complejidades (Big-O)</a>
+                    <a class="list-group-item list-group-item-action" href="#parte6">6. Errores comunes</a>
+                    <a class="list-group-item list-group-item-action" href="#parte7">7. Siguientes pasos</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ CONTENIDO PRINCIPAL ============ -->
+        <div class="col-lg-9">
+
+            <!-- ============ PARTE 1 ============ -->
+            <div class="section-card" id="parte1">
+                <h2>1. ¿Qué es una Lista Enlazada?</h2>
+
+                <h3>Concepto básico</h3>
+                <p>
+                    Imagina una cadena de personas tomadas de la mano. Cada persona (<span class="termino">nodo</span>) sabe quién tiene a su lado derecho, pero no sabe nada de los demás. Para llegar a la persona número 5, debes empezar por la primera e ir avanzando una por una.
+                </p>
+                <p>
+                    Una <span class="termino">lista enlazada</span> es exactamente eso: una estructura de datos lineal donde cada elemento (llamado <strong>nodo</strong>) contiene:
+                </p>
+                <ol>
+                    <li><strong>Un dato</strong> (el valor que guardamos)</li>
+                    <li><strong>Una referencia</strong> (un "puntero") al siguiente nodo</li>
+                </ol>
+                <div class="nota">
+                    <strong>La idea en una frase:</strong> la lista guarda la referencia al primer nodo; cada nodo lleva al siguiente y el último apunta a <code>null</code>.
+                    Para encontrar un nodo, se empieza en la cabeza y se avanza enlace por enlace.
+                </div>
+                <p><strong>Ejemplo:</strong> en <code>cabeza → 10 → 20 → 30 → null</code>, para llegar al 30 primero se visita el 10 y luego el 20. No se salta directamente a una posición.</p>
+
+                <h4>Array vs Lista Enlazada</h4>
+                <ul>
+                    <li><strong>Arreglo:</strong> acceso directo por índice, por ejemplo <code>arr[5]</code>; su longitud queda fija al crearlo.</li>
+                    <li><strong>Lista enlazada:</strong> cada nodo guarda una referencia al siguiente; para avanzar se recorren los enlaces.</li>
+                </ul>
+
+                <h3>Analogía visual</h3>
+                <div class="diagrama">[ Dato | ->] --> [ Dato | ->] --> [ Dato | ->] --> null
+   Nodo 1          Nodo 2          Nodo 3        (fin)</div>
+                <p>El último nodo apunta a <code>null</code> para indicar que la lista termina.</p>
+
+                <h3>Tipos de listas enlazadas</h3>
+                <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr><th>Tipo</th><th>Descripción</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>Simplemente enlazada</strong></td><td>Cada nodo apunta solo al siguiente</td></tr>
+                        <tr><td><strong>Doblemente enlazada</strong></td><td>Cada nodo apunta al siguiente y al anterior</td></tr>
+                        <tr><td><strong>Circular</strong></td><td>El último nodo apunta al primero</td></tr>
+                    </tbody>
+                </table>
+                </div>
+                <p>En esta práctica haremos una <strong>lista simplemente enlazada</strong>, que es la base de todo.</p>
+            </div>
+
+            <!-- ============ PARTE 2 ============ -->
+            <div class="section-card" id="parte2">
+                <h2>2. Ventajas y Desventajas</h2>
+
+                <div class="exito">
+                    <strong>✅ Ventajas:</strong>
+                    <ul class="mb-0">
+                        <li>Tamaño dinámico (crece/decrece en tiempo de ejecución).</li>
+                        <li>Inserción/eliminación al inicio es O(1).</li>
+                        <li>Puede crecer o reducirse sin reservar de antemano un bloque de tamaño fijo.</li>
+                    </ul>
+                </div>
+
+                <div class="advertencia">
+                    <strong>⚠️ Desventajas:</strong>
+                    <ul class="mb-0">
+                        <li>No hay acceso aleatorio (debes recorrer para llegar al índice n).</li>
+                        <li>Usa memoria extra por las referencias.</li>
+                        <li>Peor localidad de caché que un array.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ============ PARTE 3 (AMPLIADA) ============ -->
+            <div class="section-card" id="parte3">
+                <h2>3. Nodo, clase y constructor</h2>
+
+                <p>Para construir la lista necesitamos saber qué representa un nodo y cómo se crea un objeto. Si ya conoces clases y constructores, puedes leer el resumen y continuar con la práctica.</p>
+
+                <h3>3.1 ¿Qué es una clase en Java?</h3>
+                <p>
+                    Una <span class="termino">clase</span> define un tipo de referencia y describe cómo serán los objetos creados a partir de ella. Puede definir:
+                </p>
+                <ul>
+                    <li><strong>Atributos</strong> (también llamados campos o propiedades): los datos que cada objeto tendrá.</li>
+                    <li><strong>Métodos</strong>: las acciones que cada objeto podrá realizar.</li>
+                    <li><strong>Constructores</strong>: cómo se inicializa un objeto al crearlo.</li>
+                </ul>
+
+                <p>Ejemplo mínimo de una clase:</p>
+<pre><code class="language-java">public class Persona {
+    String nombre;   // atributo
+    int edad;        // atributo
+
+    public Persona(String nombre, int edad) {  // constructor
+        this.nombre = nombre;
+        this.edad = edad;
+    }
+}</code></pre>
+
+                <p>
+                    <code>Persona</code> es un tipo que describe objetos; cuando escribes
+                    <code>new Persona("Ana", 25)</code> estás creando un <strong>objeto</strong> concreto: una persona llamada Ana, de 25 años.
+                </p>
+
+                <h3>3.2 ¿Qué es un constructor?</h3>
+                <p>
+                    Un <span class="termino">constructor</span> es un método especial que se ejecuta automáticamente cuando creas un objeto con <code>new</code>. Sus reglas básicas son:
+                </p>
+                <ul>
+                    <li>Tiene el <strong>mismo nombre que la clase</strong>.</li>
+                    <li><strong>No tiene tipo de retorno</strong> (ni siquiera <code>void</code>).</li>
+                    <li>Sirve para <strong>dar valores iniciales</strong> a los atributos del objeto.</li>
+                    <li>Si no declaras ningún constructor, Java proporciona uno predeterminado sin parámetros.</li>
+                </ul>
+
+                <div class="nota">
+                    <strong>Idea clave:</strong> el constructor inicializa el objeto creado con <code>new</code>. En Java se escribe sin tipo de retorno, ni siquiera <code>void</code>.
+                </div>
+
+                <h3>3.3 ¿Por qué se puede crear una clase <code>Nodo</code> "aunque no tenga tipo de dato"?</h3>
+                <p>
+                    Esta es la parte que suele confundir. Vamos a desglosarla:
+                </p>
+
+                <h4>❌ Idea equivocada común</h4>
+                <p>
+                    "Una clase necesita tener un tipo de dato, como <code>int</code> o <code>String</code>."
+                </p>
+
+                <h4>✅ Realidad</h4>
+                <p>
+                    Una clase sí define un tipo: al escribir <code>class Nodo { ... }</code>, creas el tipo por referencia <code>Nodo</code>. Se diferencia de un tipo primitivo como <code>int</code> porque las variables de tipo <code>Nodo</code> guardan una referencia a un objeto.
+                </p>
+
+                <p>Entonces, cuando escribimos:</p>
+
+<pre><code class="language-java">public class Nodo {
+    int dato;
+    Nodo siguiente;
+
+    public Nodo(int dato) {
+        this.dato = dato;
+        this.siguiente = null;
+    }
+}</code></pre>
+
+                <p>están pasando varias cosas a la vez:</p>
+                <ol>
+                    <li>
+                        <strong>Estamos definiendo un nuevo tipo de dato</strong> llamado <code>Nodo</code>. A partir de ahora podemos declarar variables como <code>Nodo x;</code> igual que declaramos <code>int x;</code>.
+                    </li>
+                    <li>
+                        <strong>Dentro de la clase</strong> declaramos <code>Nodo siguiente;</code>. Esa variable puede referirse a otro objeto <code>Nodo</code>; este patrón se llama <span class="termino">auto-referencia</span>.
+                    </li>
+                    <li>
+                        <strong>El constructor</strong> <code>public Nodo(int dato)</code> recibe un <code>int</code> y lo guarda en el atributo <code>dato</code>. El atributo <code>siguiente</code> se inicializa a <code>null</code> porque aún no hay ningún otro nodo al cual apuntar.
+                    </li>
+                </ol>
+
+                <h4>¿Por qué <code>Nodo</code> puede referirse a otro <code>Nodo</code>?</h4>
+                <p>
+                    Porque <code>siguiente</code> guarda una referencia, no un nodo completo dentro del nodo. Así se pueden crear objetos separados y enlazarlos. Si no existe un nodo siguiente, la referencia vale <code>null</code>.
+                </p>
+
+                <div class="diagrama">Variable  →  [ dato: 10 | siguiente: → ]  →  [ dato: 20 | siguiente: null ]
+   de tipo Nodo        objeto Nodo #1              objeto Nodo #2</div>
+
+                <h4>🔑 Resumen de por qué funciona</h4>
+                <ul>
+                    <li><code>Nodo</code> es una clase y también el tipo de sus objetos.</li>
+                    <li><code>Nodo siguiente;</code> guarda una referencia a otro nodo, o <code>null</code>.</li>
+                    <li><code>new Nodo(5)</code> crea un nodo y su constructor guarda el valor <code>5</code>.</li>
+                </ul>
+
+                <div class="nota">
+                    Piensa en cada nodo como una caja con un valor y una flecha. La flecha apunta a otra caja o queda vacía (<code>null</code>); no contiene otra caja dentro.
+                </div>
+            </div>
+
+            <!-- ============ PARTE 4 ============ -->
+            <div class="section-card" id="parte4">
+                <h2>4. Práctica paso a paso en Java</h2>
+
+                <p>Vamos a construir una lista enlazada desde cero. <strong>No usaremos <code>java.util.LinkedList</code></strong>, la construiremos nosotros para entenderla.</p>
+
+                <h3>Estructura del proyecto</h3>
+                <div class="diagrama">ListaEnlazada.java   ← Gestiona la lista e incluye la clase Nodo
+Main.java            ← Crea la lista y prueba sus operaciones</div>
+
+                <p class="nota"><strong>Cómo leer los ejemplos:</strong> los siguientes fragmentos muestran la clase y sus métodos por separado para explicarlos. En el código completo, <code>Nodo</code> queda como clase interna privada de <code>ListaEnlazada</code>; no necesitas crear un archivo <code>Nodo.java</code>.</p>
+
+                <h3>PASO 1: Representar un nodo</h3>
+                <p>El nodo guarda un dato y la referencia al siguiente. El ejemplo independiente ayuda a ver sus dos partes; más adelante quedará dentro de la lista.</p>
+
+<pre><code class="language-java">public class Nodo {
+    // El valor que almacena este nodo.
+    int dato;
+
+    // Referencia al SIGUIENTE nodo de la lista.
+    // Si este nodo es el último, 'siguiente' será null.
+    Nodo siguiente;
+
+    // ===== CONSTRUCTOR =====
+    // Recibe el dato; siguiente inicia en null.
+    public Nodo(int dato) {
+        this.dato = dato;
+        this.siguiente = null;   // explícito para que quede claro
+    }
+}</code></pre>
+
+                <p><strong>Puntos clave a entender:</strong></p>
+                <ul>
+                    <li><code>int dato;</code> → aquí se guarda el valor. Si quisieras una lista de Strings, sería <code>String dato;</code>.</li>
+                    <li><code>Nodo siguiente;</code> → ¡Esto es la magia! Un nodo contiene una referencia a otro nodo <strong>del mismo tipo</strong>. Esto es lo que forma la "cadena".</li>
+                    <li>El constructor solo pide el dato, porque al crear un nodo nuevo siempre estará "suelto" (no apunta a nada todavía).</li>
+                </ul>
+                <div class="nota">
+                    <strong>Primera traza:</strong> para una lista vacía, <code>cabeza = null</code>. Al insertar el primer dato (por ejemplo, 10), se crea <code>[10 | null]</code> y <code>cabeza</code> apunta a ese nodo. Al insertar 20 al final, el enlace del nodo 10 apunta al nodo 20.
+                </div>
+
+                <h3>PASO 2: Crear la clase <code>ListaEnlazada</code></h3>
+                <p>Esta clase es el "administrador". Guarda la referencia al primer nodo (llamada <strong>cabeza</strong> o <strong>head</strong>) y ofrece los métodos para operar.</p>
+
+<pre><code class="language-java">public class ListaEnlazada {
+
+    // ===== ATRIBUTO PRINCIPAL =====
+    // 'cabeza' apunta al PRIMER nodo de la lista.
+    // Si la lista está vacía, cabeza == null.
+    private Nodo cabeza;
+
+    // ===== CONSTRUCTOR =====
+    // Al crear la lista, está vacía: cabeza apunta a null.
+    public ListaEnlazada() {
+        this.cabeza = null;
+    }</code></pre>
+
+                <p>Ahora vamos a añadir los métodos <strong>uno por uno</strong>, explicando cada línea.</p>
+
+                <h3>PASO 3: Método <code>estaVacia()</code></h3>
+                <p>Antes de operar, conviene saber si la lista tiene elementos.</p>
+
+<pre><code class="language-java">// Devuelve true si la lista no tiene ningún nodo.
+public boolean estaVacia() {
+    return cabeza == null;
+}</code></pre>
+
+                <p><strong>Explicación:</strong> si <code>cabeza</code> es <code>null</code>, significa que no hay ni siquiera un primer nodo, por lo tanto la lista está vacía.</p>
+
+                <h3>PASO 4: Método <code>insertarAlInicio(int dato)</code></h3>
+                <p>Inserta un nodo al principio. Es la operación <strong>más eficiente</strong> de una lista enlazada: O(1).</p>
+
+<pre><code class="language-java">public void insertarAlInicio(int dato) {
+    // 1) Creamos el nuevo nodo con el dato recibido.
+    //    En este momento: nuevo.siguiente == null, y 'cabeza'
+    //    sigue apuntando al antiguo primer nodo.
+    Nodo nuevo = new Nodo(dato);
+
+    // 2) Hacemos que el nuevo nodo apunte al que era el primer nodo.
+    //    Esto "engancha" el nuevo nodo delante de la lista actual.
+    nuevo.siguiente = cabeza;
+
+    // 3) Actualizamos 'cabeza' para que apunte al nuevo nodo.
+    //    Ahora el nuevo nodo es oficialmente el primero.
+    cabeza = nuevo;
+}</code></pre>
+
+                <p><strong>Traza visual.</strong> Supón que la lista tiene <code>10 → 20 → null</code>:</p>
+
+                <div class="diagrama">Antes:  cabeza → [10| →] → [20| →] → null
+
+Paso 1: creamos nuevo = [5| →] (siguiente = null)
+Paso 2: nuevo.siguiente = cabeza   ⇒  [5| →] → [10| →] → [20| →] → null
+Paso 3: cabeza = nuevo             ⇒  cabeza → [5| →] → [10| →] → [20| →] → null</div>
+
+                <div class="advertencia">
+                    <strong>⚠️ El orden importa:</strong> si hiciéramos <code>cabeza = nuevo</code> antes de <code>nuevo.siguiente = cabeza</code>, perderíamos la referencia al resto de la lista.
+                </div>
+
+                <h3>PASO 5: Método <code>insertarAlFinal(int dato)</code></h3>
+                <p>Aquí sí debemos <strong>recorrer</strong> toda la lista para llegar al último nodo. Coste O(n).</p>
+
+<pre><code class="language-java">public void insertarAlFinal(int dato) {
+    // 1) Creamos el nuevo nodo.
+    Nodo nuevo = new Nodo(dato);
+
+    // 2) Caso especial: si la lista está vacía,
+    //    el nuevo nodo pasa a ser la cabeza.
+    if (cabeza == null) {
+        cabeza = nuevo;
+        return; // salimos del método
+    }
+
+    // 3) Si no está vacía, recorremos hasta el ÚLTIMO nodo.
+    //    Empezamos desde la cabeza con un puntero auxiliar 'actual'.
+    Nodo actual = cabeza;
+
+    //    Mientras 'actual.siguiente' NO sea null, avanzamos.
+    //    Cuando 'actual.siguiente == null', significa que 'actual'
+    //    es el último nodo de la lista.
+    while (actual.siguiente != null) {
+        actual = actual.siguiente;
+    }
+
+    // 4) Enlazamos el último nodo con el nuevo.
+    actual.siguiente = nuevo;
+}</code></pre>
+
+                <p><strong>Traza visual.</strong> Lista <code>10 → 20 → null</code>, insertamos <code>30</code>:</p>
+
+                <div class="diagrama">Paso 1: nuevo = [30| →] (siguiente = null)
+Paso 2: cabeza != null, seguimos.
+Paso 3: actual = cabeza (nodo 10)
+        actual.siguiente (20) != null  → actual = nodo 20
+        actual.siguiente (null) == null → salimos del while
+        Ahora actual es el nodo 20 (el último)
+Paso 4: actual.siguiente = nuevo   ⇒  [20| →] → [30| →] → null
+
+Resultado final: 10 → 20 → 30 → null</div>
+
+                <h3>PASO 6: Método <code>imprimir()</code></h3>
+                <p>Recorre la lista y muestra los datos. Esencial para depurar.</p>
+
+<pre><code class="language-java">public void imprimir() {
+    // Si está vacía, avisamos y salimos.
+    if (cabeza == null) {
+        System.out.println("La lista está vacía.");
+        return;
+    }
+
+    // Puntero auxiliar para no perder la cabeza.
+    Nodo actual = cabeza;
+
+    // Recorremos hasta el final imprimiendo cada dato.
+    while (actual != null) {
+        System.out.print(actual.dato);
+
+        // Si hay siguiente, imprimimos la flecha.
+        if (actual.siguiente != null) {
+            System.out.print(" → ");
+        }
+
+        actual = actual.siguiente; // avanzamos
+    }
+    System.out.println(); // salto de línea final
+}</code></pre>
+
+                <div class="advertencia">
+                    <strong>⚠️ Nunca muevas <code>cabeza</code> para recorrer.</strong> Siempre usa una variable auxiliar (<code>actual</code>), o perderás la referencia al inicio de la lista para siempre.
+                </div>
+
+                <h3>PASO 7: Método <code>buscar(int dato)</code></h3>
+                <p>Devuelve <code>true</code> si el dato existe, <code>false</code> si no.</p>
+
+<pre><code class="language-java">public boolean buscar(int dato) {
+    Nodo actual = cabeza;
+
+    // Recorremos mientras no lleguemos al final.
+    while (actual != null) {
+        // Comparamos el dato del nodo actual con el buscado.
+        if (actual.dato == dato) {
+            return true; // encontrado
+        }
+        actual = actual.siguiente; // avanzamos
+    }
+
+    return false; // llegamos al final sin encontrarlo
+}</code></pre>
+
+                <h3>PASO 8: Método <code>eliminar(int dato)</code></h3>
+                <p>Eliminar en una lista enlazada tiene <strong>tres casos</strong> que hay que manejar. Este es el método más delicado.</p>
+
+<pre><code class="language-java">public boolean eliminar(int dato) {
+    // CASO 1: lista vacía → nada que eliminar.
+    if (cabeza == null) {
+        return false;
+    }
+
+    // CASO 2: el dato está en la CABEZA.
+    // Debemos mover 'cabeza' al siguiente nodo.
+    if (cabeza.dato == dato) {
+        cabeza = cabeza.siguiente; // el segundo pasa a ser primero
+        return true;
+    }
+
+    // CASO 3: el dato está en medio o al final.
+    // Necesitamos DOS punteros:
+    //   - 'anterior': el nodo previo al que queremos borrar.
+    //   - 'actual'  : el nodo que estamos examinando.
+    Nodo anterior = cabeza;
+    Nodo actual   = cabeza.siguiente;
+
+    while (actual != null) {
+        if (actual.dato == dato) {
+            // "Saltamos" el nodo actual: anterior.siguiente
+            // pasa a apuntar al siguiente de actual.
+            // Al terminar el método, el nodo eliminado queda sin referencias
+            // desde la lista y puede ser recolectado por el Garbage Collector.
+            anterior.siguiente = actual.siguiente;
+            return true;
+        }
+        // Avanzamos AMBOS punteros.
+        anterior = actual;
+        actual   = actual.siguiente;
+    }
+
+    return false; // no se encontró el dato
+}</code></pre>
+
+                <p><strong>Traza visual.</strong> Lista <code>10 → 20 → 30 → null</code>, eliminar <code>20</code>:</p>
+
+                <div class="diagrama">Antes:  cabeza → [10|→] → [20|→] → [30|→] → null
+                anterior    actual
+
+En el while:
+  actual.dato (20) == 20  → ¡encontrado!
+  anterior.siguiente = actual.siguiente
+  ⇒ [10|→] deja de apuntar a [20] y apunta a [30]
+
+Después: cabeza → [10|→] → [30|→] → null
+        (el nodo 20 ya no pertenece a la lista y queda elegible para recolección)</div>
+
+                <h3>PASO 9: Método <code>contar()</code></h3>
+                <p>Devuelve cuántos elementos hay.</p>
+
+<pre><code class="language-java">public int contar() {
+    int contador = 0;
+    Nodo actual = cabeza;
+    while (actual != null) {
+        contador++;
+        actual = actual.siguiente;
+    }
+    return contador;
+}</code></pre>
+
+                <h3>PASO 10: Método <code>obtener(int indice)</code></h3>
+                <p>Devuelve el dato en la posición <code>indice</code> (empezando en 0). Coste O(n).</p>
+
+<pre><code class="language-java">public int obtener(int indice) {
+    // Validación básica.
+    if (indice &lt; 0) {
+        throw new IndexOutOfBoundsException("Índice negativo: " + indice);
+    }
+
+    Nodo actual = cabeza;
+    int posicion = 0;
+
+    while (actual != null) {
+        if (posicion == indice) {
+            return actual.dato;
+        }
+        actual = actual.siguiente;
+        posicion++;
+    }
+
+    // Si salimos del while, el índice se pasó del tamaño.
+    throw new IndexOutOfBoundsException("Índice fuera de rango: " + indice);
+}</code></pre>
+
+                <h3>🧱 Código completo y unificado — <code>ListaEnlazada.java</code></h3>
+
+<pre><code class="language-java">public class ListaEnlazada {
+
+    // ===== CLASE INTERNA NODO =====
+    // Definir Nodo como clase interna estática es una práctica común:
+    // queda encapsulada y solo ListaEnlazada la usa.
+    private static class Nodo {
+        int dato;
+        Nodo siguiente;
+
+        Nodo(int dato) {
+            this.dato = dato;
+            this.siguiente = null;
+        }
+    }
+
+    // ===== ATRIBUTO =====
+    private Nodo cabeza;
+
+    public ListaEnlazada() {
+        this.cabeza = null;
+    }
+
+    public boolean estaVacia() {
+        return cabeza == null;
+    }
+
+    public void insertarAlInicio(int dato) {
+        Nodo nuevo = new Nodo(dato);
+        nuevo.siguiente = cabeza;
+        cabeza = nuevo;
+    }
+
+    public void insertarAlFinal(int dato) {
+        Nodo nuevo = new Nodo(dato);
+        if (cabeza == null) {
+            cabeza = nuevo;
+            return;
+        }
+        Nodo actual = cabeza;
+        while (actual.siguiente != null) {
+            actual = actual.siguiente;
+        }
+        actual.siguiente = nuevo;
+    }
+
+    public boolean buscar(int dato) {
+        Nodo actual = cabeza;
+        while (actual != null) {
+            if (actual.dato == dato) return true;
+            actual = actual.siguiente;
+        }
+        return false;
+    }
+
+    public boolean eliminar(int dato) {
+        if (cabeza == null) return false;
+
+        if (cabeza.dato == dato) {
+            cabeza = cabeza.siguiente;
+            return true;
+        }
+
+        Nodo anterior = cabeza;
+        Nodo actual = cabeza.siguiente;
+
+        while (actual != null) {
+            if (actual.dato == dato) {
+                anterior.siguiente = actual.siguiente;
+                return true;
+            }
+            anterior = actual;
+            actual = actual.siguiente;
+        }
+        return false;
+    }
+
+    public int contar() {
+        int contador = 0;
+        Nodo actual = cabeza;
+        while (actual != null) {
+            contador++;
+            actual = actual.siguiente;
+        }
+        return contador;
+    }
+
+    public int obtener(int indice) {
+        if (indice &lt; 0) throw new IndexOutOfBoundsException("Índice negativo");
+        Nodo actual = cabeza;
+        int posicion = 0;
+        while (actual != null) {
+            if (posicion == indice) return actual.dato;
+            actual = actual.siguiente;
+            posicion++;
+        }
+        throw new IndexOutOfBoundsException("Índice fuera de rango: " + indice);
+    }
+
+    public void imprimir() {
+        if (cabeza == null) {
+            System.out.println("La lista está vacía.");
+            return;
+        }
+        Nodo actual = cabeza;
+        while (actual != null) {
+            System.out.print(actual.dato);
+            if (actual.siguiente != null) System.out.print(" → ");
+            actual = actual.siguiente;
+        }
+        System.out.println();
+    }
+}</code></pre>
+
+                <h3>🧪 Pruebas — <code>Main.java</code></h3>
+
+<pre><code class="language-java">public class Main {
+    public static void main(String[] args) {
+        ListaEnlazada lista = new ListaEnlazada();
+
+        System.out.println("¿Está vacía? " + lista.estaVacia()); // true
+
+        // Insertamos al final
+        lista.insertarAlFinal(10);
+        lista.insertarAlFinal(20);
+        lista.insertarAlFinal(30);
+        System.out.print("Tras insertar 10, 20, 30 al final: ");
+        lista.imprimir(); // 10 → 20 → 30
+
+        // Insertamos al inicio
+        lista.insertarAlInicio(5);
+        System.out.print("Tras insertar 5 al inicio: ");
+        lista.imprimir(); // 5 → 10 → 20 → 30
+
+        // Buscar
+        System.out.println("¿Contiene 20? " + lista.buscar(20)); // true
+        System.out.println("¿Contiene 99? " + lista.buscar(99)); // false
+
+        // Contar
+        System.out.println("Tamaño: " + lista.contar()); // 4
+
+        // Obtener por índice
+        System.out.println("Elemento en índice 2: " + lista.obtener(2)); // 20
+
+        // Eliminar
+        lista.eliminar(10);
+        System.out.print("Tras eliminar 10: ");
+        lista.imprimir(); // 5 → 20 → 30
+
+        lista.eliminar(5); // borra la cabeza
+        System.out.print("Tras eliminar la cabeza (5): ");
+        lista.imprimir(); // 20 → 30
+
+        lista.eliminar(30); // borra el último
+        System.out.print("Tras eliminar el último (30): ");
+        lista.imprimir(); // 20
+
+        lista.eliminar(20); // deja la lista vacía
+        System.out.print("Tras eliminar todo: ");
+        lista.imprimir(); // La lista está vacía.
+    }
+}</code></pre>
+
+                <p><strong>Salida esperada:</strong></p>
+                <div class="diagrama">¿Está vacía? true
+Tras insertar 10, 20, 30 al final: 10 → 20 → 30
+Tras insertar 5 al inicio: 5 → 10 → 20 → 30
+¿Contiene 20? true
+¿Contiene 99? false
+Tamaño: 4
+Elemento en índice 2: 20
+Tras eliminar 10: 5 → 20 → 30
+Tras eliminar la cabeza (5): 20 → 30
+Tras eliminar el último (30): 20
+Tras eliminar todo: La lista está vacía.</div>
+            </div>
+
+            <!-- ============ PARTE 5 AMPLIADA ============ -->
+            <div class="section-card" id="parte5">
+                <h2>5. Complejidades (Notación Big-O)</h2>
+
+                <h3>5.1 ¿Qué es la Notación Big-O?</h3>
+                <p>
+                    La <span class="termino">notación Big-O</span> es una forma matemática de describir <strong>cómo crece el tiempo de ejecución (o el uso de memoria) de un algoritmo a medida que crece el tamaño de la entrada</strong>. No mide segundos exactos, sino el <em>orden de magnitud</em> del crecimiento.
+                </p>
+                <p>
+                    Si <code>n</code> es el número de elementos en la lista:
+                </p>
+                <ul>
+                    <li><strong>O(1)</strong> → trabajo constante: no aumenta al crecer <code>n</code>.</li>
+                    <li><strong>O(n)</strong> → trabajo lineal: aumenta en proporción al número de elementos.</li>
+                    <li><strong>O(log n)</strong> → trabajo logarítmico: crece despacio, como en una búsqueda binaria.</li>
+                    <li><strong>O(n²)</strong> → trabajo cuadrático: puede crecer rápidamente, por ejemplo con dos recorridos anidados.</li>
+                </ul>
+
+                <h3>5.2 ¿Qué significa exactamente O(1)?</h3>
+                <div class="exito">
+                    <strong>O(1) — Trabajo constante:</strong> la cantidad de pasos no depende del número de elementos. No significa que siempre tarde exactamente los mismos segundos, sino que no necesita recorrer una lista más grande.
+                </div>
+                        <p>Ejemplo intuitivo: sacar la primera carta de un mazo requiere un movimiento tanto si el mazo tiene 10 cartas como si tiene 1000. Big-O describe la cantidad de trabajo al crecer la entrada, no promete el mismo tiempo exacto en segundos.</p>
+                <p>En una lista enlazada, <code>insertarAlInicio</code> es O(1) porque solo hacemos 3 operaciones fijas:</p>
+                <ol>
+                    <li>Crear un nodo nuevo.</li>
+                    <li>Hacer que su <code>siguiente</code> apunte a la cabeza actual.</li>
+                    <li>Actualizar <code>cabeza</code> al nuevo nodo.</li>
+                </ol>
+                <p>Nada de eso depende del tamaño de la lista.</p>
+
+                <h3>5.3 ¿Qué significa O(n)?</h3>
+                <div class="advertencia">
+                    <strong>O(n) — Tiempo lineal:</strong> el tiempo crece <strong>proporcionalmente al número de elementos</strong>. Si la lista tiene el doble de elementos, tardará aproximadamente el doble.
+                </div>
+                <p>Ejemplo intuitivo: buscar una carta concreta en un mazo desordenado. Cuantas más cartas tengas, más tiempo tardas en encontrarla (en el peor caso, las revisas todas).</p>
+                <p>En nuestra lista, <code>insertarAlFinal</code>, <code>buscar</code>, <code>eliminar</code>, <code>contar</code> y <code>obtener</code> son O(n) porque recorremos nodo por nodo desde la cabeza hasta encontrar lo que buscamos (o llegar al final).</p>
+
+                <h3>5.4 Otras complejidades que verás a menudo</h3>
+                <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr><th>Notación</th><th>Nombre</th><th>Ejemplo típico</th><th>Crecimiento</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><span class="badge badge-o1">O(1)</span></td><td>Constante</td><td>Acceso a <code>arr[0]</code>, insertar al inicio de una lista</td><td>Plano</td></tr>
+                        <tr><td><span class="badge badge-on">O(log n)</span></td><td>Logarítmica</td><td>Búsqueda binaria en un arreglo ordenado</td><td>El trabajo crece muy despacio</td></tr>
+                        <tr><td><span class="badge badge-on">O(n)</span></td><td>Lineal</td><td>Recorrer una lista, buscar secuencialmente</td><td>Lineal</td></tr>
+                        <tr><td><span class="badge badge-on2">O(n²)</span></td><td>Cuadrática</td><td>Doble bucle anidado</td><td>El trabajo crece rápidamente</td></tr>
+                    </tbody>
+                </table>
+                </div>
+                <p>La búsqueda binaria es rápida porque puede saltar a una posición del arreglo. En esta lista enlazada no hay acceso directo por índice, así que la búsqueda se hace nodo por nodo: O(n).</p>
+
+                <h3>5.5 Tabla de complejidades de nuestra lista enlazada</h3>
+                <p>Cada fila explica <strong>qué hace la operación</strong> y <strong>por qué tiene esa complejidad</strong>:</p>
+
+                <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Operación</th>
+                            <th>¿Qué hace?</th>
+                            <th>Complejidad</th>
+                            <th>¿Por qué?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Insertar al inicio</strong></td>
+                            <td>Añade un nodo nuevo como primera posición de la lista.</td>
+                            <td><span class="badge badge-o1">O(1)</span></td>
+                            <td>Solo cambiamos 2 referencias: la del nuevo nodo y la de <code>cabeza</code>. No depende del tamaño.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Insertar al final</strong></td>
+                            <td>Añade un nodo nuevo como última posición de la lista.</td>
+                            <td><span class="badge badge-on">O(n)</span></td>
+                            <td>Hay que recorrer toda la lista desde la cabeza hasta el último nodo para engancharlo.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Buscar</strong></td>
+                            <td>Determina si un valor existe en la lista.</td>
+                            <td><span class="badge badge-on">O(n)</span></td>
+                            <td>En el peor caso (no está o está al final) hay que revisar todos los nodos.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Eliminar (por valor)</strong></td>
+                            <td>Quita el primer nodo cuyo dato coincida con el valor dado.</td>
+                            <td><span class="badge badge-on">O(n)</span></td>
+                            <td>Hay que localizar el nodo primero (recorrido) y luego reajustar referencias.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Obtener por índice</strong></td>
+                            <td>Devuelve el dato en la posición <code>i</code> (0-based).</td>
+                            <td><span class="badge badge-on">O(n)</span></td>
+                            <td>No hay acceso directo: hay que avanzar nodo por nodo hasta la posición deseada.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Contar</strong></td>
+                            <td>Devuelve cuántos elementos tiene la lista.</td>
+                            <td><span class="badge badge-on">O(n)</span></td>
+                            <td>Se recorre toda la lista incrementando un contador.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Está vacía</strong></td>
+                            <td>Indica si la lista no tiene ningún nodo.</td>
+                            <td><span class="badge badge-o1">O(1)</span></td>
+                            <td>Solo se comprueba si <code>cabeza == null</code>. Una operación fija.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <div class="nota">
+                    <strong>💡 Truco:</strong> si guardas también una referencia al último nodo (llamada <code>cola</code> o <code>tail</code>), <code>insertarAlFinal</code> baja a <strong>O(1)</strong>. Es un ejercicio excelente para que lo intentes.
+                </div>
+
+                <h3>5.6 Regla práctica para identificar la complejidad</h3>
+                <ul>
+                    <li>¿El trabajo que haces es siempre el mismo, sin importar el tamaño? → <strong>O(1)</strong></li>
+                    <li>¿Recorres todos los elementos una vez? → <strong>O(n)</strong></li>
+                    <li>¿Recorres todos los elementos y por cada uno haces otro recorrido completo? → <strong>O(n²)</strong></li>
+                    <li>¿Vas dividiendo el problema a la mitad en cada paso? → <strong>O(log n)</strong></li>
+                </ul>
+            </div>
+
+            <!-- ============ PARTE 6 ============ -->
+            <div class="section-card" id="parte6">
+                <h2>6. Errores Comunes a Evitar</h2>
+                <ol>
+                    <li><strong>Mover <code>cabeza</code> para recorrer</strong> → pierdes la lista entera. Siempre usa <code>Nodo actual = cabeza;</code>.</li>
+                    <li><strong>Olvidar el caso "lista vacía"</strong> al insertar o eliminar → <code>NullPointerException</code>.</li>
+                    <li><strong>No actualizar <code>cabeza</code> al eliminar el primer nodo</strong> → el nodo eliminado sigue "vivo".</li>
+                    <li><strong>Mal orden en las asignaciones</strong> al insertar al inicio (<code>nuevo.siguiente = cabeza;</code> <strong>antes</strong> de <code>cabeza = nuevo;</code>).</li>
+                    <li><strong>Confundir <code>actual != null</code> con <code>actual.siguiente != null</code></strong> — son útiles en contextos distintos:
+                        <ul>
+                            <li>Recorrer todos los nodos → <code>actual != null</code>.</li>
+                            <li>Detenerse en el <strong>último</strong> nodo → <code>actual.siguiente != null</code>.</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+
+            <!-- ============ PARTE 7 ============ -->
+            <div class="section-card" id="parte7">
+                <h2>7. Siguientes Pasos Recomendados</h2>
+                <ol>
+                    <li><strong>Genéricos:</strong> cambia <code>int</code> por <code>&lt;T&gt;</code> para listas de cualquier tipo.</li>
+                    <li><strong>Puntero a la cola</strong> para insertar al final en O(1).</li>
+                    <li><strong>Lista doblemente enlazada:</strong> añade <code>Nodo anterior;</code> y podrás recorrer hacia atrás.</li>
+                    <li><strong>Lista circular:</strong> haz que el último nodo apunte al primero.</li>
+                    <li><strong>Iterador:</strong> implementa <code>Iterator&lt;T&gt;</code> para usar <code>for-each</code>.</li>
+                    <li><strong>Invertir la lista:</strong> ejercicio clásico de entrevistas (con 3 punteros: <code>prev</code>, <code>actual</code>, <code>sig</code>).</li>
+                </ol>
+
+               
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p class="mb-0">Guía de listas enlazadas en Java · Recursos de Sistemas</p>
+</footer>
+ </main>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Prism.js -->
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-java.min.js"></script>
+
+</body>
+</html>

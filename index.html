@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#fffaf9">
+    <meta name="description" content="Manuales y recursos prácticos para aprender desarrollo, bases de datos y programación.">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <link rel="stylesheet" href="public/style.css">
+    <title>Recursos de Sistemas | Aprende y construye</title>
+    <script type="module" src="public/app.js"></script>
+</head>
+<body>
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+    <div id="site-shell" aria-busy="true">
+        <p class="page-status" id="loading-state" role="status">Cargando recursos...</p>
+        <div id="load-error" class="page-status page-status-error" role="alert" hidden>
+            No se pudieron cargar las secciones. Abre el proyecto con un servidor local, como Live Server en VS Code, y vuelve a intentarlo.
+        </div>
+        <div id="page-content" hidden>
+            <div id="site-header"></div>
+            <main id="contenido">
+                <div data-component="../components/hero.html"></div>
+                <div data-component="../components/resources.html"></div>
+                <div data-component="../components/technologies.html"></div>
+            </main>
+            <div data-component="../components/footer.html"></div>
+            <div data-component="../components/resource-dialog.html"></div>
+        </div>
+    </div>
+</body>
+</html>

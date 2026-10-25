@@ -1,0 +1,2212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual de Java — Bloque 2: Decisiones (if, else, else if)</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+  :root {
+    --acento: #f89820;
+    --acento-2: #5382a1;
+    --code-bg: #1e1e2e;
+    --code-fg: #cdd6f4;
+  }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.7;
+    scroll-behavior: smooth;
+  }
+  .sidebar {
+    position: fixed; top: 0; left: 0;
+    width: 280px; height: 100vh;
+    overflow-y: auto; padding: 1rem;
+    background: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+    z-index: 1030;
+  }
+  [data-bs-theme="dark"] .sidebar { background: #16181d; border-right-color: #2a2d34; }
+  .sidebar h6 {
+    text-transform: uppercase; font-size: .75rem;
+    letter-spacing: .05em; color: #6c757d; margin-top: 1.25rem;
+  }
+  .sidebar .nav-link {
+    padding: .35rem .6rem; border-radius: .35rem;
+    font-size: .92rem; color: inherit;
+  }
+  .sidebar .nav-link:hover { background: rgba(248,152,32,.12); }
+  .sidebar .nav-link.active { background: var(--acento); color: #fff !important; font-weight: 600; }
+  .contenido { margin-left: 280px; padding: 2.5rem 3rem 6rem; max-width: 900px; }
+  .btn-menu, .btn-cerrar-menu { display: none; }
+  @media (max-width: 991px) {
+    .btn-menu {
+      display: inline-flex; position: fixed; top: 1rem; left: 1rem;
+      z-index: 1040; align-items: center; gap: .4rem;
+    }
+    .sidebar {
+      position: fixed; top: 0; left: 0; width: min(88vw, 320px); height: 100vh;
+      transform: translateX(-100%); transition: transform .2s ease;
+      box-shadow: 0 0 1.5rem rgba(0, 0, 0, .2);
+    }
+    .sidebar.abierto { transform: translateX(0); }
+    .btn-cerrar-menu { display: inline-flex; float: right; margin-top: -.25rem; }
+    body.menu-abierto { overflow: hidden; }
+    .contenido { margin-left: 0; padding: 1.5rem; }
+  }
+  h1, h2, h3 { font-weight: 700; }
+  h2 { margin-top: 3.5rem; padding-bottom: .5rem; border-bottom: 3px solid var(--acento); }
+  h3 { margin-top: 2.2rem; color: var(--acento-2); }
+  [data-bs-theme="dark"] h3 { color: #8ab4d6; }
+
+  .bloque-codigo {
+    position: relative; margin: 1.25rem 0;
+    border-radius: .5rem; overflow: hidden;
+    background: var(--code-bg);
+  }
+  .bloque-codigo pre {
+    margin: 0; padding: 1rem 1rem .9rem;
+    color: var(--code-fg); font-size: .9rem; line-height: 1.55;
+    overflow-x: auto;
+    font-family: "JetBrains Mono", Consolas, Menlo, monospace;
+  }
+  .bloque-codigo .btn-copiar {
+    position: absolute; top: .5rem; right: .5rem;
+    background: rgba(255,255,255,.08); color: #cdd6f4;
+    border: 1px solid rgba(255,255,255,.15);
+    font-size: .75rem; padding: .2rem .55rem;
+    border-radius: .3rem; opacity: 0; transition: opacity .15s;
+  }
+  .bloque-codigo:hover .btn-copiar { opacity: 1; }
+  .bloque-codigo .btn-copiar:hover { background: rgba(248,152,32,.3); }
+  .kw  { color: #cba6f7; }
+  .str { color: #a6e3a1; }
+  .num { color: #fab387; }
+  .cmt { color: #6c7086; font-style: italic; }
+  .cls { color: #f9e2af; }
+  .mth { color: #89b4fa; }
+
+  .caja { border-radius: .5rem; padding: 1rem 1.15rem; margin: 1.25rem 0; border-left: 5px solid; }
+  .caja-detente   { background: #fff8e6; border-color: #f0ad4e; }
+  .caja-error     { background: #fdecec; border-color: #dc3545; }
+  .caja-protocolo { background: #eef5ff; border-color: #4a7cff; }
+  .caja-idea      { background: #eefaf1; border-color: #28a745; }
+  .caja-anticipa  { background: #f3e8ff; border-color: #a855f7; }
+  [data-bs-theme="dark"] .caja-detente   { background: #2e2612; }
+  [data-bs-theme="dark"] .caja-error     { background: #2e1618; }
+  [data-bs-theme="dark"] .caja-protocolo { background: #14202e; }
+  [data-bs-theme="dark"] .caja-idea      { background: #12291b; }
+  [data-bs-theme="dark"] .caja-anticipa  { background: #231531; }
+  .caja h5 { margin-top: 0; font-size: 1rem; font-weight: 700; }
+  .caja p:last-child, .caja ul:last-child, .caja ol:last-child { margin-bottom: 0; }
+
+  .nivel {
+    display: inline-block; padding: .15rem .55rem;
+    border-radius: 999px; font-size: .72rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .03em; margin-right: .4rem;
+  }
+  .nivel-reconocer { background:#dbeafe; color:#1e40af; }
+  .nivel-completar { background:#dcfce7; color:#166534; }
+  .nivel-modificar { background:#fef3c7; color:#92400e; }
+  .nivel-construir { background:#fae8ff; color:#86198f; }
+  .nivel-combinar  { background:#ffe4e6; color:#9f1239; }
+  .nivel-crear     { background:#e0e7ff; color:#3730a3; }
+
+  .simulacion table { font-size: .9rem; }
+  .simulacion th { background: #f1f3f5; }
+  [data-bs-theme="dark"] .simulacion th { background: #23262e; }
+
+  details.solucion {
+    margin: .75rem 0; border: 1px solid #dee2e6;
+    border-radius: .4rem; padding: .6rem .9rem; background: #fbfbfb;
+  }
+  [data-bs-theme="dark"] details.solucion { background: #16181d; border-color: #2a2d34; }
+  details.solucion summary { cursor: pointer; font-weight: 600; color: #495057; }
+  [data-bs-theme="dark"] details.solucion summary { color: #adb5bd; }
+
+  .btn-tema { position: fixed; top: 1rem; right: 1rem; z-index: 1040; }
+
+  .portada {
+    background: linear-gradient(135deg, var(--acento) 0%, var(--acento-2) 100%);
+    color: #fff; padding: 3rem 2rem; border-radius: 1rem; margin-bottom: 2rem;
+  }
+  .portada h1 { font-size: 2.2rem; }
+
+  /* Diagrama de flujo en texto */
+  .flujo {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: .5rem;
+    padding: 1rem 1.25rem;
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: .85rem;
+    line-height: 1.5;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  [data-bs-theme="dark"] .flujo { background: #16181d; border-color: #2a2d34; }
+</style>
+    <link rel="stylesheet" href="../../../public/java-manual.css">
+</head>
+<body class="java-manual">
+
+<button class="btn btn-outline-secondary btn-sm btn-tema" id="btnTema" title="Cambiar tema">
+  <i class="bi bi-moon-stars"></i>
+</button>
+
+<button class="btn btn-primary btn-sm btn-menu" id="btnMenu" type="button"
+        aria-controls="sidebar" aria-expanded="false">
+  <i class="bi bi-list"></i>
+  <span>Menú</span>
+</button>
+
+<nav class="sidebar" id="sidebar" aria-label="Navegación del bloque 2">
+  <div class="px-2 pb-2 border-bottom">
+    <button class="btn btn-outline-secondary btn-sm btn-cerrar-menu" id="btnCerrarMenu"
+            type="button" aria-label="Cerrar menú">
+      <i class="bi bi-x-lg"></i>
+    </button>
+    <strong style="color:var(--acento)">Manual Java</strong><br>
+    <small class="text-secondary">Bloque 2 · Decisiones</small>
+  </div>
+  <a class="nav-link mt-2" href="index.html">
+    <i class="bi bi-house-door me-1"></i> Volver al índice
+  </a>
+
+  <h6>Antes de empezar</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#bienvenida-2">Bienvenida al Bloque 2</a></li>
+    <li><a class="nav-link" href="#anticipo-combinar">Vas a combinar piezas por primera vez</a></li>
+    <li><a class="nav-link" href="#antes-de-programar">"Antes de programar"</a></li>
+  </ul>
+
+  <h6>La decisión más simple</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#if">El <code>if</code></a></li>
+    <li><a class="nav-link" href="#simulacion-if">Simulación: qué hace Java paso a paso</a></li>
+    <li><a class="nav-link" href="#ejemplos-if">Ejemplos progresivos</a></li>
+    <li><a class="nav-link" href="#errores-if">Errores comunes con <code>if</code></a></li>
+    <li><a class="nav-link" href="#ejercicios-if">Ejercicios de <code>if</code></a></li>
+  </ul>
+
+  <h6>El otro camino</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#else"><code>else</code>: y si no…</a></li>
+    <li><a class="nav-link" href="#ejemplos-else">Ejemplos progresivos</a></li>
+    <li><a class="nav-link" href="#errores-else">Errores comunes con <code>else</code></a></li>
+    <li><a class="nav-link" href="#ejercicios-else">Ejercicios de <code>else</code></a></li>
+  </ul>
+
+  <h6>Más de dos caminos</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#else-if"><code>else if</code></a></li>
+    <li><a class="nav-link" href="#simulacion-else-if">Simulación: cómo se recorren las ramas</a></li>
+    <li><a class="nav-link" href="#ejemplos-else-if">Ejemplos progresivos</a></li>
+    <li><a class="nav-link" href="#errores-else-if">Errores comunes con <code>else if</code></a></li>
+    <li><a class="nav-link" href="#ejercicios-else-if">Ejercicios de <code>else if</code></a></li>
+    <li><a class="nav-link" href="#identidad-2">Volvamos a las piezas</a></li>
+  </ul>
+
+  <h6>Combinar condiciones</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#operadores-logicos">Operadores lógicos aplicados</a></li>
+    <li><a class="nav-link" href="#cortocircuito">Cómo los evalúa Java</a></li>
+    <li><a class="nav-link" href="#ejemplos-logicos">Ejemplos progresivos</a></li>
+    <li><a class="nav-link" href="#errores-logicos">Errores comunes</a></li>
+    <li><a class="nav-link" href="#ejercicios-logicos">Ejercicios</a></li>
+  </ul>
+
+  <h6>Cierre del bloque</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#anidados">Un <code>if</code> dentro de otro</a></li>
+    <li><a class="nav-link" href="#reto-final">Reto del Bloque 2</a></li>
+    <li><a class="nav-link" href="#resumen-2">Lo que llevas construido</a></li>
+  </ul>
+</nav>
+
+<main class="contenido">
+
+  <div class="portada">
+    <h1>Decisiones en Java</h1>
+    <p class="mb-0 fs-5">Bloque 2 — <code>if</code>, <code>else</code>, <code>else if</code> y operadores lógicos</p>
+    <p class="mb-0"><small>Hasta ahora tu programa hacía siempre lo mismo. Aquí empieza a decidir.</small></p>
+  </div>
+
+  <!-- ============================================================ -->
+  <section id="bienvenida-2">
+    <h2>Bienvenida al Bloque 2</h2>
+
+    <p>En el Bloque 1 construiste las piezas básicas: variables, tipos, mostrar cosas en pantalla, operadores, comparaciones, booleanos. Tu programa ya puede <em>guardar</em> datos y <em>mostrarlos</em>. Pero hasta ahora, siempre hace exactamente lo mismo sin importar qué datos tenga. Corre las mismas líneas en el mismo orden, siempre.</p>
+
+    <p>En este bloque vas a agregar la primera pieza que le permite a tu programa <strong>tomar decisiones</strong>: hacer una cosa si se cumple algo, y otra cosa si no. Esa pieza se llama <code>if</code>, y es probablemente la estructura más importante de todo el lenguaje. Todo lo que sigue —ciclos, arreglos, métodos— se apoya, de una u otra manera, en la idea de que el programa puede decidir.</p>
+
+    <p>Vamos a ir pieza por pieza. Primero <code>if</code> solo. Después <code>else</code>. Después <code>else if</code>. Y al final, cómo combinar varias condiciones a la vez. No vamos a meter todo junto de entrada. Si ves la sintaxis de un <code>else if</code> antes de haber entendido bien un <code>if</code> solo, la mesa se te llena y no avanzas. Vamos paso a paso.</p>
+
+    <div class="caja caja-idea">
+      <p class="mb-0">Antes de cada estructura vas a leer una situación cotidiana, después un análisis en español, después la pieza de Java, después una simulación manual, después ejemplos, y solo al final ejercicios. Ese orden es el mismo en todo el manual. No lo saltes.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="anticipo-combinar">
+    <h2>Vas a combinar piezas por primera vez (léelo antes de que pase)</h2>
+
+    <p>Este es el primer bloque del manual en el que vas a juntar dos piezas que hasta ahora usabas por separado: <strong>una variable</strong> y <strong>una decisión</strong>. Hasta ahora, una variable guardaba un valor y ya. Hasta ahora, un programa ejecutaba todas las líneas en orden sin preguntar nada. A partir de aquí, una variable va a <em>alimentar</em> una decisión: el programa va a mirar el valor guardado y va a elegir qué hacer con él.</p>
+
+    <p>Es muy probable que cuando empieces a escribir tus primeros <code>if</code> que usen variables, sientas algo raro. Tal vez sientas que "se te olvidó" cómo declarar una variable, o que ya no recuerdas cómo se compara, o que se te enredan las llaves. <strong>Eso va a pasar.</strong> No lo digo como consuelo: lo digo porque es un fenómeno predecible y tiene explicación.</p>
+
+    <p>Cuando tu mente guarda dos ideas por separado, las tiene en dos lugares. Cuando necesita usarlas <em>juntas</em>, tiene que <strong>reacomodarlas</strong> para que encajen. Ese reacomodo se siente, durante un rato, como confusión. Como si hubieras retrocedido. Como si lo que ya sabías se hubiera desarmado. No se desarmó: está reordenándose para aceptar la pieza nueva.</p>
+
+    <div class="caja caja-anticipa">
+      <h5>Anticipa esto antes de que te pase</h5>
+      <p class="mb-0">Si en los primeros ejercicios con <code>if</code> + variables sientes que "no entiendes nada" o que "se te olvidó todo", no es que hayas perdido el Bloque 1. Es el reacomodo. Sigue escribiendo. Sigue ejecutando. Sigue mirando qué pasa. En un par de días vuelve a sentirse claro —y cuando se aclare, vas a saber <em>más</em> que antes, no lo mismo.</p>
+    </div>
+
+    <p>Este manual vuelve a hablar de esto una vez más, más adelante. Aquí solo quería que lo leyeras <strong>antes</strong> de vivirlo, no después. Cuando te pase, vas a reconocerlo ("ah, esto es lo que me habían dicho"), en lugar de interpretarlo como una señal de que no sirves.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="antes-de-programar">
+    <h2>"Antes de programar": el hábito que hace la diferencia</h2>
+
+    <p>Antes de empezar con <code>if</code>, quiero enseñarte un hábito que vas a usar durante todo el manual y, en realidad, durante toda tu vida programando. Se llama <strong>"Antes de programar"</strong>, y consiste en lo siguiente:</p>
+
+    <p><strong>Antes de escribir una sola línea de código, escribe en español qué quieres que pase.</strong> No cómo lo harías en Java. Qué quieres que pase. Como si se lo estuvieras explicando a alguien que no sabe programar.</p>
+
+    <p>Suena simple, pero cambia todo. Si no puedes describir en español qué tiene que hacer tu programa, no vas a poder escribirlo en Java. Y si puedes describirlo, escribir el Java se convierte en traducir, no en inventar.</p>
+
+    <p>Veamos un ejemplo. Supón que te piden: "haz un programa que diga si una persona es mayor de edad". Antes de abrir VSCode, escribes en español:</p>
+
+    <div class="flujo">1. Necesito la edad de la persona.
+2. Necesito saber si esa edad es mayor o igual a 18.
+3. Si lo es, muestro "mayor de edad".
+4. Si no lo es, no muestro nada (o muestro "menor de edad", ya veremos).</div>
+
+    <p>Eso es el análisis. Es más útil que cualquier fragmento de código, porque describe la <em>intención</em>. Una vez que tienes esto, Java se vuelve casi mecánico: buscar la pieza que corresponde a cada paso.</p>
+
+    <p>En cada estructura de este bloque y de los siguientes vamos a hacer esto juntos. Al principio te lo voy a mostrar yo; al final del bloque vas a hacerlo tú antes de cada ejercicio.</p>
+
+    <div class="caja caja-idea">
+      <p class="mb-0"><strong>Regla del manual:</strong> si no puedes escribirlo en español, no intentes escribirlo en Java. Vuelve al español. Casi siempre el problema está ahí, no en la sintaxis.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="if">
+    <h2>El <code>if</code>: la pieza que hace que tu programa pregunte algo</h2>
+
+    <h3>Antes de Java (situación cotidiana)</h3>
+    <p>Piensa en un semáforo. Cuando llegas a un cruce, miras el color. Si está en verde, cruzas. Si no está en verde, no cruzas. No "cruzas un poco". No "cruzas más o menos". Cruzas o no cruzas, según una condición que puedes verificar en el momento.</p>
+
+    <p>Piensa ahora en un cajero automático. Le pides 500 pesos. Antes de dártelos, el cajero mira tu saldo. Si tienes al menos 500, te los da. Si no, te muestra un mensaje diciendo que no alcanza. La decisión del cajero depende de una condición verificable: ¿tu saldo es mayor o igual a lo que pediste?</p>
+
+    <p>En ambos casos hay una estructura común: hay <strong>una condición</strong>, y <strong>una acción</strong> que se hace si esa condición es verdadera. Si la condición no es verdadera, la acción simplemente no se hace. Esa estructura es exactamente la del <code>if</code>.</p>
+
+    <h3>La idea en español</h3>
+    <p>Un <code>if</code> significa: <em>"si se cumple esto, haz aquello"</em>. Nada más. La condición va entre paréntesis. La acción va entre llaves. Si la condición es verdadera (<code>true</code>), Java ejecuta lo que está entre llaves. Si es falsa (<code>false</code>), Java se salta todo lo que está entre llaves y sigue con la siguiente instrucción.</p>
+
+    <h3>La nueva pieza</h3>
+    <p>La sintaxis mínima de un <code>if</code> es esta:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">if</span> (condición) {
+    <span class="cmt">// esto se ejecuta solo si la condición es true</span>
+}</pre>
+    </div>
+
+    <p>Un ejemplo concreto:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> edad = <span class="num">20</span>;
+
+<span class="kw">if</span> (edad &gt;= <span class="num">18</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Eres mayor de edad"</span>);
+}</pre>
+    </div>
+
+    <p>Lee eso en español: "si la edad es mayor o igual a 18, muestra 'Eres mayor de edad'". Si <code>edad</code> fuera 15, la condición <code>15 &gt;= 18</code> daría <code>false</code>, y la línea del <code>println</code> no se ejecutaría. El programa terminaría sin mostrar nada.</p>
+
+    <h3>Anatomía de un <code>if</code></h3>
+    <p>Vamos a nombrar cada parte, porque las vas a ver una y otra vez:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">if</span> (condición) {
+    acciones
+}</pre>
+    </div>
+
+    <ul>
+      <li><strong><code>if</code></strong> — la palabra clave. Siempre en minúscula. Siempre seguida de un paréntesis.</li>
+      <li><strong><code>(condición)</code></strong> — cualquier expresión que dé como resultado un <code>boolean</code> (ya viste cómo construirlas en el Bloque 1). Puede ser una comparación simple (<code>edad &gt;= 18</code>) o una expresión lógica más compleja (<code>edad &gt;= 18 &amp;&amp; tieneIdentificacion</code>).</li>
+      <li><strong><code>{ ... }</code></strong> — las llaves encierran las acciones que se ejecutan solo si la condición es verdadera. Todo lo que esté entre las llaves forma el "cuerpo" del <code>if</code>.</li>
+    </ul>
+
+    <p>Una nota sobre las llaves: si el cuerpo del <code>if</code> tiene <strong>una sola instrucción</strong>, técnicamente Java permite omitirlas. Pero no las omitas. Siempre llaves, incluso con una sola línea. Es una regla de estilo que te va a evitar errores cuando el cuerpo crezca, y que además hace que el código se lea más fácil. Los programadores experimentados casi siempre las ponen.</p>
+
+    <h3>El flujo de ejecución, con un diagrama</h3>
+
+    <div class="flujo">              ┌─────────────────────────┐
+              │  evaluar la condición   │
+              │       (edad >= 18)      │
+              └───────────┬─────────────┘
+                          │
+                 ┌────────┴────────┐
+                 │                 │
+            true │                 │ false
+                 ▼                 ▼
+        ┌────────────────┐   ┌────────────────┐
+        │ ejecutar el    │   │ saltar el      │
+        │ cuerpo del if  │   │ cuerpo del if  │
+        └────────┬───────┘   └────────┬───────┘
+                 │                    │
+                 └────────┬───────────┘
+                          ▼
+                 ┌────────────────┐
+                 │ seguir con la  │
+                 │  siguiente     │
+                 │  instrucción   │
+                 └────────────────┘</div>
+
+    <p>No importa qué tan complicado sea el código dentro del <code>if</code>: el programa siempre evalúa primero la condición, y después va por uno de los dos caminos. Nunca por los dos.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="simulacion-if">
+    <h2>Simulación: qué hace Java paso a paso</h2>
+
+    <p>Antes de ver más ejemplos, vamos a ejecutar mentalmente un programa, línea por línea. Esta es la habilidad más importante del bloque. Escribir código sin poder leerlo mentalmente es como escribir en un idioma que no sabes pronunciar.</p>
+
+    <h3>El programa</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">public class</span> <span class="cls">Decision</span> {
+    <span class="kw">public static void</span> <span class="mth">main</span>(<span class="cls">String</span>[] args) {
+        <span class="kw">int</span> edad = <span class="num">20</span>;
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Inicio del programa"</span>);
+
+        <span class="kw">if</span> (edad &gt;= <span class="num">18</span>) {
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Eres mayor de edad"</span>);
+        }
+
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Fin del programa"</span>);
+    }
+}</pre>
+    </div>
+
+    <h3>Paso a paso</h3>
+
+    <div class="simulacion">
+      <table class="table table-bordered">
+        <thead>
+          <tr><th>#</th><th>Línea</th><th>Qué hace</th><th>Salida</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td><code>int edad = 20;</code></td><td>Guarda 20 en <code>edad</code>.</td><td>—</td></tr>
+          <tr><td>2</td><td><code>println("Inicio del programa");</code></td><td>Muestra el texto.</td><td><code>Inicio del programa</code></td></tr>
+          <tr><td>3</td><td><code>if (edad &gt;= 18)</code></td><td>Evalúa la condición: <code>20 &gt;= 18</code> → <code>true</code>. Entra al cuerpo.</td><td>—</td></tr>
+          <tr><td>4</td><td><code>println("Eres mayor de edad");</code></td><td>Muestra el texto.</td><td><code>Eres mayor de edad</code></td></tr>
+          <tr><td>5</td><td>cierre del <code>if</code></td><td>Sigue con la siguiente línea.</td><td>—</td></tr>
+          <tr><td>6</td><td><code>println("Fin del programa");</code></td><td>Muestra el texto.</td><td><code>Fin del programa</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Salida completa:</p>
+    <div class="flujo">Inicio del programa
+Eres mayor de edad
+Fin del programa</div>
+
+    <h3>Ahora cambia un dato y simula mentalmente</h3>
+    <p>Cambia <code>edad = 20</code> por <code>edad = 15</code>. Antes de leer lo que sigue, piensa qué pasaría. Después compáralo con lo que escribas.</p>
+
+    <details class="solucion">
+      <summary>Ver la simulación con edad = 15</summary>
+      <div class="simulacion mt-2">
+        <table class="table table-bordered">
+          <thead>
+            <tr><th>#</th><th>Línea</th><th>Qué hace</th><th>Salida</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td><code>int edad = 15;</code></td><td>Guarda 15 en <code>edad</code>.</td><td>—</td></tr>
+            <tr><td>2</td><td><code>println("Inicio del programa");</code></td><td>Muestra el texto.</td><td><code>Inicio del programa</code></td></tr>
+            <tr><td>3</td><td><code>if (edad &gt;= 18)</code></td><td>Evalúa <code>15 &gt;= 18</code> → <code>false</code>. <strong>Salta el cuerpo.</strong></td><td>—</td></tr>
+            <tr><td>4</td><td>cuerpo saltado</td><td>No ejecuta el <code>println</code> de adentro.</td><td>—</td></tr>
+            <tr><td>5</td><td><code>println("Fin del programa");</code></td><td>Muestra el texto.</td><td><code>Fin del programa</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="mb-0">Salida: <code>Inicio del programa</code> / <code>Fin del programa</code>. La línea de "Eres mayor de edad" nunca se ejecutó. Fíjate en algo importante: <strong>el programa no se rompe cuando la condición es falsa</strong>. Simplemente se salta el cuerpo del <code>if</code> y sigue como si nada.</p>
+    </details>
+
+    <div class="caja caja-detente">
+      <h5>Detente un momento y piensa</h5>
+      <p class="mb-0">Antes de seguir, cambia mentalmente <code>edad</code> por <code>18</code> exactamente. ¿Qué imprime? ¿Y si fuera <code>17</code>? Si tienes claro el resultado de ambos casos, ya entendiste el <code>if</code> mejor de lo que muchos aprenden en su primer mes. Si no, no sigas aún: vuelve a la sección y léela de nuevo. Es mejor tardar aquí que arrastrar la duda.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejemplos-if">
+    <h2>Ejemplos progresivos con <code>if</code></h2>
+
+    <p>Cinco ejemplos que van subiendo de dificultad. El primero es casi el mismo que ya viste. El último combina varias cosas. Después de cada uno, pregúntate: ¿qué pasa si cambio este valor? ¿Qué pasa si lo pongo al límite exacto?</p>
+
+    <h3>Ejemplo 1 — El más simple</h3>
+    <p>Mostrar un mensaje si un número es positivo.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> n = <span class="num">7</span>;
+
+<span class="kw">if</span> (n &gt; <span class="num">0</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"El número es positivo"</span>);
+}</pre>
+    </div>
+    <p>Si <code>n</code> fuera <code>-3</code>, no se imprimiría nada. Si fuera <code>0</code>, tampoco, porque <code>0 &gt; 0</code> es <code>false</code>. Este último detalle importa: muchas veces el error está en el borde (¿es <code>&gt;</code> o <code>&gt;=</code>?). Siempre prueba los casos límite.</p>
+
+    <h3>Ejemplo 2 — Comparación con texto</h3>
+    <p>Saludar de forma especial si el usuario se llama "Ana".</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span> nombre = <span class="str">"Ana"</span>;
+
+<span class="kw">if</span> (nombre.<span class="mth">equals</span>(<span class="str">"Ana"</span>)) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"¡Hola de nuevo, Ana!"</span>);
+}</pre>
+    </div>
+    <p>Recuerda del Bloque 1: para comparar texto se usa <code>.equals()</code>, no <code>==</code>. Si escribieras <code>nombre == "Ana"</code>, a veces funcionaría y a veces no, y no tendrías idea de por qué.</p>
+
+    <h3>Ejemplo 3 — Condición con operador lógico</h3>
+    <p>Permitir el acceso solo a mayores de edad con identificación.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> edad = <span class="num">22</span>;
+<span class="kw">boolean</span> tieneIdentificacion = <span class="kw">true</span>;
+
+<span class="kw">if</span> (edad &gt;= <span class="num">18</span> &amp;&amp; tieneIdentificacion) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Acceso permitido"</span>);
+}</pre>
+    </div>
+    <p>La condición <code>edad &gt;= 18 &amp;&amp; tieneIdentificacion</code> es <code>true</code> solo si <em>las dos</em> partes son verdaderas. Si la edad es 22 pero no hay identificación, no entra. Si hay identificación pero la edad es 15, tampoco. Aunque no lo parezca, ya estás empezando a construir condiciones "reales", de las que se usan en programas de verdad.</p>
+
+    <h3>Ejemplo 4 — <code>if</code> con varias instrucciones adentro</h3>
+    <p>Si un número es par, mostrar dos mensajes diferentes.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> n = <span class="num">8</span>;
+
+<span class="kw">if</span> (n % <span class="num">2</span> == <span class="num">0</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"El número es par"</span>);
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Y además es divisible por 2"</span>);
+}</pre>
+    </div>
+    <p>Fíjate en la condición: <code>n % 2 == 0</code>. El <code>%</code> da el resto. Si el resto de dividir entre 2 es 0, el número es par. Este patrón se usa mucho y vale la pena reconocerlo de un vistazo.</p>
+
+    <h3>Ejemplo 5 — Combinando todo lo del Bloque 1</h3>
+    <p>Un programa que calcule el precio final de una compra aplicando un descuento del 10% solo si el total supera los 100.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">double</span> subtotal = <span class="num">120.0</span>;
+<span class="kw">double</span> descuento = <span class="num">0.10</span>;
+<span class="kw">double</span> total = subtotal;
+
+<span class="kw">if</span> (subtotal &gt; <span class="num">100</span>) {
+    total = subtotal - (subtotal * descuento);
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Total a pagar: "</span> + total);</pre>
+    </div>
+    <p>Hay algo importante en este ejemplo: <code>total</code> se declara <strong>antes</strong> del <code>if</code> con el valor de <code>subtotal</code>, y <em>dentro</em> del <code>if</code> se modifica. Si el <code>if</code> no se cumple, <code>total</code> conserva el valor original. Si se cumple, se aplica el descuento. Después del <code>if</code>, en ambos casos, <code>total</code> tiene un valor válido y se muestra.</p>
+
+    <p>Este patrón —declarar fuera, modificar dentro— va a aparecer constantemente en el manual. Reconocerlo ahora te va a ahorrar tiempo después.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="errores-if">
+    <h2>Errores comunes con <code>if</code></h2>
+
+    <p>Estos son los errores que comete casi todo el mundo la primera vez. Léelos <em>antes</em> de escribir tus primeros <code>if</code>, no después. Así, cuando te aparezcan, los vas a reconocer.</p>
+
+    <h3>1. Poner <code>;</code> después del paréntesis del <code>if</code></h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">if</span> (edad &gt;= <span class="num">18</span>);   <span class="cmt">// ← ese ; es un error</span>
+{
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Mayor"</span>);
+}</pre>
+    </div>
+
+    <p>Ese punto y coma le dice a Java "el cuerpo del <code>if</code> es una instrucción vacía". Entonces el bloque de llaves de abajo se ejecuta <em>siempre</em>, sin importar la condición. Es un error muy silencioso: el código compila, corre, pero se comporta mal. Si tu <code>if</code> parece "no hacer nada", revisa si tiene un <code>;</code> escondido después del paréntesis.</p>
+
+    <h3>2. Usar <code>=</code> en vez de <code>==</code></h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">if</span> (edad = <span class="num">18</span>) {   <span class="cmt">// ← error: asignación, no comparación</span>
+    ...
+}</pre>
+    </div>
+
+    <p>Java espera un <code>boolean</code> entre los paréntesis del <code>if</code>. Una asignación no es un <code>boolean</code>. Así que este error sí lo detecta el compilador y el programa no arranca. Es una de las pocas bondades de Java sobre otros lenguajes: aquí el error se ve rápido.</p>
+
+    <h3>3. Confundir la lógica con el orden de las palabras</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Quiero: "si la edad está entre 18 y 30"</span>
+<span class="kw">if</span> (<span class="num">18</span> &lt;= edad &lt;= <span class="num">30</span>) {   <span class="cmt">// ← error de sintaxis</span>
+    ...
+}</pre>
+    </div>
+
+    <p>Java no acepta comparaciones encadenadas como en matemáticas. Hay que partir la condición en dos y unirlas con <code>&amp;&amp;</code>:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">if</span> (edad &gt;= <span class="num">18</span> &amp;&amp; edad &lt;= <span class="num">30</span>) {
+    ...
+}</pre>
+    </div>
+
+    <h3>4. Olvidar las llaves y que solo una línea quede dentro</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">if</span> (edad &gt;= <span class="num">18</span>)
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Mayor"</span>);
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Puede votar"</span>);   <span class="cmt">// ← esto NO está dentro del if</span></pre>
+    </div>
+
+    <p>Sin llaves, solo la primera línea después del <code>if</code> queda dentro. La segunda se ejecuta siempre. Este es el motivo por el que en este manual <strong>siempre</strong> usamos llaves: para no depender de la indentación, que es frágil y fácil de romper al mover líneas.</p>
+
+    <h3>5. Creer que un <code>if</code> "no entró" cuando en realidad la condición era falsa</h3>
+
+    <p>Esto no es un error de sintaxis, es un error de razonamiento. A veces uno escribe un <code>if</code> pensando que la condición va a dar <code>true</code>, y no entra. Antes de asumir que Java está mal, haz esto: <strong>muestra la condición por pantalla</strong>.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"La condición vale: "</span> + (edad &gt;= <span class="num">18</span>));
+
+<span class="kw">if</span> (edad &gt;= <span class="num">18</span>) {
+    ...
+}</pre>
+    </div>
+
+    <p>Este truco lo vas a usar cien veces. Cuando algo no se comporta como esperas, imprime la condición. Casi siempre descubres que el problema no estaba en el <code>if</code>, sino en el valor que creías que tenía la variable.</p>
+
+    <div class="caja caja-error">
+      <h5>Si después de leer esto igual te atoras</h5>
+      <p class="mb-0">Recuerda el protocolo del Bloque 1: <em>nombra lo que sientes → pregúntate si es hecho o interpretación → busca la pieza específica → aísla esa pieza y revísala sola</em>. Casi siempre el problema no está en "el <code>if</code>" entero, sino en una sola palabra del código: un <code>;</code> de más, un <code>=</code> de menos, un <code>.equals</code> olvidado. Aísla esa línea y mírala sola.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejercicios-if">
+    <h2>Ejercicios de <code>if</code></h2>
+
+    <p>Como en el Bloque 1, hay seis niveles. Intenta cada uno antes de mirar la solución. Y cuando termines cada ejercicio, <strong>léelo mentalmente línea por línea</strong>, como hicimos en la simulación. Esa parte es tan importante como resolver el ejercicio.</p>
+
+    <h3><span class="nivel nivel-reconocer">Reconocer</span></h3>
+    <p>Mira este fragmento. Sin ejecutarlo, dime si se imprime algo y qué.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> x = <span class="num">10</span>;
+
+<span class="kw">if</span> (x &gt; <span class="num">5</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"A"</span>);
+}
+
+<span class="kw">if</span> (x &gt; <span class="num">15</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"B"</span>);
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-0">Solo se imprime <code>A</code>. La primera condición (<code>10 &gt; 5</code>) es verdadera. La segunda (<code>10 &gt; 15</code>) es falsa y el cuerpo se salta. Dos <code>if</code> separados son <em>independientes</em>: uno puede ejecutarse y el otro no, o los dos, o ninguno. No se excluyen mutuamente.</p>
+    </details>
+
+    <h3><span class="nivel nivel-completar">Completar</span></h3>
+    <p>Completa la condición para que el mensaje se muestre solo cuando la temperatura sea mayor a 30.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> temperatura = <span class="num">35</span>;
+
+<span class="kw">if</span> (_______________) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Hace calor"</span>);
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-0"><code>temperatura &gt; 30</code>. También podrías haber escrito <code>temperatura &gt;= 31</code> si consideras que 31 ya es "calor", pero la consigna pedía "mayor a 30", así que la primera es la correcta. Fíjate en la diferencia entre <code>&gt;</code> y <code>&gt;=</code>: el borde importa.</p>
+    </details>
+
+    <h3><span class="nivel nivel-modificar">Modificar</span></h3>
+    <p>Este programa dice si una persona puede votar, pero solo si tiene exactamente 18 años. Cámbialo para que funcione con cualquier edad mayor o igual a 18.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> edad = <span class="num">25</span>;
+
+<span class="kw">if</span> (edad == <span class="num">18</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Puede votar"</span>);
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> edad = <span class="num">25</span>;
+
+<span class="kw">if</span> (edad &gt;= <span class="num">18</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Puede votar"</span>);
+}</pre>
+      </div>
+      <p class="mb-0">Este es un ejemplo clarísimo de "error de borde". El código original no era inválido —compilaba y corría—, pero solo funcionaba para 18 exactos. Los errores de lógica no dan error de compilación: se descubren probando. Por eso en este manual vas a probar <em>varios</em> valores cada vez que escribas un <code>if</code>.</p>
+    </details>
+
+    <h3><span class="nivel nivel-construir">Construir</span></h3>
+    <p>Escribe un programa que guarde en una variable un número y muestre "El número es divisible por 5" solo si lo es. Recuerda que el operador <code>%</code> te da el resto.</p>
+
+    <details class="solucion">
+      <summary>Ver una posible solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> n = <span class="num">35</span>;
+
+<span class="kw">if</span> (n % <span class="num">5</span> == <span class="num">0</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"El número es divisible por 5"</span>);
+}</pre>
+      </div>
+      <p class="mb-0">Prueba con <code>n = 35</code> (debe imprimir), <code>n = 12</code> (no debe imprimir), y <code>n = 0</code> (técnicamente es divisible: <code>0 % 5 == 0</code>, así que sí imprime). Los casos de borde como el 0 a veces revelan que tu lógica no cubre todo lo que creías.</p>
+    </details>
+
+    <h3><span class="nivel nivel-combinar">Combinar</span></h3>
+    <p>Escribe un programa que muestre "Apto para el descuento" solo si:</p>
+    <ul>
+      <li>El cliente tiene más de 60 años, <strong>o</strong></li>
+      <li>Es socio del club (una variable <code>boolean</code>).</li>
+    </ul>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> edad = <span class="num">45</span>;
+<span class="kw">boolean</span> esSocio = <span class="kw">true</span>;
+
+<span class="kw">if</span> (edad &gt; <span class="num">60</span> || esSocio) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Apto para el descuento"</span>);
+}</pre>
+      </div>
+      <p class="mb-0">Usé <code>||</code> porque basta con una de las dos condiciones. Aquí sí importa entender la diferencia entre <code>&amp;&amp;</code> y <code>||</code>: si hubiera usado <code>&amp;&amp;</code>, solo se aplicaría el descuento a quienes cumplieran <em>ambas</em> cosas, y eso es otra regla distinta. Antes de escribir la condición, <strong>piensa en español qué quieres</strong>: "mayores de 60 O socios" → <code>||</code>. "mayores de 60 Y socios" → <code>&amp;&amp;</code>.</p>
+    </details>
+
+    <h3><span class="nivel nivel-crear">Crear</span></h3>
+    <p>Escribe un programa que, dado un año en una variable, determine si es bisiesto. Un año es bisiesto si es divisible por 4, <em>excepto</em> los que son divisibles por 100 pero no por 400.</p>
+
+    <p>Antes de escribir código, haz el análisis en español, como en la sección "Antes de programar":</p>
+
+    <details class="solucion">
+      <summary>Ver análisis y solución</summary>
+      <p class="mt-2 mb-2"><strong>Análisis en español:</strong></p>
+      <ul>
+        <li>Un año es bisiesto si (divisible por 4) Y (no divisible por 100, salvo si es divisible por 400).</li>
+        <li>Eso se puede escribir como: (año % 4 == 0) Y ((año % 100 != 0) O (año % 400 == 0))</li>
+      </ul>
+      <div class="bloque-codigo">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> año = <span class="num">2024</span>;
+
+<span class="kw">if</span> (año % <span class="num">4</span> == <span class="num">0</span> &amp;&amp; (año % <span class="num">100</span> != <span class="num">0</span> || año % <span class="num">400</span> == <span class="num">0</span>)) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(año + <span class="str">" es bisiesto"</span>);
+}</pre>
+      </div>
+      <p class="mb-0">Fíjate en los paréntesis. Sin ellos, la precedencia cambiaría el significado completamente. Cuando tu condición tenga <code>&amp;&amp;</code> y <code>||</code> mezclados, <strong>usa paréntesis</strong>. No es obligatorio, pero es una buena costumbre: no solo funciona igual, se lee mucho mejor, y te obliga a pensar bien qué estás diciendo.</p>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="else">
+    <h2><code>else</code>: y si no, entonces…</h2>
+
+    <h3>Antes de Java (situación cotidiana)</h3>
+    <p>Volvamos al cajero. Si tienes saldo suficiente, te da el dinero. Si no tienes, te muestra un mensaje de error. No es que <em>a veces</em> no pase nada: <strong>siempre</strong> pasa una de las dos cosas. Una o la otra. Nunca las dos, nunca ninguna.</p>
+
+    <p>Eso es exactamente lo que agrega el <code>else</code> al <code>if</code>: un camino alternativo que se ejecuta cuando la condición del <code>if</code> es falsa. No es "otra cosa que también podría pasar". Es "lo que pasa cuando la condición no se cumplió".</p>
+
+    <h3>La idea en español</h3>
+    <p><em>"Si se cumple esto, haz A. Y si no, haz B."</em> El <code>else</code> es "y si no". Su cuerpo se ejecuta <strong>exactamente</strong> cuando la condición del <code>if</code> fue falsa. Ni más ni menos.</p>
+
+    <h3>La nueva pieza</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">if</span> (condición) {
+    <span class="cmt">// se ejecuta si la condición es true</span>
+} <span class="kw">else</span> {
+    <span class="cmt">// se ejecuta si la condición es false</span>
+}</pre>
+    </div>
+
+    <p>Un ejemplo concreto:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> edad = <span class="num">15</span>;
+
+<span class="kw">if</span> (edad &gt;= <span class="num">18</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Eres mayor de edad"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Eres menor de edad"</span>);
+}</pre>
+    </div>
+
+    <p>Con <code>edad = 15</code>, la condición es falsa, así que se ejecuta el bloque del <code>else</code> y se imprime "Eres menor de edad". Con <code>edad = 20</code>, la condición es verdadera, se ejecuta el bloque del <code>if</code> y el <code>else</code> se salta por completo.</p>
+
+    <h3>Lo que <code>else</code> no es</h3>
+
+    <p>Este es un malentendido muy común que conviene desarmar antes de que ocurra:</p>
+
+    <p><strong><code>else</code> no significa "lo contrario de la condición".</strong> Significa "cualquier caso en el que la condición fue falsa". La diferencia es sutil pero real, y se ve cuando la condición es compuesta.</p>
+
+    <p>Por ejemplo:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> edad = <span class="num">17</span>;
+<span class="kw">boolean</span> tienePermiso = <span class="kw">false</span>;
+
+<span class="kw">if</span> (edad &gt;= <span class="num">18</span> || tienePermiso) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Puede entrar"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"No puede entrar"</span>);
+}</pre>
+    </div>
+
+    <p>El <code>else</code> aquí no significa "tiene menos de 18 y no tiene permiso". Significa "no se cumplió la condición compuesta", que puede ser porque falló una parte, o las dos, o cualquier combinación. Es un error frecuente pensar que el <code>else</code> invierte cada condición individual. No lo hace: <strong>el <code>else</code> solo mira si la condición del <code>if</code> fue falsa como un todo</strong>.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejemplos-else">
+    <h2>Ejemplos progresivos con <code>if / else</code></h2>
+
+    <h3>Ejemplo 1 — Par o impar</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> n = <span class="num">7</span>;
+
+<span class="kw">if</span> (n % <span class="num">2</span> == <span class="num">0</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Es par"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Es impar"</span>);
+}</pre>
+    </div>
+    <p>Con <code>n = 7</code>, <code>7 % 2</code> da 1, así que la condición es falsa y va por el <code>else</code>. Con <code>n = 8</code>, <code>8 % 2</code> da 0, la condición es verdadera y va por el <code>if</code>.</p>
+
+    <h3>Ejemplo 2 — Aprobado o reprobado</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">double</span> calificacion = <span class="num">5.8</span>;
+
+<span class="kw">if</span> (calificacion &gt;= <span class="num">6.0</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Aprobado"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Reprobado"</span>);
+}</pre>
+    </div>
+    <p>Con <code>5.8</code>, es reprobado. Con <code>6.0</code> exacto, aprueba (porque la condición es <code>&gt;=</code>, no <code>&gt;</code>). Aquí el borde importa muchísimo: un alumno con 5.99 reprueba, uno con 6.00 aprueba. Siempre piensa dónde quieres poner el límite.</p>
+
+    <h3>Ejemplo 3 — Saludo personalizado con <code>equals</code></h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span> usuario = <span class="str">"admin"</span>;
+
+<span class="kw">if</span> (usuario.<span class="mth">equals</span>(<span class="str">"admin"</span>)) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Bienvenido, administrador"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Bienvenido, usuario"</span>);
+}</pre>
+    </div>
+    <p>Recuerda: <code>.equals</code> para textos, no <code>==</code>. Y ojo, <code>.equals</code> distingue mayúsculas: "Admin" no es igual a "admin". Si quisieras ignorar mayúsculas, existe <code>.equalsIgnoreCase()</code>, que ves aquí de paso pero no vamos a profundizar todavía.</p>
+
+    <h3>Ejemplo 4 — Condición con operador lógico</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> edad = <span class="num">70</span>;
+<span class="kw">boolean</span> esSocio = <span class="kw">false</span>;
+
+<span class="kw">if</span> (edad &gt; <span class="num">60</span> || esSocio) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Descuento aplicado"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Sin descuento"</span>);
+}</pre>
+    </div>
+    <p>Con <code>edad = 70</code>, la primera parte de la condición es verdadera y entra al <code>if</code>. Fíjate en algo importante: aunque <code>esSocio</code> sea <code>false</code>, la condición completa es verdadera, porque usamos <code>||</code>. Con <code>||</code> basta con que una parte sea verdadera.</p>
+
+    <h3>Ejemplo 5 — Combinando variables y decisiones en un caso real</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">double</span> saldo = <span class="num">300.0</span>;
+<span class="kw">double</span> retiro = <span class="num">500.0</span>;
+
+<span class="kw">if</span> (retiro &lt;= saldo) {
+    saldo = saldo - retiro;
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Retiro exitoso. Saldo restante: "</span> + saldo);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Fondos insuficientes. Saldo actual: "</span> + saldo);
+}</pre>
+    </div>
+    <p>Con <code>retiro = 500</code> y <code>saldo = 300</code>, la condición es falsa. Se imprime "Fondos insuficientes. Saldo actual: 300.0". Fíjate que <code>saldo</code> no cambió, porque la resta solo ocurre dentro del <code>if</code>, y no entró. Esta es la primera vez en el manual que ves un <code>else</code> con <strong>estado</strong>: la variable <code>saldo</code> termina con valores distintos según qué rama se haya ejecutado. Esa es la esencia de lo que hace útil a un <code>if</code>.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="errores-else">
+    <h2>Errores comunes con <code>else</code></h2>
+
+    <h3>1. Poner punto y coma antes de <code>else</code></h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">if</span> (x &gt; <span class="num">0</span>) {
+    ...
+};   <span class="cmt">// ← el ; después de la llave está mal</span>
+<span class="kw">else</span> {
+    ...
+}</pre>
+    </div>
+
+    <p>El <code>else</code> tiene que ir inmediatamente después de la llave de cierre del <code>if</code>. Nada de punto y coma en medio. Java lo detecta como error de sintaxis, así que no es silencioso, pero pasa mucho.</p>
+
+    <h3>2. Poner un <code>else</code> sin <code>if</code></h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">else</span> {   <span class="cmt">// ← error: else siempre necesita un if antes</span>
+    ...
+}</pre>
+    </div>
+
+    <p>El <code>else</code> no existe solo. Siempre acompaña a un <code>if</code>. Si lo escribes sin uno arriba, Java se queja. Es la misma idea que "no puede haber un 'sino' sin un 'si' antes".</p>
+
+    <h3>3. Creer que <code>else</code> invierte la condición</h3>
+
+    <p>Ya lo mencionamos antes, pero vale repetirlo. Si tienes:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">if</span> (a &gt; <span class="num">0</span> &amp;&amp; b &gt; <span class="num">0</span>) {
+    ...
+} <span class="kw">else</span> {
+    ...
+}</pre>
+    </div>
+
+    <p>el <code>else</code> no significa "a &lt;= 0 o b &lt;= 0". Significa "no se cumple <code>(a &gt; 0 &amp;&amp; b &gt; 0)</code>", lo cual puede pasar por varias razones. Si necesitas razonar sobre qué pasa en el <code>else</code>, piensa en la condición completa negada, no en cada parte invertida.</p>
+
+    <h3>4. Poner <code>else if</code> cuando bastaba con <code>else</code></h3>
+
+    <p>Si solo tienes dos casos posibles, <code>else</code> es lo correcto. Poner <code>else if (condición contraria)</code> funciona, pero es más código de lo necesario y más propenso a errores:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Funciona, pero es innecesario</span>
+<span class="kw">if</span> (edad &gt;= <span class="num">18</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Mayor"</span>);
+} <span class="kw">else if</span> (edad &lt; <span class="num">18</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Menor"</span>);
+}
+
+<span class="cmt">// Mejor</span>
+<span class="kw">if</span> (edad &gt;= <span class="num">18</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Mayor"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Menor"</span>);
+}</pre>
+    </div>
+
+    <p>La segunda versión es más clara. Cuando solo hay dos caminos, el <code>else</code> es tu amigo. El <code>else if</code> lo vas a usar cuando haya <strong>tres o más</strong> posibilidades, en la siguiente sección.</p>
+
+    <h3>5. Anidar innecesariamente cuando <code>else if</code> era mejor</h3>
+
+    <p>Esto se va a ver clarísimo cuando lleguemos a <code>else if</code>. Por ahora quédate con la idea: si te encuentras escribiendo un <code>else</code> que dentro tiene otro <code>if</code>, probablemente puedas usar <code>else if</code> y ahorrarte un nivel de indentación.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejercicios-else">
+    <h2>Ejercicios de <code>if / else</code></h2>
+
+    <h3><span class="nivel nivel-reconocer">Reconocer</span></h3>
+    <p>¿Qué imprime este programa?</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> a = <span class="num">5</span>;
+<span class="kw">int</span> b = <span class="num">10</span>;
+
+<span class="kw">if</span> (a &gt; b) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"a es mayor"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"b es mayor o igual"</span>);
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-0">Imprime <code>b es mayor o igual</code>. La condición <code>a &gt; b</code> es <code>false</code> (5 no es mayor que 10), así que va por el <code>else</code>. Fíjate en el mensaje: dice "b es mayor o igual" y no "b es mayor", porque efectivamente el <code>else</code> cubre los dos casos: b es estrictamente mayor, o son iguales. Si <code>a</code> y <code>b</code> valieran ambos 10, el resultado seguiría siendo el mismo y el <code>else</code> seguiría ejecutándose.</p>
+    </details>
+
+    <h3><span class="nivel nivel-completar">Completar</span></h3>
+    <p>Completa el <code>else</code> para que el programa diga si un número es cero o no.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> n = <span class="num">0</span>;
+
+<span class="kw">if</span> (n == <span class="num">0</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Es cero"</span>);
+} <span class="kw">else</span> {
+    <span class="cmt">// tu línea aquí</span>
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-0"><code>System.out.println("No es cero");</code></p>
+    </details>
+
+    <h3><span class="nivel nivel-modificar">Modificar</span></h3>
+    <p>Este programa muestra un mensaje si el usuario es mayor de edad, pero no dice nada si no lo es. Agrega un <code>else</code> para que se muestre "Acceso denegado" en el caso contrario.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> edad = <span class="num">16</span>;
+
+<span class="kw">if</span> (edad &gt;= <span class="num">18</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Acceso permitido"</span>);
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> edad = <span class="num">16</span>;
+
+<span class="kw">if</span> (edad &gt;= <span class="num">18</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Acceso permitido"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Acceso denegado"</span>);
+}</pre>
+      </div>
+      <p class="mb-0">Compila y ejecuta con distintos valores de <code>edad</code>: 16, 18, 21, 0. Nota cuál rama se ejecuta en cada caso. Este es el mejor tipo de práctica: <strong>cambiar un dato y ver qué pasa</strong>.</p>
+    </details>
+
+    <h3><span class="nivel nivel-construir">Construir</span></h3>
+    <p>Escribe un programa que:</p>
+    <ul>
+      <li>Tenga dos variables: <code>usuario</code> y <code>contraseña</code> (ambas <code>String</code>).</li>
+      <li>Si el usuario es <code>"admin"</code> y la contraseña es <code>"1234"</code>, muestre "Bienvenido".</li>
+      <li>En cualquier otro caso, muestre "Credenciales incorrectas".</li>
+    </ul>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span> usuario = <span class="str">"admin"</span>;
+<span class="cls">String</span> contraseña = <span class="str">"1234"</span>;
+
+<span class="kw">if</span> (usuario.<span class="mth">equals</span>(<span class="str">"admin"</span>) &amp;&amp; contraseña.<span class="mth">equals</span>(<span class="str">"1234"</span>)) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Bienvenido"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Credenciales incorrectas"</span>);
+}</pre>
+      </div>
+      <p class="mb-0">Ojo con las comparaciones de texto: <code>.equals</code>, no <code>==</code>. Y ojo con el <code>&amp;&amp;</code>: para entrar al <code>if</code>, <em>ambas</em> condiciones deben ser verdaderas. Prueba distintos valores para ver cómo cambia la rama ejecutada.</p>
+    </details>
+
+    <h3><span class="nivel nivel-combinar">Combinar</span></h3>
+    <p>Una tienda hace un descuento del 20% a mayores de 65 años, y del 10% a cualquier cliente frecuente (una variable <code>boolean</code>). El descuento mayor gana. Escribe un programa que, dados una edad y una variable <code>esFrecuente</code>, muestre el porcentaje de descuento aplicable.</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> edad = <span class="num">70</span>;
+<span class="kw">boolean</span> esFrecuente = <span class="kw">true</span>;
+
+<span class="kw">if</span> (edad &gt; <span class="num">65</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Descuento: 20%"</span>);
+} <span class="kw">else</span> {
+    <span class="kw">if</span> (esFrecuente) {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Descuento: 10%"</span>);
+    } <span class="kw">else</span> {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Descuento: 0%"</span>);
+    }
+}</pre>
+      </div>
+      <p class="mb-0">Fíjate en el <code>if</code> anidado dentro del <code>else</code>. Se lee bien, pero es incómodo. En la siguiente sección vas a ver cómo <code>else if</code> te permite escribir esto mismo con menos niveles. Por ahora está bien como está.</p>
+    </details>
+
+    <h3><span class="nivel nivel-crear">Crear</span></h3>
+    <p>Escribe un programa que simule un semáforo. Dada una variable <code>String color</code>, muestre la acción correspondiente:</p>
+    <ul>
+      <li><code>"verde"</code> → "Avanzar"</li>
+      <li><code>"amarillo"</code> → "Precaución"</li>
+      <li><code>"rojo"</code> → "Detenerse"</li>
+      <li>cualquier otra cosa → "Color no válido"</li>
+    </ul>
+    <p>Hazlo con <code>if / else</code> y anidados por ahora. En la siguiente sección vas a ver la forma "bonita" con <code>else if</code>.</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span> color = <span class="str">"amarillo"</span>;
+
+<span class="kw">if</span> (color.<span class="mth">equals</span>(<span class="str">"verde"</span>)) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Avanzar"</span>);
+} <span class="kw">else</span> {
+    <span class="kw">if</span> (color.<span class="mth">equals</span>(<span class="str">"amarillo"</span>)) {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Precaución"</span>);
+    } <span class="kw">else</span> {
+        <span class="kw">if</span> (color.<span class="mth">equals</span>(<span class="str">"rojo"</span>)) {
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Detenerse"</span>);
+        } <span class="kw">else</span> {
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Color no válido"</span>);
+        }
+    }
+}</pre>
+      </div>
+      <p class="mb-0">Ya funciona, pero fíjate en cuánto se va hacia la derecha con cada <code>if</code> anidado. Ese desplazamiento progresivo tiene un límite práctico: a partir de tres o cuatro niveles ya cuesta leer. La sección siguiente arregla esto.</p>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="else-if">
+    <h2><code>else if</code>: cuando hay más de dos caminos</h2>
+
+    <h3>Antes de Java (situación cotidiana)</h3>
+    <p>Piensa en un sistema de calificaciones: 9 o más es "excelente", 7 u 8 es "bien", 5 o 6 es "suficiente", menos de 5 es "insuficiente". No son dos caminos, son cuatro. Cada uno excluye a los demás: una calificación no puede ser a la vez "bien" y "suficiente".</p>
+
+    <p>Con lo que sabes hasta ahora, podrías escribirlo con <code>if</code> y <code>else</code> anidados, pero como acabaste de ver, se va hacia la derecha y se vuelve difícil de leer. Java tiene una forma más directa para esta situación: <code>else if</code>.</p>
+
+    <h3>La idea en español</h3>
+    <p><em>"Si se cumple A, haz esto. Y si no, pero se cumple B, haz esto otro. Y si no, pero se cumple C, haz esto otro. Y si no se cumple nada, haz esto último."</em></p>
+
+    <p>Es una cadena. Java va probando condiciones en orden, y se detiene en la primera que sea verdadera. Las siguientes ya no las evalúa.</p>
+
+    <h3>La nueva pieza</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">if</span> (condición1) {
+    <span class="cmt">// se ejecuta si condición1 es true</span>
+} <span class="kw">else if</span> (condición2) {
+    <span class="cmt">// se ejecuta si condición1 es false Y condición2 es true</span>
+} <span class="kw">else if</span> (condición3) {
+    <span class="cmt">// se ejecuta si las anteriores fueron false Y condición3 es true</span>
+} <span class="kw">else</span> {
+    <span class="cmt">// se ejecuta si todas las anteriores fueron false</span>
+}</pre>
+    </div>
+
+    <p>Un ejemplo con las calificaciones:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> nota = <span class="num">8</span>;
+
+<span class="kw">if</span> (nota &gt;= <span class="num">9</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Excelente"</span>);
+} <span class="kw">else if</span> (nota &gt;= <span class="num">7</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Bien"</span>);
+} <span class="kw">else if</span> (nota &gt;= <span class="num">5</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Suficiente"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Insuficiente"</span>);
+}</pre>
+    </div>
+
+    <p>Con <code>nota = 8</code>: se evalúa la primera condición (<code>8 &gt;= 9</code>), es falsa. Se pasa a la segunda (<code>8 &gt;= 7</code>), es verdadera. Se ejecuta "Bien" y <strong>se ignora el resto de la cadena</strong>. Nunca se llega a evaluar la condición <code>nota &gt;= 5</code>, aunque también sería verdadera. Esto es fundamental entenderlo.</p>
+
+    <h3>El orden importa (muchísimo)</h3>
+
+    <p>Cuando usas <code>else if</code>, el orden de las condiciones cambia el comportamiento. Si en el ejemplo anterior pusieras primero <code>nota &gt;= 5</code> y después <code>nota &gt;= 9</code>, todas las notas mayores o iguales a 5 caerían en la primera rama, y las notas altas nunca llegarían a la rama "Excelente". Porque cuando Java encuentra la primera condición verdadera, <strong>ya no sigue revisando</strong>.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// ESTO ESTÁ MAL (orden incorrecto)</span>
+<span class="kw">if</span> (nota &gt;= <span class="num">5</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Suficiente"</span>);   <span class="cmt">// se ejecuta también con nota 10</span>
+} <span class="kw">else if</span> (nota &gt;= <span class="num">7</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Bien"</span>);        <span class="cmt">// nunca se llega</span>
+} <span class="kw">else if</span> (nota &gt;= <span class="num">9</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Excelente"</span>);   <span class="cmt">// nunca se llega</span>
+}</pre>
+    </div>
+
+    <p>Regla práctica: cuando las condiciones son rangos del mismo dato, <strong>pon las más restrictivas primero</strong>. O piensa en "qué es más específico" y ordénalo de más a menos específico.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="simulacion-else-if">
+    <h2>Simulación: cómo se recorren las ramas</h2>
+
+    <p>Esta es la parte más importante de la sección. Vamos a ejecutar paso a paso el ejemplo de las calificaciones, con tres valores distintos, para que veas exactamente cómo se recorre la cadena.</p>
+
+    <h3>Caso 1: <code>nota = 10</code></h3>
+
+    <div class="simulacion">
+      <table class="table table-bordered">
+        <thead><tr><th>Paso</th><th>Qué pasa</th><th>Resultado</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Evalúa <code>10 &gt;= 9</code></td><td><code>true</code> → ejecuta "Excelente", sale de la cadena</td></tr>
+          <tr><td>—</td><td>El resto de condiciones no se evalúa</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Salida: <code>Excelente</code>.</p>
+
+    <h3>Caso 2: <code>nota = 7</code></h3>
+
+    <div class="simulacion">
+      <table class="table table-bordered">
+        <thead><tr><th>Paso</th><th>Qué pasa</th><th>Resultado</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Evalúa <code>7 &gt;= 9</code></td><td><code>false</code> → pasa al siguiente</td></tr>
+          <tr><td>2</td><td>Evalúa <code>7 &gt;= 7</code></td><td><code>true</code> → ejecuta "Bien", sale de la cadena</td></tr>
+          <tr><td>—</td><td>El resto no se evalúa</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Salida: <code>Bien</code>. Nota: no se evalúa <code>7 &gt;= 5</code> aunque sería verdadera, porque ya salió en la segunda.</p>
+
+    <h3>Caso 3: <code>nota = 3</code></h3>
+
+    <div class="simulacion">
+      <table class="table table-bordered">
+        <thead><tr><th>Paso</th><th>Qué pasa</th><th>Resultado</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Evalúa <code>3 &gt;= 9</code></td><td><code>false</code></td></tr>
+          <tr><td>2</td><td>Evalúa <code>3 &gt;= 7</code></td><td><code>false</code></td></tr>
+          <tr><td>3</td><td>Evalúa <code>3 &gt;= 5</code></td><td><code>false</code></td></tr>
+          <tr><td>4</td><td>Ninguna condición cumplida, entra al <code>else</code></td><td>Ejecuta "Insuficiente"</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Salida: <code>Insuficiente</code>.</p>
+
+    <div class="caja caja-detente">
+      <h5>Detente un momento y piensa</h5>
+      <p class="mb-0">Antes de seguir, predice qué imprime si <code>nota = 9</code>. ¿Y si <code>nota = 6.5</code> (asumiendo que lo cambiamos a <code>double</code>)? ¿Y si <code>nota = -1</code>? Haz los tres casos en papel o en un archivo antes de seguir. Esta es la habilidad más útil que puedes desarrollar aquí: ejecutar en tu cabeza.</p>
+    </div>
+
+    <p><strong>La idea central</strong>: una cadena de <code>else if</code> <em>para</em> en la primera condición verdadera. Todas las siguientes, aunque también fueran verdaderas, se ignoran. Por eso el orden importa, y por eso hay que pensar bien en qué orden van las condiciones.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejemplos-else-if">
+    <h2>Ejemplos progresivos con <code>else if</code></h2>
+
+    <h3>Ejemplo 1 — Categorías por edad</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> edad = <span class="num">30</span>;
+
+<span class="kw">if</span> (edad &lt; <span class="num">13</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Niño"</span>);
+} <span class="kw">else if</span> (edad &lt; <span class="num">18</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Adolescente"</span>);
+} <span class="kw">else if</span> (edad &lt; <span class="num">65</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Adulto"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Adulto mayor"</span>);
+}</pre>
+    </div>
+    <p>Con <code>edad = 30</code> → "Adulto". Con <code>edad = 12</code> → "Niño". Con <code>edad = 70</code> → "Adulto mayor". Fíjate que las condiciones van en orden creciente de edad, pero cada una sola compara contra un límite. Java no necesita saber que la anterior fue falsa para evaluar la siguiente —el <code>else if</code> ya garantiza que solo se llega aquí si las anteriores fueron falsas.</p>
+
+    <h3>Ejemplo 2 — Clasificación de temperatura</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> temp = <span class="num">15</span>;
+
+<span class="kw">if</span> (temp &lt; <span class="num">0</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Bajo cero"</span>);
+} <span class="kw">else if</span> (temp &lt; <span class="num">10</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Frío"</span>);
+} <span class="kw">else if</span> (temp &lt; <span class="num">25</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Templado"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Caluroso"</span>);
+}</pre>
+    </div>
+    <p>Con <code>15</code> → "Templado". Con <code>30</code> → "Caluroso". Con <code>-5</code> → "Bajo cero". Nota cómo las condiciones cubren rangos sin necesitar comparaciones dobles: <code>temp &lt; 10</code> después de <code>temp &lt; 0</code> cubre el rango 0-9, porque ya sabemos que no cayó en "menos de 0".</p>
+
+    <h3>Ejemplo 3 — Clasificación de IMC (parcial)</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">double</span> peso = <span class="num">70.0</span>;
+<span class="kw">double</span> altura = <span class="num">1.75</span>;
+<span class="kw">double</span> imc = peso / (altura * altura);
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Tu IMC es: "</span> + imc);
+
+<span class="kw">if</span> (imc &lt; <span class="num">18.5</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Bajo peso"</span>);
+} <span class="kw">else if</span> (imc &lt; <span class="num">25.0</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Peso normal"</span>);
+} <span class="kw">else if</span> (imc &lt; <span class="num">30.0</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Sobrepeso"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Obesidad"</span>);
+}</pre>
+    </div>
+    <p>Este ejemplo combina varias piezas del Bloque 1: variables, cálculo, concatenación, y ahora decisiones. Es exactamente el tipo de programa que ya puedes escribir sin ayuda. Si te sientes cómodo escribiendo esto de cero, vas bien.</p>
+
+    <h3>Ejemplo 4 — Descuentos por monto</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">double</span> compra = <span class="num">250.0</span>;
+<span class="kw">double</span> descuento = <span class="num">0.0</span>;
+
+<span class="kw">if</span> (compra &gt;= <span class="num">500</span>) {
+    descuento = <span class="num">0.20</span>;
+} <span class="kw">else if</span> (compra &gt;= <span class="num">200</span>) {
+    descuento = <span class="num">0.10</span>;
+} <span class="kw">else if</span> (compra &gt;= <span class="num">100</span>) {
+    descuento = <span class="num">0.05</span>;
+}
+
+<span class="kw">double</span> total = compra - (compra * descuento);
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Descuento: "</span> + (descuento * <span class="num">100</span>) + <span class="str">"%"</span>);
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Total a pagar: "</span> + total);</pre>
+    </div>
+    <p>Con <code>250</code>, el descuento es 10%. Con <code>550</code>, 20%. Con <code>50</code>, 0% (no cae en ninguna rama, y como no hay <code>else</code> final, <code>descuento</code> se queda en 0.0). Fíjate en dos cosas: la variable <code>descuento</code> se declara <strong>fuera</strong> de la cadena con valor inicial 0, y solo cambia si alguna condición se cumple. Y las condiciones van de mayor a menor, porque cada una mira solo un borde inferior.</p>
+
+    <h3>Ejemplo 5 — Combinando texto y números</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span> tipoCliente = <span class="str">"VIP"</span>;
+<span class="kw">double</span> totalCompra = <span class="num">300.0</span>;
+<span class="kw">double</span> descuento = <span class="num">0.0</span>;
+
+<span class="kw">if</span> (tipoCliente.<span class="mth">equals</span>(<span class="str">"VIP"</span>)) {
+    descuento = <span class="num">0.25</span>;
+} <span class="kw">else if</span> (tipoCliente.<span class="mth">equals</span>(<span class="str">"Frecuente"</span>)) {
+    descuento = <span class="num">0.10</span>;
+} <span class="kw">else if</span> (tipoCliente.<span class="mth">equals</span>(<span class="str">"Nuevo"</span>)) {
+    descuento = <span class="num">0.05</span>;
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Tipo de cliente no reconocido"</span>);
+}
+
+<span class="kw">double</span> totalFinal = totalCompra - (totalCompra * descuento);
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Descuento aplicado: "</span> + (descuento * <span class="num">100</span>) + <span class="str">"%"</span>);
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Total final: "</span> + totalFinal);</pre>
+    </div>
+    <p>Aquí el <code>else</code> final hace algo distinto a los demás: imprime un mensaje de "no reconocido". Es un caso muy común: las ramas exitosas asignan un valor, y el <code>else</code> final advierte que algo salió mal. En un programa real, ese <code>else</code> probablemente termine el programa o pida datos de nuevo. Por ahora basta con que muestre el aviso.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="errores-else-if">
+    <h2>Errores comunes con <code>else if</code></h2>
+
+    <h3>1. Orden incorrecto de las condiciones</h3>
+    <p>Ya lo mencionamos, pero es el error más frecuente con <code>else if</code>. Si pones las condiciones más amplias primero, las más específicas nunca se van a evaluar. El caso clásico: poner <code>&gt;= 5</code> antes que <code>&gt;= 9</code> en el ejemplo de las calificaciones.</p>
+
+    <p>Regla: <strong>condiciones específicas primero</strong>, o de lo más restrictivo a lo más amplio.</p>
+
+    <h3>2. Poner un <code>else</code> entre medio de la cadena</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">if</span> (a &gt; <span class="num">10</span>) {
+    ...
+} <span class="kw">else</span> {                 <span class="cmt">// ← esto no debería ir aquí si quieres seguir con else if</span>
+    ...
+} <span class="kw">else if</span> (b &gt; <span class="num">5</span>) {       <span class="cmt">// ← error: ya terminó la cadena</span>
+    ...
+}</pre>
+    </div>
+
+    <p>El <code>else</code> cierra la cadena. Después de un <code>else</code>, ya no puede venir un <code>else if</code>. Si lo intentas, Java te da error. Las cadenas de <code>else if</code> terminan con un <code>else</code> final, o simplemente terminan sin nada más.</p>
+
+    <h3>3. Repetir la condición del <code>if</code> dentro del <code>else if</code></h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Está mal, es redundante</span>
+<span class="kw">if</span> (x &lt; <span class="num">10</span>) {
+    ...
+} <span class="kw">else if</span> (x &gt;= <span class="num">10</span>) {   <span class="cmt">// ← esta condición siempre es verdadera aquí</span>
+    ...
+}</pre>
+    </div>
+
+    <p>Cuando escribes un <code>else if</code>, ya sabes que la condición anterior fue falsa. No hace falta que la vuelvas a verificar. Basta con comparar contra el siguiente límite. En este ejemplo, la segunda condición <em>siempre</em> va a ser verdadera (porque si <code>x</code> no es menor que 10, entonces <code>x &gt;= 10</code> seguro), así que podría ser simplemente un <code>else</code>.</p>
+
+    <h3>4. Creer que todos los <code>if</code> se evalúan</h3>
+
+    <p>Este es el error de razonamiento más importante de la sección. Una cadena de <code>else if</code> <strong>no es un conjunto de <code>if</code> independientes</strong>. Es una <em>cadena</em>: en cuanto una condición se cumple, las demás se ignoran. Si quieres que varias condiciones se evalúen, y que varias ramas puedan ejecutarse, tienes que usar <code>if</code> separados, no <code>else if</code>.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Con else if: SOLO UNA rama se ejecuta</span>
+<span class="kw">if</span> (a &gt; <span class="num">0</span>) { <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"A"</span>); }
+<span class="kw">else if</span> (b &gt; <span class="num">0</span>) { <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"B"</span>); }
+
+<span class="cmt">// Con if separados: VARIAS pueden ejecutarse</span>
+<span class="kw">if</span> (a &gt; <span class="num">0</span>) { <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"A"</span>); }
+<span class="kw">if</span> (b &gt; <span class="num">0</span>) { <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"B"</span>); }</pre>
+    </div>
+
+    <p>Si <code>a = 5</code> y <code>b = 5</code>: el primer bloque imprime solo "A", el segundo imprime "A" y "B". Dos formas válidas para problemas distintos. La pregunta "¿quiero que solo una se ejecute, o que se puedan ejecutar varias?" te dice cuál usar.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejercicios-else-if">
+    <h2>Ejercicios de <code>else if</code></h2>
+
+    <h3><span class="nivel nivel-reconocer">Reconocer</span></h3>
+    <p>¿Qué imprime este programa con <code>x = 15</code>? ¿Y con <code>x = 25</code>?</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">if</span> (x &gt; <span class="num">20</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"grande"</span>);
+} <span class="kw">else if</span> (x &gt; <span class="num">10</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"mediano"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"pequeño"</span>);
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-2">Con <code>x = 15</code>: "mediano". Con <code>x = 25</code>: "grande".</p>
+      <p class="mb-0">Con <code>x = 15</code>, la primera condición (<code>15 &gt; 20</code>) es falsa; la segunda (<code>15 &gt; 10</code>) es verdadera, así que cae en "mediano". Fíjate que <code>15 &gt; 10</code> también <em>implicaría</em> que no es "pequeño", pero la lógica del <code>else</code> garantiza que solo una rama se ejecuta, así que no hay riesgo de que se imprima más de un mensaje.</p>
+    </details>
+
+    <h3><span class="nivel nivel-completar">Completar</span></h3>
+    <p>Completa la condición del segundo <code>else if</code> para que cubra notas entre 5 y 6.9.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">double</span> nota = <span class="num">6.5</span>;
+
+<span class="kw">if</span> (nota &gt;= <span class="num">9.0</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Excelente"</span>);
+} <span class="kw">else if</span> (nota &gt;= <span class="num">7.0</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Bien"</span>);
+} <span class="kw">else if</span> (_______________) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Suficiente"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Insuficiente"</span>);
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-0"><code>nota &gt;= 5.0</code>. No hace falta escribir <code>nota &gt;= 5.0 &amp;&amp; nota &lt; 7.0</code>, porque la cadena de <code>else if</code> ya garantiza que si llegamos aquí, <code>nota &lt; 7.0</code>. Si te tienta escribir la doble condición, está bien (es más explícita y no incorrecta), pero entiende que es redundante.</p>
+    </details>
+
+    <h3><span class="nivel nivel-modificar">Modificar</span></h3>
+    <p>Este programa está roto: clasifica mal las notas. Encuentra el error y arréglalo.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">double</span> nota = <span class="num">9.5</span>;
+
+<span class="kw">if</span> (nota &gt;= <span class="num">5.0</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Suficiente"</span>);
+} <span class="kw">else if</span> (nota &gt;= <span class="num">7.0</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Bien"</span>);
+} <span class="kw">else if</span> (nota &gt;= <span class="num">9.0</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Excelente"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Insuficiente"</span>);
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-2">Con <code>nota = 9.5</code>, este programa imprime "Suficiente", ¡cuando debería decir "Excelente"! El problema es el orden: la condición <code>nota &gt;= 5.0</code> atrapa <em>todas</em> las notas mayores o iguales a 5, incluyendo las excelentes. Arreglo: reordenar de más específico a menos específico.</p>
+      <div class="bloque-codigo">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">if</span> (nota &gt;= <span class="num">9.0</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Excelente"</span>);
+} <span class="kw">else if</span> (nota &gt;= <span class="num">7.0</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Bien"</span>);
+} <span class="kw">else if</span> (nota &gt;= <span class="num">5.0</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Suficiente"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Insuficiente"</span>);
+}</pre>
+      </div>
+      <p class="mb-0">Este error es difícil de detectar mirando el código, porque todo compila bien. La forma de atraparlo es <strong>probar varios valores</strong>: 9.5, 7.5, 5.5, 4.0. Cuando un programa con <code>else if</code> se comporta raro, la primera sospecha siempre debe ser el orden de las condiciones.</p>
+    </details>
+
+    <h3><span class="nivel nivel-construir">Construir</span></h3>
+    <p>Escribe un programa que, dado un número del 1 al 7 en una variable <code>int dia</code>, muestre el nombre del día de la semana. Si el número no está entre 1 y 7, debe mostrar "Día no válido".</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> dia = <span class="num">3</span>;
+
+<span class="kw">if</span> (dia == <span class="num">1</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Lunes"</span>);
+} <span class="kw">else if</span> (dia == <span class="num">2</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Martes"</span>);
+} <span class="kw">else if</span> (dia == <span class="num">3</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Miércoles"</span>);
+} <span class="kw">else if</span> (dia == <span class="num">4</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Jueves"</span>);
+} <span class="kw">else if</span> (dia == <span class="num">5</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Viernes"</span>);
+} <span class="kw">else if</span> (dia == <span class="num">6</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Sábado"</span>);
+} <span class="kw">else if</span> (dia == <span class="num">7</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Domingo"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Día no válido"</span>);
+}</pre>
+      </div>
+      <p class="mb-0">Aquí el orden de las condiciones no importa, porque cada una compara contra un valor exacto (<code>==</code>) y no hay rangos solapados. Ese es el caso donde <code>else if</code> es "seguro" respecto al orden. Cuando las condiciones son rangos (<code>&gt;=</code>, <code>&lt;</code>), el orden siempre importa. Buena regla para recordar.</p>
+    </details>
+
+    <h3><span class="nivel nivel-combinar">Combinar</span></h3>
+    <p>Una empresa clasifica a sus empleados por categoría según dos datos: años de antigüedad y si tienen título universitario. La regla es:</p>
+    <ul>
+      <li>5 o más años <strong>y</strong> título → "Senior"</li>
+      <li>5 o más años <strong>sin</strong> título → "Especialista"</li>
+      <li>Menos de 5 años <strong>con</strong> título → "Junior"</li>
+      <li>Menos de 5 años <strong>sin</strong> título → "Auxiliar"</li>
+    </ul>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> antigüedad = <span class="num">7</span>;
+<span class="kw">boolean</span> tieneTitulo = <span class="kw">true</span>;
+
+<span class="kw">if</span> (antigüedad &gt;= <span class="num">5</span> &amp;&amp; tieneTitulo) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Senior"</span>);
+} <span class="kw">else if</span> (antigüedad &gt;= <span class="num">5</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Especialista"</span>);
+} <span class="kw">else if</span> (tieneTitulo) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Junior"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Auxiliar"</span>);
+}</pre>
+      </div>
+      <p class="mb-0">Fíjate cómo cada <code>else if</code> aprovecha que las condiciones anteriores ya fueron falsas. En el segundo <code>else if</code>, no hace falta escribir <code>antigüedad &gt;= 5 &amp;&amp; !tieneTitulo</code>: basta con <code>antigüedad &gt;= 5</code>, porque ya sabemos que <code>tieneTitulo</code> es falso (si no, habríamos entrado en la primera rama). Aprovechar esta información implícita es lo que hace a <code>else if</code> tan potente.</p>
+    </details>
+
+    <h3><span class="nivel nivel-crear">Crear</span></h3>
+    <p>Escribe un programa que, dado un mes en una variable <code>int mes</code> (1 a 12), diga cuántos días tiene. Ten en cuenta que febrero tiene 28 o 29 días según el año. Asume que tienes dos variables: <code>mes</code> y <code>año</code>. Usa la regla de bisiesto que viste en la sección de <code>if</code>.</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> mes = <span class="num">2</span>;
+<span class="kw">int</span> año = <span class="num">2024</span>;
+<span class="kw">int</span> dias;
+
+<span class="kw">if</span> (mes == <span class="num">2</span>) {
+    <span class="kw">boolean</span> bisiesto = (año % <span class="num">4</span> == <span class="num">0</span>) &amp;&amp; ((año % <span class="num">100</span> != <span class="num">0</span>) || (año % <span class="num">400</span> == <span class="num">0</span>));
+    dias = bisiesto ? <span class="num">29</span> : <span class="num">28</span>;
+} <span class="kw">else if</span> (mes == <span class="num">4</span> || mes == <span class="num">6</span> || mes == <span class="num">9</span> || mes == <span class="num">11</span>) {
+    dias = <span class="num">30</span>;
+} <span class="kw">else if</span> (mes &gt;= <span class="num">1</span> &amp;&amp; mes &lt;= <span class="num">12</span>) {
+    dias = <span class="num">31</span>;
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Mes no válido"</span>);
+    dias = <span class="num">0</span>;
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"El mes "</span> + mes + <span class="str">" tiene "</span> + dias + <span class="str">" días"</span>);</pre>
+      </div>
+      <p class="mb-0">Aparecen dos cosas nuevas aquí: el operador ternario <code>condición ? valorSiTrue : valorSiFalse</code>, y el uso de <code>||</code> para agrupar varios meses en una sola condición. El ternario es un <code>if / else</code> comprimido en una línea; lo veremos con más calma en otro bloque. Si te resulta confuso, puedes escribir el bisiesto como un <code>if / else</code> normal y funciona igual:</p>
+      <div class="bloque-codigo">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">if</span> (bisiesto) {
+    dias = <span class="num">29</span>;
+} <span class="kw">else</span> {
+    dias = <span class="num">28</span>;
+}</pre>
+      </div>
+      <p class="mb-0">Siempre prefiere la versión que entiendas. El código más corto no siempre es el mejor: el mejor es el que <em>tú</em> puedes leer y explicar.</p>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="identidad-2">
+    <h2>Volvamos a las piezas</h2>
+
+    <p>Antes de seguir con operadores lógicos, quiero detenerme un momento. Llevas tres estructuras construidas: <code>if</code>, <code>else</code>, <code>else if</code>. Y llevas un montón de piezas del Bloque 1 con las que las estás combinando. Vamos a contarlas.</p>
+
+    <p>Hace unas horas, probablemente no sabías qué era un <code>if</code>. Ahora puedes:</p>
+
+    <ul>
+      <li>Leer un <code>if</code> y predecir si va a entrar o no.</li>
+      <li>Escribir un <code>else</code> y saber exactamente cuándo se ejecuta.</li>
+      <li>Encadenar varios <code>else if</code> y razonar sobre cuál rama va a tomar un valor dado.</li>
+      <li>Detectar un orden incorrecto de condiciones y arreglarlo.</li>
+      <li>Simular mentalmente lo que hace tu programa, línea por línea, antes de ejecutarlo.</li>
+    </ul>
+
+    <p>Cada una de estas cosas es una pieza. Y ninguna la tenías al empezar. Eso no fue suerte, ni talento, ni haber nacido con "cabeza para programar". Fue práctica dirigida, un pedazo a la vez. Si te hubieran mostrado todo esto en una sola sesión, la mesa se te habría llenado y no hubieras podido sostener nada.</p>
+
+    <p>Esta es la segunda vez en el manual que aparece la idea que viste en la introducción. Va a volver una tercera vez, cerca del final, cuando termines los arreglos. Cada vez que la ves, va con una lista de piezas más larga. Y eso es, en el fondo, la respuesta a la pregunta que sí sirve: <em>¿qué piezas me faltan construir?</em> Cada vez menos. Cada vez más complejas. Pero todas se construyen igual: una, después de otra, con práctica.</p>
+
+    <div class="caja caja-idea">
+      <p class="mb-0">Si en este punto sientes que las decisiones "ya no te dan miedo", ese es el resultado concreto de haber construido piezas. Y si todavía te dan miedo, no pasa nada: vuelve a los ejercicios de <code>if</code> sin <code>else</code>, resuélvelos otra vez, y después vuelve a intentar <code>else if</code>. Nada de lo que has hecho está "perdido".</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="operadores-logicos">
+    <h2>Operadores lógicos aplicados</h2>
+
+    <p>Ya viste los operadores <code>&amp;&amp;</code>, <code>||</code> y <code>!</code> en el Bloque 1, cuando hablamos de valores booleanos. En esa sección eran piezas sueltas. Aquí se convierten en herramientas reales: van a ser la forma de escribir condiciones complejas dentro de un <code>if</code>.</p>
+
+    <h3>Antes de Java (situación cotidiana)</h3>
+    <p>Imagina una puerta con dos cerraduras. Necesitas abrir las dos para entrar. Eso es <code>&amp;&amp;</code>: ambas condiciones deben cumplirse. Ahora imagina una puerta con dos cerraduras donde basta con abrir una. Eso es <code>||</code>. Y ahora imagina una alarma que suena cuando NO hay nadie en casa. Eso es <code>!</code>.</p>
+
+    <h3>La idea en español</h3>
+
+    <ul>
+      <li><code>A &amp;&amp; B</code> es verdadero solo si <strong>ambas</strong> son verdaderas. Si una sola es falsa, todo es falso.</li>
+      <li><code>A || B</code> es verdadero si <strong>al menos una</strong> es verdadera. Solo es falso si las dos son falsas.</li>
+      <li><code>!A</code> invierte: si <code>A</code> es <code>true</code>, <code>!A</code> es <code>false</code>, y viceversa.</li>
+    </ul>
+
+    <p>Estas tres reglas son simples pero muy fáciles de confundir cuando las condiciones se vuelven largas. La clave es irlas leyendo como en español, parte por parte.</p>
+
+    <h3>Ejemplos de cada uno dentro de un <code>if</code></h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// &amp;&amp;: ambas condiciones deben cumplirse</span>
+<span class="kw">if</span> (edad &gt;= <span class="num">18</span> &amp;&amp; tieneIdentificacion) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Puede entrar"</span>);
+}
+
+<span class="cmt">// ||: basta con una</span>
+<span class="kw">if</span> (esEstudiante || esProfesor) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Acceso al campus"</span>);
+}
+
+<span class="cmt">// !: negación</span>
+<span class="kw">if</span> (!estaBloqueado) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Puede intentar iniciar sesión"</span>);
+}</pre>
+    </div>
+
+    <h3>Negar una condición compuesta</h3>
+
+    <p>Cuando quieras negar una condición compuesta, conviene saber las <strong>leyes de De Morgan</strong>, que son dos reglas sencillas:</p>
+
+    <ul>
+      <li><code>!(A &amp;&amp; B)</code> es lo mismo que <code>!A || !B</code></li>
+      <li><code>!(A || B)</code> es lo mismo que <code>!A &amp;&amp; !B</code></li>
+    </ul>
+
+    <p>No hace falta memorizarlas. Lo que importa es entender la idea: <strong>negar una condición compuesta cambia también el operador interno</strong>. Cuando tengas una condición larga con <code>!</code> afuera, piensa primero en español qué estás negando, y después escribe la negación.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// "Si NO es cierto que (edad >= 18 Y tiene identificación)"</span>
+<span class="cmt">// es lo mismo que "si edad &lt; 18 O no tiene identificación"</span>
+
+<span class="kw">if</span> (!(edad &gt;= <span class="num">18</span> &amp;&amp; tieneIdentificacion)) { ... }
+
+<span class="cmt">// es equivalente a</span>
+
+<span class="kw">if</span> (edad &lt; <span class="num">18</span> || !tieneIdentificacion) { ... }</pre>
+    </div>
+
+    <p>Las dos formas dan el mismo resultado. La primera se lee "no es cierto que ambas cosas sean verdaderas", la segunda "o la edad es menor, o no tiene identificación". Para el caso de arriba, la segunda suele ser más fácil de razonar.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="cortocircuito">
+    <h2>Cómo los evalúa Java (cortocircuito)</h2>
+
+    <p>Esta es una parte que sorprende a mucha gente y conviene entenderla bien: <code>&amp;&amp;</code> y <code>||</code> en Java <strong>no evalúan siempre ambos lados</strong>. Esto se llama <em>cortocircuito</em> (short-circuit), y funciona así:</p>
+
+    <ul>
+      <li>En <code>A &amp;&amp; B</code>, si <code>A</code> es <code>false</code>, Java <strong>ya no evalúa <code>B</code></strong>. Total, el resultado va a ser <code>false</code> de todas formas, así que se ahorra el trabajo.</li>
+      <li>En <code>A || B</code>, si <code>A</code> es <code>true</code>, Java <strong>ya no evalúa <code>B</code></strong>. Total, el resultado ya es <code>true</code>.</li>
+    </ul>
+
+    <p>Esto suena a optimización, y lo es. Pero también importa por otra razón: <strong>si <code>B</code> tuviera un efecto secundario</strong> (por ejemplo, modificar una variable, o hacer una llamada a un método), ese efecto <em>no ocurriría</em> si Java se salta la evaluación. Vas a ver esto más claro cuando llegues a métodos, pero por ahora vale con saber que <code>&amp;&amp;</code> y <code>||</code> pueden "cortar" la evaluación antes de tiempo.</p>
+
+    <p>Un caso muy común donde esto importa: evitar errores al comparar con posibles valores nulos o al acceder a índices que podrían no existir. Es lo que se llama un <em>guarda</em>: poner la condición más propensa a fallar <strong>después</strong> del <code>&amp;&amp;</code>, para que no se evalúe si la primera ya dijo "no".</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Supón que no estamos seguros de si "usuario" puede ser null</span>
+<span class="cmt">// Este orden protege contra un error:</span>
+<span class="kw">if</span> (usuario != <span class="kw">null</span> &amp;&amp; usuario.<span class="mth">equals</span>(<span class="str">"admin"</span>)) {
+    ...
+}
+
+<span class="cmt">// Este orden puede dar error si usuario es null:</span>
+<span class="kw">if</span> (usuario.<span class="mth">equals</span>(<span class="str">"admin"</span>) &amp;&amp; usuario != <span class="kw">null</span>) {
+    ...
+}</pre>
+    </div>
+
+    <p>En el primer caso, si <code>usuario</code> es <code>null</code>, Java ve <code>usuario != null</code>, da <code>false</code>, y ya no evalúa <code>usuario.equals("admin")</code>. Evita un error. En el segundo caso, Java primero evalúa <code>usuario.equals("admin")</code>, y si <code>usuario</code> es <code>null</code>, eso lanza un error antes de llegar a la segunda parte. <strong>El orden importa cuando hay condiciones que pueden fallar.</strong></p>
+
+    <p>No te preocupes si el concepto de <code>null</code> todavía no te es familiar: va a aparecer más adelante. Lo que quiero que te lleves ahora es la idea del cortocircuito. Es una de esas cosas que uno aprende mejor cuando le pasa, no cuando las lee. Pero al menos ahora sabrás que existen.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejemplos-logicos">
+    <h2>Ejemplos progresivos con operadores lógicos</h2>
+
+    <h3>Ejemplo 1 — Rango con <code>&amp;&amp;</code></h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> edad = <span class="num">25</span>;
+
+<span class="kw">if</span> (edad &gt;= <span class="num">18</span> &amp;&amp; edad &lt;= <span class="num">30</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Edad entre 18 y 30"</span>);
+}</pre>
+    </div>
+    <p>El caso clásico de rango. La condición se lee en español así: "mayor o igual a 18 Y menor o igual a 30". Los dos límites incluidos, porque usamos <code>&gt;=</code> y <code>&lt;=</code>. Si quisiéramos excluir un límite, cambiaríamos a <code>&gt;</code> o <code>&lt;</code>.</p>
+
+    <h3>Ejemplo 2 — Descuento por cumplir una de dos condiciones</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> edad = <span class="num">68</span>;
+<span class="kw">boolean</span> esSocio = <span class="kw">false</span>;
+
+<span class="kw">if</span> (edad &gt; <span class="num">65</span> || esSocio) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Descuento aplicado"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Sin descuento"</span>);
+}</pre>
+    </div>
+    <p>Aquí la lógica en español es: "mayor de 65 O socio". Basta con una. La diferencia entre <code>&amp;&amp;</code> y <code>||</code> no es solo sintáctica: cambia por completo a quién se le aplica el descuento. Este es un buen ejemplo para pensar cómo se escribe la <em>misma</em> regla con el operador contrario, y qué pasaría.</p>
+
+    <h3>Ejemplo 3 — Negación de un booleano</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">boolean</span> sistemaBloqueado = <span class="kw">false</span>;
+
+<span class="kw">if</span> (!sistemaBloqueado) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Acceso permitido"</span>);
+}</pre>
+    </div>
+    <p>Fíjate en la diferencia de estilo. Podrías escribir <code>if (sistemaBloqueado == false)</code>, pero se considera redundante: si <code>sistemaBloqueado</code> ya es un <code>boolean</code>, basta con negarlo con <code>!</code>. La forma <code>== false</code> funciona, pero es ruido. Los programadores experimentados la evitan.</p>
+
+    <h3>Ejemplo 4 — Condición con texto y número</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span> rol = <span class="str">"admin"</span>;
+<span class="kw">int</span> intentos = <span class="num">0</span>;
+
+<span class="kw">if</span> (rol.<span class="mth">equals</span>(<span class="str">"admin"</span>) &amp;&amp; intentos &lt; <span class="num">3</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Acceso concedido"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Acceso denegado"</span>);
+}</pre>
+    </div>
+    <p>Aquí combinamos una comparación de texto (con <code>.equals</code>) y una comparación numérica. Es exactamente lo que se hace en un sistema de login real: se verifica que el rol sea el correcto Y que no se haya pasado del límite de intentos. Ambas condiciones deben cumplirse, por eso <code>&amp;&amp;</code>.</p>
+
+    <h3>Ejemplo 5 — Combinación con paréntesis y negación</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> edad = <span class="num">20</span>;
+<span class="kw">boolean</span> tieneIdentificacion = <span class="kw">true</span>;
+<span class="kw">boolean</span> estaEnListaNegra = <span class="kw">false</span>;
+
+<span class="kw">if</span> (edad &gt;= <span class="num">18</span> &amp;&amp; (tieneIdentificacion || !estaEnListaNegra)) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Puede pasar"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"No puede pasar"</span>);
+}</pre>
+    </div>
+    <p>Aquí hay dos cosas importantes. Primero, los paréntesis alrededor de <code>(tieneIdentificacion || !estaEnListaNegra)</code> son <em>indispensables</em>: sin ellos, Java evaluaría <code>&amp;&amp;</code> antes que <code>||</code> (por precedencia) y el resultado sería distinto. Segundo, esta condición se puede leer en español: "si es mayor de edad Y (tiene identificación o no está en la lista negra)". Cuando una condición es compleja, léela en español primero, y después verifica que el código diga lo mismo.</p>
+
+    <div class="caja caja-detente">
+      <h5>Detente un momento y piensa</h5>
+      <p class="mb-0">Con los valores del ejemplo, ¿qué imprime? Y si cambiaras <code>estaEnListaNegra</code> a <code>true</code> y <code>tieneIdentificacion</code> a <code>false</code>, ¿qué imprimiría? La primera parte de la condición (mayor de edad) sigue siendo verdadera, pero la segunda (identificación o no en lista negra) pasa a ser <code>(false || false)</code>, o sea <code>false</code>. Entonces la condición completa es <code>true &amp;&amp; false = false</code>. Imprime "No puede pasar". Antes de leer esto, deberías haberlo predicho.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="errores-logicos">
+    <h2>Errores comunes con operadores lógicos</h2>
+
+    <h3>1. Usar <code>&amp;&amp;</code> cuando querías <code>||</code> (y viceversa)</h3>
+
+    <p>El error más común. La causa casi siempre es que no pensaste bien la regla en español. Truco: antes de escribir la condición, <strong>di en voz alta qué quieres</strong>:</p>
+
+    <ul>
+      <li>"Debe cumplir A <em>y</em> B" → <code>&amp;&amp;</code></li>
+      <li>"Debe cumplir A <em>o</em> B" → <code>||</code></li>
+    </ul>
+
+    <p>Si tienes problemas para decidir, prueba mentalmente un caso que cumpla solo una de las dos condiciones. ¿Debería entrar? Si sí, <code>||</code>. Si no, <code>&amp;&amp;</code>. Casi siempre la respuesta se vuelve obvia con un ejemplo concreto.</p>
+
+    <h3>2. Olvidar los paréntesis cuando se mezclan</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// ¿Qué significa esta condición?</span>
+<span class="kw">if</span> (a &gt; <span class="num">0</span> || b &gt; <span class="num">0</span> &amp;&amp; c &gt; <span class="num">0</span>) { ... }
+
+<span class="cmt">// Java la interpreta así (por precedencia de &amp;&amp; sobre ||):</span>
+<span class="kw">if</span> (a &gt; <span class="num">0</span> || (b &gt; <span class="num">0</span> &amp;&amp; c &gt; <span class="num">0</span>)) { ... }
+
+<span class="cmt">// Pero ¿quizás lo que querías era esto otro?</span>
+<span class="kw">if</span> ((a &gt; <span class="num">0</span> || b &gt; <span class="num">0</span>) &amp;&amp; c &gt; <span class="num">0</span>) { ... }</pre>
+    </div>
+
+    <p><code>&amp;&amp;</code> tiene mayor precedencia que <code>||</code>. Es decir, se evalúa primero. Esto es correcto pero peligroso, porque quien lee el código no siempre lo recuerda. <strong>Siempre pon paréntesis cuando mezcles <code>&amp;&amp;</code> y <code>||</code></strong>. No porque sea obligatorio, sino porque hace que el código diga exactamente lo que quieres y cualquiera lo lea bien.</p>
+
+    <h3>3. Usar <code>!</code> al inicio cuando querías comparar</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Esto dice: "si NO es cierto que x es igual a 5"</span>
+<span class="kw">if</span> (!(x == <span class="num">5</span>)) { ... }
+
+<span class="cmt">// Esto también dice lo mismo, pero más claro:</span>
+<span class="kw">if</span> (x != <span class="num">5</span>) { ... }</pre>
+    </div>
+
+    <p>Siempre prefiere la forma más directa. La primera versión funciona, pero requiere que quien la lea entienda la doble negación. La segunda se lee sin esfuerzo. <em>Claridad sobre elegancia</em>: el código no tiene que verse complicado para ser bueno.</p>
+
+    <h3>4. Confundir cortocircuito con "Java evalúa todo"</h3>
+
+    <p>Ya lo vimos en la sección de cortocircuito, pero es un error que sorprende a muchos principiantes cuando empiezan a escribir funciones con efectos secundarios. Por ahora solo asegúrate de recordar que <code>&amp;&amp;</code> y <code>||</code> pueden no evaluar el segundo lado. Eso va a importar más adelante.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejercicios-logicos">
+    <h2>Ejercicios con operadores lógicos</h2>
+
+    <h3><span class="nivel nivel-reconocer">Reconocer</span></h3>
+    <p>Con <code>a = 5</code>, <code>b = 10</code>, <code>c = 0</code>, ¿cuál es el valor de cada expresión?</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre>a &gt; <span class="num">0</span> &amp;&amp; b &gt; <span class="num">0</span>
+a &gt; <span class="num">0</span> || c &gt; <span class="num">0</span>
+!(a &gt; <span class="num">0</span>)
+a &gt; <span class="num">0</span> &amp;&amp; c &gt; <span class="num">0</span>
+a &gt; <span class="num">0</span> || c &gt; <span class="num">0</span> &amp;&amp; b &gt; <span class="num">0</span></pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver respuestas</summary>
+      <ul class="mt-2 mb-0">
+        <li><code>true</code> — ambas partes son verdaderas.</li>
+        <li><code>true</code> — <code>a &gt; 0</code> es verdadero, con <code>||</code> basta.</li>
+        <li><code>false</code> — niega un verdadero.</li>
+        <li><code>false</code> — <code>c &gt; 0</code> es falso, con <code>&amp;&amp;</code> todo es falso.</li>
+        <li><code>true</code> — por precedencia es <code>a &gt; 0 || (c &gt; 0 &amp;&amp; b &gt; 0)</code> = <code>true || (false &amp;&amp; true)</code> = <code>true || false</code> = <code>true</code>. Fíjate en cómo se complica cuando no hay paréntesis: leer esto sin saber la precedencia es una trampa.</li>
+      </ul>
+    </details>
+
+    <h3><span class="nivel nivel-completar">Completar</span></h3>
+    <p>Completa la condición para que el mensaje se muestre a personas entre 18 y 65 años (ambos inclusive).</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> edad = <span class="num">40</span>;
+
+<span class="kw">if</span> (_______________) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"En rango de edad laboral"</span>);
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-0"><code>edad &gt;= 18 &amp;&amp; edad &lt;= 65</code>. Los dos límites incluidos, por eso <code>&gt;=</code> y <code>&lt;=</code>.</p>
+    </details>
+
+    <h3><span class="nivel nivel-modificar">Modificar</span></h3>
+    <p>Este programa debería mostrar el mensaje a <em>menores de 18</em> o <em>mayores de 65</em>, pero no lo hace. Encuentra el error y arréglalo.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> edad = <span class="num">70</span>;
+
+<span class="kw">if</span> (edad &lt; <span class="num">18</span> &amp;&amp; edad &gt; <span class="num">65</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Tarifa reducida"</span>);
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-2">Dos errores: debería ser <code>||</code> en lugar de <code>&amp;&amp;</code>, y las condiciones están invertidas respecto a los operadores. La versión correcta:</p>
+      <div class="bloque-codigo">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">if</span> (edad &lt; <span class="num">18</span> || edad &gt; <span class="num">65</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Tarifa reducida"</span>);
+}</pre>
+      </div>
+      <p class="mb-0">El error original era <code>&amp;&amp;</code>: con <code>&amp;&amp;</code>, se requiere que <em>ambas</em> condiciones sean verdaderas, y eso es imposible (nadie es a la vez menor de 18 y mayor de 65). El cuerpo nunca se ejecutaba. Este tipo de error —una condición lógicamente imposible— es una señal clásica de que confundiste <code>&amp;&amp;</code> con <code>||</code>. Cuando un <code>if</code> "nunca entra" sin importar qué valores pruebes, sospecha de esto.</p>
+    </details>
+
+    <h3><span class="nivel nivel-construir">Construir</span></h3>
+    <p>Escribe un programa que determine si una persona puede obtener una licencia de conducir. Los requisitos son:</p>
+    <ul>
+      <li>Tener al menos 18 años.</li>
+      <li>Haber aprobado el examen teórico (variable <code>boolean</code>).</li>
+      <li>Haber aprobado el examen práctico (variable <code>boolean</code>).</li>
+    </ul>
+    <p>Si cumple todo, mostrar "Licencia otorgada". Si no, mostrar qué requisito falta (al menos uno).</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> edad = <span class="num">20</span>;
+<span class="kw">boolean</span> aprobóTeórico = <span class="kw">true</span>;
+<span class="kw">boolean</span> aprobóPráctico = <span class="kw">false</span>;
+
+<span class="kw">if</span> (edad &gt;= <span class="num">18</span> &amp;&amp; aprobóTeórico &amp;&amp; aprobóPráctico) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Licencia otorgada"</span>);
+} <span class="kw">else if</span> (edad &lt; <span class="num">18</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Falta: ser mayor de edad"</span>);
+} <span class="kw">else if</span> (!aprobóTeórico) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Falta: aprobar el examen teórico"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Falta: aprobar el examen práctico"</span>);
+}</pre>
+      </div>
+      <p class="mb-0">Fíjate en dos cosas. Primero, la condición principal usa tres <code>&amp;&amp;</code>: todas deben cumplirse. Segundo, el <code>else</code> final no necesita condición: si llegamos ahí, es porque las anteriores fueron falsas, y la única que queda es que <code>aprobóPráctico</code> sea falso. <em>Aprovechar esa información implícita</em> es una de las cosas que separa a quien escribe mucho código de quien escribe buen código.</p>
+    </details>
+
+    <h3><span class="nivel nivel-combinar">Combinar</span></h3>
+    <p>Escribe un programa que valide si un año (variable <code>int</code>) es bisiesto, pero ahora con más requisitos adicionales: el año debe estar entre 1900 y 2100, y no debe ser múltiplo de 100 salvo que sea de 400. Muestra "Bisiesto", "No bisiesto" o "Año fuera de rango" según corresponda.</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> año = <span class="num">2024</span>;
+
+<span class="kw">if</span> (año &lt; <span class="num">1900</span> || año &gt; <span class="num">2100</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Año fuera de rango"</span>);
+} <span class="kw">else if</span> ((año % <span class="num">4</span> == <span class="num">0</span>) &amp;&amp; ((año % <span class="num">100</span> != <span class="num">0</span>) || (año % <span class="num">400</span> == <span class="num">0</span>))) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Bisiesto"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"No bisiesto"</span>);
+}</pre>
+      </div>
+      <p class="mb-0">Fíjate en el orden: primero verificamos que el año esté en rango, y solo después nos preocupamos por bisiesto. Esa es una regla muy útil: <strong>valida primero lo básico y solo después lo específico</strong>. Si el año está fuera de rango, no tiene sentido verificar si es bisiesto. Y fíjate también en cómo los paréntesis hacen legible la condición larga. Sin ellos, sería una sopa difícil de revisar.</p>
+    </details>
+
+    <h3><span class="nivel nivel-crear">Crear</span></h3>
+    <p>Escribe un programa que determine si un usuario puede hacer una compra en línea. Reglas:</p>
+    <ul>
+      <li>Debe estar registrado.</li>
+      <li>Debe tener tarjeta válida, o tener saldo en la cuenta virtual.</li>
+      <li>No debe estar bloqueado.</li>
+      <li>El monto de la compra no debe superar el límite (digamos, 5000).</li>
+    </ul>
+    <p>Muestra "Compra aprobada" o, si no, un mensaje específico sobre qué falta.</p>
+
+    <details class="solucion">
+      <summary>Ver una posible solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">boolean</span> registrado = <span class="kw">true</span>;
+<span class="kw">boolean</span> tarjetaValida = <span class="kw">false</span>;
+<span class="kw">boolean</span> tieneSaldo = <span class="kw">true</span>;
+<span class="kw">boolean</span> bloqueado = <span class="kw">false</span>;
+<span class="kw">double</span> monto = <span class="num">1200.0</span>;
+<span class="kw">double</span> limite = <span class="num">5000.0</span>;
+
+<span class="kw">if</span> (!registrado) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Debes registrarte primero"</span>);
+} <span class="kw">else if</span> (bloqueado) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Tu cuenta está bloqueada"</span>);
+} <span class="kw">else if</span> (monto &gt; limite) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"El monto supera tu límite"</span>);
+} <span class="kw">else if</span> (!(tarjetaValida || tieneSaldo)) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Necesitas tarjeta válida o saldo disponible"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Compra aprobada"</span>);
+}</pre>
+      </div>
+      <p class="mb-0">Hay una decisión interesante aquí: <em>¿en qué orden pongo los chequeos?</em> Cualquier orden funciona, pero algunos son más útiles. Por ejemplo, verificar primero si el usuario ni siquiera está registrado probablemente es mejor que verificar el monto primero: si no está registrado, ni siquiera tiene sentido hablarle del monto. Aprender a decidir el orden de las validaciones es parte del oficio. Y fíjate en <code>!(tarjetaValida || tieneSaldo)</code>: negar un <code>||</code> equivale (por De Morgan) a <code>!tarjetaValida &amp;&amp; !tieneSaldo</code>. Las dos formas funcionan; prefiere la que se lea más cerca del español.</p>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="anidados">
+    <h2>Un <code>if</code> dentro de otro</h2>
+
+    <p>Ya mencioné varias veces los <code>if</code> anidados, pero no los hemos visto en detalle. Vale la pena dedicarles un apartado porque, aunque en teoría son simples, en la práctica se vuelven la fuente número uno de confusión cuando el código crece.</p>
+
+    <p>Un <code>if</code> anidado es simplemente un <code>if</code> que está <em>dentro</em> de otro <code>if</code>. Sucede cuando la decisión de "hacer algo" depende de dos condiciones que no se pueden combinar con un simple <code>&amp;&amp;</code>, o que se leen mejor por separado.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">if</span> (usuarioRegistrado) {
+    <span class="kw">if</span> (contraseñaCorrecta) {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Bienvenido"</span>);
+    } <span class="kw">else</span> {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Contraseña incorrecta"</span>);
+    }
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Usuario no encontrado"</span>);
+}</pre>
+    </div>
+
+    <p>Este programa muestra tres mensajes distintos según el caso. Si lo hubieras escrito con <code>&amp;&amp;</code>, no podrías distinguir "usuario no registrado" de "contraseña incorrecta": ambos casos son "no se cumple". Los anidados te permiten <strong>descomponer</strong> una decisión en pasos, cada uno mostrando un mensaje específico.</p>
+
+    <h3>Cuándo usar anidados (y cuándo no)</h3>
+
+    <p>Los <code>if</code> anidados son útiles cuando quieres distinguir distintos motivos de fracaso, o cuando una decisión solo tiene sentido si la anterior se cumplió. Pero se vuelven difíciles de leer si pasas de dos o tres niveles. Regla práctica:</p>
+
+    <ul>
+      <li><strong>Más de 3 niveles de anidado</strong>: probablemente puedas reescribirlo con <code>else if</code>, o extrayendo el bloque interno a un método (lo verás más adelante).</li>
+      <li><strong>Si puedes combinar las condiciones con <code>&amp;&amp;</code> o <code>||</code> sin perder claridad</strong>: prefiere eso.</li>
+      <li><strong>Si el anidado te permite dar mensajes más específicos</strong>: vale la pena, aunque agregues niveles.</li>
+    </ul>
+
+    <p>Los anidados se vuelven indispensables cuando llegues a ciclos (Bloque 3), porque vas a querer tomar decisiones dentro de una repetición, y esas decisiones a veces tendrán sus propias decisiones. Por ahora solo reconócelos, y aprende a leerlos.</p>
+
+    <h3>Cómo leer un <code>if</code> anidado</h3>
+
+    <p>Lee siempre de afuera hacia adentro, y en cada nivel pregúntate: <em>¿este <code>if</code> es verdadero o falso en este caso?</em> Después entra (o no) al siguiente nivel.</p>
+
+    <div class="flujo">nivel 1: ¿usuarioRegistrado?
+   ├── true ──► nivel 2: ¿contraseñaCorrecta?
+   │              ├── true ──► "Bienvenido"
+   │              └── false ─► "Contraseña incorrecta"
+   └── false ─► "Usuario no encontrado"</div>
+
+    <p>Es útil dibujarlo así cuando tienes anidados, porque te obliga a considerar todos los caminos posibles. Muchos errores de lógica se detectan simplemente dibujando el árbol: aparecen ramas que nunca se ejecutan, o casos que se te olvidó cubrir.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="reto-final">
+    <h2>Reto del Bloque 2</h2>
+
+    <p>Este reto combina todo lo que viste: variables, operadores, <code>if</code>, <code>else</code>, <code>else if</code>, operadores lógicos, anidados. No es de resolver en 5 minutos. Tómate tu tiempo.</p>
+
+    <p><strong>Reto: cajero automático</strong></p>
+
+    <p>Escribe un programa que simule un cajero. Tienes las siguientes variables ya definidas:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">double</span> saldo = <span class="num">1500.0</span>;
+<span class="kw">boolean</span> tarjetaValida = <span class="kw">true</span>;
+<span class="kw">int</span> intentosFallidos = <span class="num">0</span>;
+<span class="kw">double</span> montoARetirar = <span class="num">800.0</span>;</pre>
+    </div>
+
+    <p>El programa debe mostrar por pantalla uno de estos mensajes, según el caso:</p>
+
+    <ul>
+      <li>"Tarjeta no válida" — si <code>tarjetaValida</code> es <code>false</code>.</li>
+      <li>"Tarjeta bloqueada. Contacta a tu banco" — si <code>intentosFallidos</code> es mayor o igual a 3.</li>
+      <li>"El monto debe ser múltiplo de 100" — si <code>montoARetirar</code> no es múltiplo de 100.</li>
+      <li>"Saldo insuficiente" — si el monto es mayor al saldo.</li>
+      <li>"Retiro exitoso. Nuevo saldo: X" — si todo está bien. (No te preocupes por modificar <code>saldo</code>, solo mostrar el mensaje.)</li>
+    </ul>
+
+    <p>Intenta resolverlo antes de mirar la solución. Y cuando lo hayas escrito, pruébalo con distintos valores:</p>
+
+    <ul>
+      <li><code>tarjetaValida = false</code></li>
+      <li><code>intentosFallidos = 3</code></li>
+      <li><code>montoARetirar = 850</code> (no múltiplo de 100)</li>
+      <li><code>montoARetirar = 5000</code> (más que el saldo)</li>
+      <li>Todo bien con <code>montoARetirar = 500</code></li>
+    </ul>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">if</span> (!tarjetaValida) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Tarjeta no válida"</span>);
+} <span class="kw">else if</span> (intentosFallidos &gt;= <span class="num">3</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Tarjeta bloqueada. Contacta a tu banco"</span>);
+} <span class="kw">else if</span> (montoARetirar % <span class="num">100</span> != <span class="num">0</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"El monto debe ser múltiplo de 100"</span>);
+} <span class="kw">else if</span> (montoARetirar &gt; saldo) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Saldo insuficiente"</span>);
+} <span class="kw">else</span> {
+    <span class="kw">double</span> nuevoSaldo = saldo - montoARetirar;
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Retiro exitoso. Nuevo saldo: "</span> + nuevoSaldo);
+}</pre>
+      </div>
+      <p class="mb-0">Fíjate en el orden que elegí: primero valido lo más "externo" (¿la tarjeta funciona? ¿no está bloqueada?), y después lo específico (¿el monto es válido? ¿hay saldo suficiente?). Si hubiera puesto primero <code>montoARetirar &gt; saldo</code>, un usuario con tarjeta inválida escucharía "saldo insuficiente", que es técnicamente cierto pero no dice la verdadera razón. <strong>El orden de las validaciones comunica información.</strong> Pon las más generales primero, y las más específicas al final, para que el usuario reciba el mensaje que corresponde al problema real.</p>
+    </details>
+
+    <p>Cuando termines, antes de cerrar el archivo, haz lo siguiente:</p>
+
+    <ol>
+      <li>Lee tu solución línea por línea, simulando lo que hace Java para cada uno de los cinco casos de prueba.</li>
+      <li>Cambia los valores y verifica que sigue funcionando.</li>
+      <li>Escribe un comentario explicando <em>por qué</em> pusiste las condiciones en ese orden.</li>
+    </ol>
+
+    <p>Ese último paso —explicar por qué— es lo que convierte "hacer que funcione" en "entender por qué funciona". Y entender por qué es lo que se queda.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="resumen-2">
+    <h2>Lo que llevas construido</h2>
+
+    <p>Al terminar este bloque, tienes estas piezas nuevas en tu mesa:</p>
+
+    <ul>
+      <li><strong><code>if</code></strong> — ejecutar algo solo si se cumple una condición.</li>
+      <li><strong><code>else</code></strong> — ejecutar otra cosa cuando la condición no se cumple.</li>
+      <li><strong><code>else if</code></strong> — elegir entre tres o más posibilidades, en cadena, quedándose con la primera que sea verdadera.</li>
+      <li><strong>Operadores lógicos</strong> — combinar condiciones con <code>&amp;&amp;</code>, <code>||</code>, <code>!</code>, y entender la precedencia y el cortocircuito.</li>
+      <li><strong><code>if</code> anidados</strong> — cuándo usar un <code>if</code> dentro de otro para distinguir motivos de éxito o fracaso.</li>
+      <li><strong>El hábito "Antes de programar"</strong> — escribir en español qué quieres antes de escribir en Java.</li>
+      <li><strong>Simulación mental</strong> — ejecutar línea por línea antes de correr, y predecir el resultado.</li>
+      <li><strong>Lectura de código complejo</strong> — leer un <code>if</code> anidado dibujando el árbol de decisiones.</li>
+    </ul>
+
+    <p>Y estas son las piezas que combinaste del Bloque 1 para poder hacer todo esto:</p>
+
+    <ul>
+      <li>Variables y tipos (<code>int</code>, <code>double</code>, <code>boolean</code>, <code>String</code>).</li>
+      <li>Operadores de comparación (<code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code>).</li>
+      <li>Booleanos y cómo se construyen a partir de expresiones.</li>
+      <li><code>System.out.println</code> y la concatenación.</li>
+    </ul>
+
+    <p>El Bloque 3 introduce el <code>switch</code>, y después los ciclos (<code>while</code>, <code>do while</code>). Los ciclos van a ser la pieza que más va a cambiar tu forma de escribir programas, porque por primera vez vas a poder ejecutar cosas <em>muchas veces</em> sin escribir las líneas repetidas. Ahí también vas a sentir otro bajón: es el momento en el que combinas decisiones (<code>if</code>) con repeticiones (<code>while</code>), y por más que ya sepas hacer cada cosa por separado, juntarlas al principio cuesta.</p>
+
+    <p>Ya sabes lo que eso significa: es parte del proceso, no una señal de que no puedes. Lo que tienes que hacer es seguir el protocolo del Bloque 1, aislar la pieza que no entiendes, y darle espacio. Las piezas nuevas se acomodan cuando les das tiempo de acomodarse.</p>
+
+    <div class="caja caja-idea">
+      <p class="mb-0">Antes de seguir al Bloque 3, asegúrate de resolver al menos un ejercicio de cada nivel en cada estructura de este bloque. No hace falta resolverlos todos, pero sí probar cada tipo. El manual avanza por piezas construidas, no por páginas leídas.</p>
+    </div>
+  </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.querySelectorAll('.bloque-codigo').forEach(function (bloque) {
+    var btn = bloque.querySelector('.btn-copiar');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var pre = bloque.querySelector('pre');
+      var texto = pre.innerText;
+      navigator.clipboard.writeText(texto).then(function () {
+        var original = btn.textContent;
+        btn.textContent = '¡Copiado!';
+        setTimeout(function () { btn.textContent = original; }, 1200);
+      });
+    });
+  });
+
+  var html = document.documentElement;
+  var btnTema = document.getElementById('btnTema');
+  var temaGuardado = localStorage.getItem('temaManual') || 'light';
+  aplicarTema(temaGuardado);
+
+  btnTema.addEventListener('click', function () {
+    var actual = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+    aplicarTema(actual);
+    localStorage.setItem('temaManual', actual);
+  });
+
+  function aplicarTema(tema) {
+    html.setAttribute('data-bs-theme', tema);
+    btnTema.innerHTML = tema === 'dark'
+      ? '<i class="bi bi-sun"></i>'
+      : '<i class="bi bi-moon-stars"></i>';
+  }
+
+  var sidebar = document.getElementById('sidebar');
+  var btnMenu = document.getElementById('btnMenu');
+  var btnCerrarMenu = document.getElementById('btnCerrarMenu');
+
+  function cerrarMenu() {
+    sidebar.classList.remove('abierto');
+    document.body.classList.remove('menu-abierto');
+    btnMenu.setAttribute('aria-expanded', 'false');
+  }
+
+  btnMenu.addEventListener('click', function () {
+    var abierto = sidebar.classList.toggle('abierto');
+    document.body.classList.toggle('menu-abierto', abierto);
+    btnMenu.setAttribute('aria-expanded', String(abierto));
+  });
+  btnCerrarMenu.addEventListener('click', cerrarMenu);
+  sidebar.querySelectorAll('a').forEach(function (enlace) {
+    enlace.addEventListener('click', cerrarMenu);
+  });
+
+  var enlaces = document.querySelectorAll('.sidebar .nav-link');
+  var secciones = [];
+  enlaces.forEach(function (a) {
+    var id = a.getAttribute('href');
+    if (id && id.startsWith('#')) {
+      var el = document.querySelector(id);
+      if (el) secciones.push({ el: el, link: a });
+    }
+  });
+
+  function actualizarActivo() {
+    var y = window.scrollY + 120;
+    var actual = null;
+    secciones.forEach(function (s) {
+      if (s.el.offsetTop <= y) actual = s;
+    });
+    enlaces.forEach(function (a) { a.classList.remove('active'); });
+    if (actual) actual.link.classList.add('active');
+  }
+  window.addEventListener('scroll', actualizarActivo);
+  window.addEventListener('load', actualizarActivo);
+</script>
+<script src="../../../public/java-manual.js"></script>
+</body>
+</html>

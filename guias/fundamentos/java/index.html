@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual para aprender Java - Una perspectiva cognitiva y práctica para principiantes</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+  :root {
+    --acento: #f89820;
+    --acento-2: #5382a1;
+    --code-bg: #1e1e2e;
+    --code-fg: #cdd6f4;
+  }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.7;
+    scroll-behavior: smooth;
+  }
+
+  /* Portada principal */
+  .portada {
+    background: linear-gradient(135deg, var(--acento) 0%, var(--acento-2) 100%);
+    color: #fff;
+    padding: 4rem 2rem;
+    text-align: center;
+  }
+  .portada h1 {
+    font-size: 2.6rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+  }
+  .portada .subtitulo {
+    font-size: 1.2rem;
+    opacity: .95;
+    max-width: 700px;
+    margin: 0 auto 1.5rem;
+  }
+  .portada .pista {
+    display: inline-block;
+    background: rgba(255,255,255,.15);
+    padding: .5rem 1.2rem;
+    border-radius: 999px;
+    font-size: .95rem;
+  }
+
+  .contenido {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 5rem;
+  }
+
+  h2 {
+    font-weight: 700;
+    margin-top: 3rem;
+    padding-bottom: .5rem;
+    border-bottom: 3px solid var(--acento);
+  }
+  h2:first-of-type { margin-top: 0; }
+  h3 { font-weight: 700; margin-top: 1.8rem; color: var(--acento-2); }
+  [data-bs-theme="dark"] h3 { color: #8ab4d6; }
+
+  /* Tarjetas de bloque */
+  .tarjeta-bloque {
+    border: 1px solid #dee2e6;
+    border-left: 5px solid var(--acento);
+    border-radius: .6rem;
+    padding: 1.5rem 1.7rem;
+    height: 100%;
+    transition: transform .15s, box-shadow .15s;
+    background: #fff;
+  }
+  .tarjeta-bloque:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.08);
+  }
+  [data-bs-theme="dark"] .tarjeta-bloque {
+    background: #1a1c22;
+    border-color: #2a2d34;
+  }
+  .tarjeta-bloque .num {
+    display: inline-block;
+    background: var(--acento);
+    color: #fff;
+    font-weight: 700;
+    width: 2.2rem;
+    height: 2.2rem;
+    line-height: 2.2rem;
+    text-align: center;
+    border-radius: 50%;
+    margin-bottom: .8rem;
+  }
+  .tarjeta-bloque h4 {
+    font-weight: 700;
+    margin-bottom: .6rem;
+  }
+  .tarjeta-bloque .piezas {
+    font-size: .9rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+  }
+  [data-bs-theme="dark"] .tarjeta-bloque .piezas { color: #adb5bd; }
+  .tarjeta-bloque .piezas code {
+    font-size: .85em;
+  }
+
+  /* Cajas reutilizadas de los bloques */
+  .caja { border-radius: .5rem; padding: 1rem 1.15rem; margin: 1.25rem 0; border-left: 5px solid; }
+  .caja-detente   { background: #fff8e6; border-color: #f0ad4e; }
+  .caja-error     { background: #fdecec; border-color: #dc3545; }
+  .caja-protocolo { background: #eef5ff; border-color: #4a7cff; }
+  .caja-idea      { background: #eefaf1; border-color: #28a745; }
+  [data-bs-theme="dark"] .caja-detente   { background: #2e2612; }
+  [data-bs-theme="dark"] .caja-error     { background: #2e1618; }
+  [data-bs-theme="dark"] .caja-protocolo { background: #14202e; }
+  [data-bs-theme="dark"] .caja-idea      { background: #12291b; }
+  .caja h5 { margin-top: 0; font-size: 1rem; font-weight: 700; }
+  .caja p:last-child, .caja ul:last-child, .caja ol:last-child { margin-bottom: 0; }
+
+  /* Bloques de código */
+  .bloque-codigo {
+    position: relative; margin: 1.25rem 0;
+    border-radius: .5rem; overflow: hidden;
+    background: var(--code-bg);
+  }
+  .bloque-codigo pre {
+    margin: 0; padding: 1rem 1rem .9rem;
+    color: var(--code-fg); font-size: .9rem; line-height: 1.55;
+    overflow-x: auto;
+    font-family: "JetBrains Mono", Consolas, Menlo, monospace;
+  }
+  .bloque-codigo .btn-copiar {
+    position: absolute; top: .5rem; right: .5rem;
+    background: rgba(255,255,255,.08); color: #cdd6f4;
+    border: 1px solid rgba(255,255,255,.15);
+    font-size: .75rem; padding: .2rem .55rem;
+    border-radius: .3rem; opacity: 0; transition: opacity .15s;
+  }
+  .bloque-codigo:hover .btn-copiar { opacity: 1; }
+  .bloque-codigo .btn-copiar:hover { background: rgba(248,152,32,.3); }
+  .kw  { color: #cba6f7; }
+  .str { color: #a6e3a1; }
+  .num { color: #fab387; }
+  .cmt { color: #6c7086; font-style: italic; }
+  .cls { color: #f9e2af; }
+  .mth { color: #89b4fa; }
+
+  /* Botón de tema */
+  .btn-tema { position: fixed; top: 1rem; right: 1rem; z-index: 1040; }
+
+  /* Pie de página */
+  footer {
+    border-top: 1px solid #dee2e6;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    color: #6c757d;
+    font-size: .9rem;
+    margin-top: 3rem;
+  }
+  [data-bs-theme="dark"] footer { border-top-color: #2a2d34; color: #adb5bd; }
+
+  /* Piezas / rompecabezas */
+  .pieza {
+    display: inline-block;
+    background: #fff3e0;
+    border: 2px dashed var(--acento);
+    border-radius: .5rem;
+    padding: .2rem .6rem;
+    margin: .15rem;
+    font-family: monospace;
+    font-size: .85rem;
+  }
+  .portada h1 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: .5rem;
+}
+
+.portada .subtitulo {
+  font-size: 1.3rem;
+  font-weight: 500;
+  margin-bottom: 1.2rem;
+}
+
+.portada .descripcion {
+  max-width: 750px;
+  margin: 0 auto 1.5rem;
+  font-size: 1.05rem;
+}
+
+.portada .pista {
+  display: inline-block;
+  background: rgba(255,255,255,.15);
+  padding: .6rem 1.3rem;
+  border-radius: 999px;
+  font-size: .95rem;
+}
+
+.portada .autor {
+  display: block;
+  margin-top: 1rem;
+  opacity: .8;
+}
+  [data-bs-theme="dark"] .pieza { background: #2e2412; }
+</style>
+    <link rel="stylesheet" href="../../../public/java-manual.css">
+</head>
+<body class="java-manual">
+<a class="manual-catalog-link" href="../../../index.html">← Volver a Recursos de Sistemas</a>
+
+<button class="btn btn-outline-secondary btn-sm btn-tema" id="btnTema" title="Cambiar tema">
+  <i class="bi bi-moon-stars"></i>
+</button>
+
+<!-- ============================================================ -->
+<!-- Portada -->
+<!-- ============================================================ -->
+<header class="portada"> 
+  <h1>Aprender a Programar con Java</h1> 
+  <p class="subtitulo"> Una perspectiva cognitiva y práctica para principiantes </p> 
+  <p class="descripcion"> Aprende a resolver problemas antes de escribir código. 
+    No se trata de memorizar sintaxis, sino de comprender el problema, identificar 
+    qué necesitas y construir la solución paso a paso. </p> 
+    <span class="pista"> 
+      <i class="bi bi-puzzle"></i> 
+      Programar es como armar un rompecabezas
+    </span> 
+    <small class="autor">Roldan Aquino</small> </header>
+
+<!-- ============================================================ -->
+<!-- Contenido -->
+<!-- ============================================================ -->
+<main class="contenido">
+
+  <!-- Qué es este manual -->
+  <section id="que-es">
+    <h2>¿Qué es este manual?</h2>
+
+    <p>Este no es un manual tradicional de programación. No está escrito como documentación técnica, ni como un libro académico. Está escrito para acompañar a quien está aprendiendo, con la idea de que programar se aprende <strong>reconociendo piezas</strong>, no memorizando reglas.</p>
+
+    <p>Cada estructura de Java —una variable, un <code>if</code>, un <code>for</code>, un <code>Scanner</code>— es una pieza. Las piezas no se estudian aisladas y después se les busca uso. Se estudian resolviendo problemas concretos donde esa pieza era necesaria. La pregunta que se repite en todos los bloques es la misma:</p>
+
+    <div class="caja caja-idea">
+      <p class="mb-0"><strong>Primero piensa en el problema. Después piensa en el código.</strong></p>
+    </div>
+
+    <p>Antes de escribir una sola línea de Java, se analiza en español qué se quiere lograr. Después se identifica qué pieza resuelve eso. Y solo al final se escribe la sintaxis. Ese orden —situación → español → pieza → código— es la columna vertebral de todo el manual.</p>
+
+    <p>Junto con lo técnico, hay algo que suele dejarse de lado en los manuales de programación: <strong>cómo se siente aprender esto</strong>. La frustración cuando algo no compila, la sensación de que "los demás entienden más rápido", la duda de si uno "sirve" para programar. Este manual no ignora eso. Lo trata como parte del aprendizaje, no como algo aparte.</p>
+  </section>
+
+  <!-- Cómo usar el manual -->
+  <section id="como-usar">
+    <h2>Cómo usar este manual</h2>
+
+    <p>Cada bloque sigue la misma metodología. Vale la pena saberla antes de empezar, para que no sorprenda:</p>
+
+    <ol>
+      <li><strong>Situación cotidiana</strong> — se presenta un problema del mundo real que ilustra la pieza.</li>
+      <li><strong>La idea en español</strong> — se describe, sin sintaxis, qué queremos que pase.</li>
+      <li><strong>La nueva pieza</strong> — se introduce la pieza de Java que resuelve eso, con la sintaxis mínima.</li>
+      <li><strong>Simulación paso a paso</strong> — se ejecuta el programa mentalmente, línea por línea, marcando el valor de las variables.</li>
+      <li><strong>Ejemplos progresivos</strong> — al menos cinco ejemplos que van subiendo de dificultad.</li>
+      <li><strong>Errores comunes</strong> — los errores que comete casi todo el mundo, explicados <em>antes</em> de que ocurran.</li>
+      <li><strong>Detente y piensa</strong> — preguntas para predecir qué hace un fragmento antes de ejecutarlo.</li>
+      <li><strong>Ejercicios por nivel</strong> — Reconocer, Completar, Modificar, Construir, Combinar, Crear.</li>
+      <li><strong>Soluciones separadas</strong> — dentro de <em>details</em>, para no spoilearte antes de intentar.</li>
+      <li><strong>Reto y cierre</strong> — un problema más abierto, y una reflexión sobre lo construido.</li>
+    </ol>
+
+    <div class="caja caja-detente">
+      <h5>Detente un momento y piensa</h5>
+      <p class="mb-0">Los bloques tienen secciones marcadas así. No son decorativas: son <strong>pausas activas</strong>. Antes de seguir leyendo, cierra el manual y predice qué va a pasar. Escribirlo (aunque sea en un papel) es una de las cosas que más acelera el aprendizaje. La mayoría del valor del manual está en estas pausas, no en las secciones que se leen corrido.</p>
+    </div>
+
+    <p>Recomendación práctica: no leas los bloques de corrido. Lee una sección, detente, escribe el ejemplo tú mismo, modifícalo, ejecútalo. Solo después pasa a la siguiente. Los bloques no están pensados para leerse en una sentada; están pensados para trabajarse.</p>
+  </section>
+
+  <!-- Antes de empezar -->
+  <section id="antes-de-empezar">
+    <h2>Antes de empezar</h2>
+
+    <p>Si estás aquí porque en algún momento sentiste que la programación "no es para ti", quiero decirte algo concreto antes de cualquier sintaxis:</p>
+
+    <p>Existen dos preguntas que se suelen confundir, y una de ellas no tiene respuesta útil:</p>
+
+    <ul>
+      <li><em>"¿Soy bueno o malo para programar?"</em> — esta pregunta asume que hay un rasgo fijo dentro de ti. Ese rasgo no existe. Nadie nace sabiendo programar, y nadie "no puede" programar de nacimiento.</li>
+      <li><em>"¿Qué piezas me faltan construir?"</em> — esta sí tiene respuesta, y cambia cada semana que practicas.</li>
+    </ul>
+
+    <div class="caja caja-idea">
+      <h5>La idea que quiero que te lleves</h5>
+      <p class="mb-0">No te falta talento. Te faltan piezas que todavía no has construido. Y las piezas se construyen practicando — no se traen de fábrica.</p>
+    </div>
+
+    <p>Si en algún momento del manual te sientes bloqueado, frustrado, o con la sensación de "no entiendo nada", hay un procedimiento específico para eso. No son frases de ánimo: es un protocolo con pasos concretos. Está al final de esta portada, y también aparece referenciado dentro de los bloques.</p>
+
+    <h3>Un aviso sobre el ritmo</h3>
+
+    <p>Para sostener una idea nueva mientras la relacionas con otra, tu mente usa la <strong>memoria de trabajo</strong>, y esa memoria tiene un límite. El mismo para todos. Cuando lees una línea con cuatro o cinco piezas nuevas a la vez, la mesa se llena y "no entiendes": no es que te falte capacidad, es que hay demasiado encima a la vez.</p>
+
+    <p>Por eso este manual introduce una pieza por vez, y por eso cada pieza se analiza primero en español. <strong>Ir despacio no es debilidad: es la única forma en que el cerebro aprende algo con varias piezas moviéndose a la vez.</strong></p>
+  </section>
+
+  <!-- Índice de bloques -->
+  <section id="indice">
+    <h2>Los bloques del manual</h2>
+
+    <p>El manual está dividido en bloques temáticos. Cada bloque es autocontenido: puedes abrirlo y trabajarlo por separado. Pero siguen un orden pensado: cada bloque se apoya en los anteriores. La recomendación es seguirlos en orden la primera vez.</p>
+
+    <div class="row g-4 mt-2">
+
+      <!-- Bloque 1 -->
+      <div class="col-md-6">
+        <div class="tarjeta-bloque">
+          <span class="num">1</span>
+          <h4>Antes de las estructuras de control</h4>
+          <p class="piezas">
+            Qué es un programa · qué hace Java · variables · tipos de datos (<code>int</code>, <code>double</code>, <code>boolean</code>, <code>String</code>) · <code>println</code> · operadores matemáticos, de comparación y lógicos · expresiones · lectura de un programa línea por línea.
+          </p>
+          <p class="piezas" style="margin-top:-.5rem;">
+            <em>Además:</em> la explicación del por qué programar cuesta al inicio, el sesgo de comparación, la curva de confianza, y el protocolo <strong>"Cuando te sientas atorado"</strong>.
+          </p>
+          <a href="bloque1.html" class="btn btn-warning btn-sm">Entrar al bloque 1 <i class="bi bi-arrow-right"></i></a>
+        </div>
+      </div>
+
+      <!-- Bloque 2 -->
+      <div class="col-md-6">
+        <div class="tarjeta-bloque">
+          <span class="num">2</span>
+          <h4>Decisiones: <code>if</code>, <code>else</code>, <code>else if</code></h4>
+          <p class="piezas">
+            <code>if</code> · <code>else</code> · <code>else if</code> · operadores lógicos aplicados · cortocircuito · <code>if</code> anidados · el hábito "Antes de programar" (analizar en español) · retos combinando decisiones.
+          </p>
+          <a href="bloque2.html" class="btn btn-warning btn-sm">Entrar al bloque 2 <i class="bi bi-arrow-right"></i></a>
+        </div>
+      </div>
+
+      <!-- Bloque 3 -->
+      <div class="col-md-6">
+        <div class="tarjeta-bloque">
+          <span class="num">3</span>
+          <h4>Repetición: <code>switch</code>, <code>while</code>, <code>do while</code></h4>
+          <p class="piezas">
+            <code>switch</code> con <code>case</code> y <code>break</code> · <code>while</code> · <code>do while</code> · contadores y acumuladores · bucles infinitos · ciclos con decisiones dentro (el "bajón" del bloque).
+          </p>
+          <a href="bloque3.html" class="btn btn-warning btn-sm">Entrar al bloque 3 <i class="bi bi-arrow-right"></i></a>
+        </div>
+      </div>
+
+      <!-- Bloque 4 -->
+      <div class="col-md-6">
+        <div class="tarjeta-bloque">
+          <span class="num">4</span>
+          <h4>El <code>for</code> y el control fino de ciclos</h4>
+          <p class="piezas">
+            <code>for</code> · equivalencia <code>for</code> ↔ <code>while</code> · <code>break</code> · <code>continue</code> · ciclos anidados (<code>for</code> dentro de <code>for</code>) · cuatro patrones comunes (recorrido con decisión, búsqueda con bandera, validación con repetición, menú con opciones).
+          </p>
+          <a href="bloque4.html" class="btn btn-warning btn-sm">Entrar al bloque 4 <i class="bi bi-arrow-right"></i></a>
+        </div>
+      </div>
+
+      <!-- Bloque 5 -->
+      <div class="col-md-6">
+        <div class="tarjeta-bloque">
+          <span class="num">5</span>
+          <h4>Scanner y parseo: leer datos del usuario</h4>
+          <p class="piezas">
+            <code>Scanner</code> · <code>nextInt()</code>, <code>nextDouble()</code>, <code>nextLine()</code>, <code>next()</code>, <code>nextBoolean()</code> · el buffer de entrada · el error universal <code>nextInt()</code> + <code>nextLine()</code> · <code>InputMismatchException</code> · parseo (<code>Integer.parseInt</code>, <code>Double.parseDouble</code>, <code>Boolean.parseBoolean</code>) · validación con <code>hasNextInt()</code> y variantes.
+          </p>
+          <a href="bloque5.html" class="btn btn-warning btn-sm">Entrar al bloque 5 <i class="bi bi-arrow-right"></i></a>
+        </div>
+      </div>
+
+      <!-- Bloque 6 -->
+      <div class="col-md-6">
+        <div class="tarjeta-bloque">
+          <span class="num">6</span>
+          <h4>Arreglos</h4>
+          <p class="piezas">
+            Declarar, crear y recorrer arreglos · índice empieza en 0 (el segundo obstáculo universal) · <code>.length</code> · recorrido con <code>for</code> y <code>for-each</code> · sumar, promediar, máximo, mínimo, buscar, contar · arreglos con Scanner · arreglos de <code>String</code> · arreglos bidimensionales (opcional) · proyecto integrador.
+          </p>
+          <a href="bloque6.html" class="btn btn-warning btn-sm">Entrar al bloque 6 <i class="bi bi-arrow-right"></i></a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Cuando te sientas atorado -->
+  <section id="protocolo">
+    <h2>Cuando te sientas atorado</h2>
+
+    <p>Este protocolo aparece también dentro del manual, pero conviene tenerlo a mano desde el principio. No es para errores de sintaxis únicamente: es para esa sensación general de "no entiendo nada" o "esto no es para mí".</p>
+
+    <div class="caja caja-protocolo">
+      <h5>Cuando te sientas atorado</h5>
+      <ol class="mb-0">
+        <li><strong>Nombra lo que sientes</strong>, en una frase simple: "estoy confundido", "siento que no avanzo". Ponerle nombre ya baja la intensidad.</li>
+        <li><strong>Pregúntate si eso es un hecho o una interpretación.</strong> "No entiendo esta línea" es un hecho. "Nunca voy a poder" es una interpretación, y probablemente no es cierta.</li>
+        <li><strong>Busca la pieza específica que no entendiste.</strong> Casi nunca es "todo". Es una sola pieza dentro de varias que sí entendiste. Encuéntrala.</li>
+        <li><strong>Aísla esa pieza sola, fuera del resto del programa.</strong> Ponla en un archivo nuevo con lo mínimo necesario, y mírala por separado. Después vuelve al conjunto.</li>
+      </ol>
+    </div>
+
+    <p>Puedes volver a este procedimiento las veces que quieras. La mayoría de los bloqueos no son intelectuales, son emocionales. Cuando la emoción se calma, la pieza que faltaba aparece casi siempre sola.</p>
+  </section>
+
+  <!-- Lo que viene -->
+  <section id="lo-que-viene">
+    <h2>Lo que viene</h2>
+
+    <p>Los seis bloques que componen este manual son la <strong>primera parte</strong> de una colección que va a seguir ampliándose. Cuando termines el bloque 6, vas a tener todas las piezas básicas de la programación: variables, decisiones, ciclos, entrada de datos, y estructuras para guardar múltiples valores. Con eso ya puedes escribir programas útiles.</p>
+
+    <p>Pero la programación tiene más piezas. A medida que se amplíe el manual, se irán agregando las que hacen falta:</p>
+
+    <ul>
+      <li><strong>Métodos</strong> — dividir un programa grande en partes pequeñas y reutilizables.</li>
+      <li><strong>Clases y objetos</strong> — la base de la programación orientada a objetos.</li>
+      <li><strong>Excepciones</strong> — manejar errores con <code>try/catch</code>.</li>
+      <li><strong>Colecciones</strong> — <code>ArrayList</code> y otras estructuras dinámicas.</li>
+      <li><strong>Archivos y datos</strong> — leer y escribir archivos.</li>
+      <li><strong>Y más</strong> — algoritmos clásicos, estructuras de datos, pruebas, depuración avanzada.</li>
+    </ul>
+
+    <p>Nada de esto hay que aprenderlo de golpe. Cada pieza nueva se apoya en las anteriores, igual que todas las que ya tienes. Y el principio es siempre el mismo: primero piensa en el problema, después busca la pieza. Primero español, después Java.</p>
+
+    <p>Mientras tanto, la mejor forma de consolidar lo que tienes es practicar. Resolver los ejercicios, escribir programas propios, cometer errores, corregirlos. La práctica es lo que hace que las piezas se vuelvan automáticas.</p>
+
+    <div class="caja caja-idea">
+      <p class="mb-0">Si terminas el bloque 6 y sientes que "ya entiendes la mayoría de las cosas", es buena señal. Si sientes que "todavía hay cosas que no te salen", también lo es: significa que sabes dónde están las piezas que te faltan. Y saber eso es lo que separa a quien sigue avanzando de quien se queda atorado.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p class="mb-1"><strong>Primero piensa en el problema. Después piensa en el código.</strong></p>
+  <p class="mb-0"><small>Una colección en construcción. Los bloques 1–6 son la primera parte.</small></p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Copiar código
+  document.querySelectorAll('.bloque-codigo').forEach(function (bloque) {
+    var btn = bloque.querySelector('.btn-copiar');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var pre = bloque.querySelector('pre');
+      var texto = pre.innerText;
+      navigator.clipboard.writeText(texto).then(function () {
+        var original = btn.textContent;
+        btn.textContent = '¡Copiado!';
+        setTimeout(function () { btn.textContent = original; }, 1200);
+      });
+    });
+  });
+
+  // Modo claro / oscuro (comparte key con los bloques)
+  var html = document.documentElement;
+  var btnTema = document.getElementById('btnTema');
+  var temaGuardado = localStorage.getItem('temaManual') || 'light';
+  aplicarTema(temaGuardado);
+
+  btnTema.addEventListener('click', function () {
+    var actual = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+    aplicarTema(actual);
+    localStorage.setItem('temaManual', actual);
+  });
+
+  function aplicarTema(tema) {
+    html.setAttribute('data-bs-theme', tema);
+    btnTema.innerHTML = tema === 'dark'
+      ? '<i class="bi bi-sun"></i>'
+      : '<i class="bi bi-moon-stars"></i>';
+  }
+</script>
+</body>
+</html>

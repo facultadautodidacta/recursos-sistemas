@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validación de datos en Java con Scanner</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <!-- FontAwesome para íconos (opcional) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            background-color: #f4f7f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-bottom: 50px;
+        }
+
+        /* Encabezado principal */
+        .header-banner {
+            background-color: #0d2b4c;
+            color: white;
+            padding: 30px 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-banner h1 {
+            font-weight: 700;
+            font-size: 2.2rem;
+        }
+
+        .header-banner p {
+            font-size: 1.2rem;
+            margin-bottom: 0;
+            color: #a8c4e1;
+        }
+
+        /* Tarjetas de contenido */
+        .card-custom {
+            border: none;
+            border-radius: 15px;
+            height: 100%;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+
+        .card-custom:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Colores de fondo de las tarjetas */
+        .bg-card-1 { background-color: #e6f0fa; }
+        .bg-card-2 { background-color: #e2f5f0; }
+        .bg-card-3 { background-color: #f0e6fa; }
+        .bg-card-4 { background-color: #faeee6; }
+        .bg-card-5 { background-color: #e6faf8; }
+        .bg-card-6 { background-color: #fce8e8; }
+        .bg-card-7 { background-color: #e8f4fc; } /* Resumen */
+        .bg-card-8 { background-color: #d1f2e5; } /* Consejos */
+
+        /* Títulos de las tarjetas con círculos numerados */
+        .card-title-wrapper {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .number-circle {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        /* Colores de los círculos */
+        .bg-num-1 { background-color: #4a90e2; }
+        .bg-num-2 { background-color: #20b2aa; }
+        .bg-num-3 { background-color: #9b59b6; }
+        .bg-num-4 { background-color: #e67e22; }
+        .bg-num-5 { background-color: #17a2b8; }
+        .bg-num-6 { background-color: #e74c3c; }
+
+        /* Bloques de código */
+        .code-block {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            line-height: 1.4;
+            margin-top: 10px;
+        }
+
+        .code-block .keyword { color: #c678dd; }
+        .code-block .class { color: #e5c07b; }
+        .code-block .method { color: #61afef; }
+        .code-block .string { color: #98c379; }
+        .code-block .comment { color: #5c6370; font-style: italic; }
+
+        /* Tabla de resumen */
+        .table-custom th {
+            background-color: #e9ecef;
+            color: #495057;
+            font-weight: 600;
+        }
+        .table-custom td {
+            font-size: 0.9rem;
+            vertical-align: middle;
+        }
+
+        /* Lista de puntos clave */
+        .key-point {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        .key-point .badge {
+            margin-right: 10px;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+    </style>
+    <link rel="stylesheet" href="../../public/guide.css">
+    <link rel="stylesheet" href="../../public/java-validation.css">
+</head>
+<body class="guide-page java-validation-page">
+
+<nav class="guide-site-header" aria-label="Navegación de la guía">
+    <a class="guide-brand" href="../../index.html"><span class="guide-brand-mark" aria-hidden="true">&lt;/&gt;</span> Recursos de Sistemas</a>
+    <a class="guide-back-link" href="../../index.html">← Volver a recursos</a>
+</nav>
+
+<div class="container">
+    
+    <!-- Encabezado -->
+    <div class="header-banner d-flex justify-content-between align-items-center flex-wrap">
+        <div>
+            <h1><i class="fa-brands fa-java text-danger me-2"></i> Validación de datos en Java con Scanner</h1>
+            <p>Guía rápida con ejemplos prácticos</p>
+        </div>
+        <div class="text-end mt-3 mt-md-0">
+            <span class="badge bg-light text-dark p-2 fs-6">Entrada correcta = programas más confiables</span>
+        </div>
+    </div>
+
+    <!-- Fila 1: Tarjetas 1, 2 y 3 -->
+    <div class="row g-4 mb-4">
+        <!-- Tarjeta 1 -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card card-custom bg-card-1 p-3">
+                <div class="card-title-wrapper">
+                    <span class="number-circle bg-num-1">1</span>
+                    Validar un número entero
+                </div>
+                <p class="small text-muted mb-2">Se usa <code>hasNextInt()</code> para verificar si lo que el usuario ingresó puede convertirse en un entero.</p>
+                <div class="code-block">
+                    <span class="keyword">import</span> java.util.Scanner;<br><br>
+                    Scanner teclado = <span class="keyword">new</span> Scanner(System.in);<br>
+                    <span class="keyword">int</span> numero;<br><br>
+                    <span class="keyword">while</span> (<span class="keyword">true</span>) {<br>
+                    &nbsp;&nbsp;System.out.print(<span class="string">"Ingresa un número entero: "</span>);<br>
+                    &nbsp;&nbsp;<span class="keyword">if</span> (teclado.hasNextInt()) {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;numero = teclado.nextInt();<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">break</span>;<br>
+                    &nbsp;&nbsp;}<br>
+                    &nbsp;&nbsp;System.out.println(<span class="string">"Error: debes ingresar un número entero."</span>);<br>
+                    &nbsp;&nbsp;teclado.next(); <span class="comment">// Descarta la entrada incorrecta</span><br>
+                    }<br>
+                    System.out.println(<span class="string">"Número ingresado: "</span> + numero);
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjeta 2 -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card card-custom bg-card-2 p-3">
+                <div class="card-title-wrapper">
+                    <span class="number-circle bg-num-2">2</span>
+                    Validar un número decimal
+                </div>
+                <p class="small text-muted mb-2">Se usa <code>hasNextDouble()</code> para verificar que el dato sea un número decimal.</p>
+                <div class="code-block">
+                    <span class="keyword">import</span> java.util.Scanner;<br><br>
+                    Scanner teclado = <span class="keyword">new</span> Scanner(System.in);<br>
+                    <span class="keyword">double</span> numero;<br><br>
+                    <span class="keyword">while</span> (<span class="keyword">true</span>) {<br>
+                    &nbsp;&nbsp;System.out.print(<span class="string">"Ingresa un número decimal: "</span>);<br>
+                    &nbsp;&nbsp;<span class="keyword">if</span> (teclado.hasNextDouble()) {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;numero = teclado.nextDouble();<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">break</span>;<br>
+                    &nbsp;&nbsp;}<br>
+                    &nbsp;&nbsp;System.out.println(<span class="string">"Error: debes ingresar un número."</span>);<br>
+                    &nbsp;&nbsp;teclado.next();<br>
+                    }<br>
+                    System.out.println(<span class="string">"Número ingresado: "</span> + numero);
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjeta 3 -->
+        <div class="col-lg-4 col-md-12">
+            <div class="card card-custom bg-card-3 p-3">
+                <div class="card-title-wrapper">
+                    <span class="number-circle bg-num-3">3</span>
+                    Validar un rango de valores
+                </div>
+                <p class="small text-muted mb-2">Además de verificar el tipo de dato, se puede validar que el valor esté dentro de un rango. <strong>Ejemplo: calificación entre 0 y 100</strong></p>
+                <div class="code-block">
+                    <span class="keyword">import</span> java.util.Scanner;<br>
+                    Scanner teclado = <span class="keyword">new</span> Scanner(System.in);<br>
+                    <span class="keyword">int</span> calificacion;<br><br>
+                    <span class="keyword">while</span> (<span class="keyword">true</span>) {<br>
+                    &nbsp;&nbsp;System.out.print(<span class="string">"Ingresa una calificación (0-100): "</span>);<br>
+                    &nbsp;&nbsp;<span class="keyword">if</span> (teclado.hasNextInt()) {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;calificacion = teclado.nextInt();<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> (calificacion >= 0 && calificacion <= 100) {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">break</span>;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;System.out.println(<span class="string">"La calificación debe estar entre 0 y 100."</span>);<br>
+                    &nbsp;&nbsp;} <span class="keyword">else</span> {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;System.out.println(<span class="string">"Debes ingresar un número entero."</span>);<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;teclado.next();<br>
+                    &nbsp;&nbsp;}<br>
+                    }<br>
+                    System.out.println(<span class="string">"Calificación ingresada: "</span> + calificacion);
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fila 2: Tarjetas 4, 5 y Puntos Clave -->
+    <div class="row g-4 mb-4">
+        <!-- Tarjeta 4 -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card card-custom bg-card-4 p-3">
+                <div class="card-title-wrapper">
+                    <span class="number-circle bg-num-4">4</span>
+                    Validar texto (no vacío)
+                </div>
+                <p class="small text-muted mb-2">Se puede usar <code>trim()</code> para evitar que el usuario ingrese solo espacios.</p>
+                <div class="code-block">
+                    <span class="keyword">import</span> java.util.Scanner;<br><br>
+                    Scanner teclado = <span class="keyword">new</span> Scanner(System.in);<br>
+                    String nombre;<br><br>
+                    System.out.print(<span class="string">"Ingresa tu nombre: "</span>);<br>
+                    nombre = teclado.nextLine();<br><br>
+                    <span class="keyword">while</span> (nombre.trim().isEmpty()) {<br>
+                    &nbsp;&nbsp;System.out.println(<span class="string">"El nombre no puede estar vacío."</span>);<br>
+                    &nbsp;&nbsp;System.out.print(<span class="string">"Ingresa tu nombre: "</span>);<br>
+                    &nbsp;&nbsp;nombre = teclado.nextLine();<br>
+                    }<br>
+                    System.out.println(<span class="string">"Hola, "</span> + nombre);
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjeta 5 -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card card-custom bg-card-5 p-3">
+                <div class="card-title-wrapper">
+                    <span class="number-circle bg-num-5">5</span>
+                    Validación combinada
+                </div>
+                <p class="small text-muted mb-2">Puedes combinar varios tipos de validación en un solo bloque. Ejemplo: un número entero entre 1 y 10.</p>
+                <div class="code-block">
+                    <span class="keyword">import</span> java.util.Scanner;<br>
+                    Scanner teclado = <span class="keyword">new</span> Scanner(System.in);<br>
+                    <span class="keyword">int</span> numero;<br><br>
+                    <span class="keyword">while</span> (<span class="keyword">true</span>) {<br>
+                    &nbsp;&nbsp;System.out.print(<span class="string">"Ingresa un número entero (1-10): "</span>);<br>
+                    &nbsp;&nbsp;<span class="keyword">if</span> (teclado.hasNextInt()) {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;numero = teclado.nextInt();<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> (numero >= 1 && numero <= 10) {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">break</span>;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;System.out.println(<span class="string">"El número debe estar entre 1 y 10."</span>);<br>
+                    &nbsp;&nbsp;} <span class="keyword">else</span> {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;System.out.println(<span class="string">"Debes ingresar un número entero."</span>);<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;teclado.next();<br>
+                    &nbsp;&nbsp;}<br>
+                    }<br>
+                    System.out.println(<span class="string">"Número válido: "</span> + numero);
+                </div>
+            </div>
+        </div>
+
+        <!-- Puntos Clave -->
+        <div class="col-lg-4 col-md-12">
+            <div class="card card-custom bg-card-6 p-4">
+                <h5 class="fw-bold mb-4 text-danger"><i class="fa-regular fa-lightbulb"></i> Puntos clave</h5>
+                
+                <div class="key-point">
+                    <span class="badge bg-primary">1</span>
+                    <div><strong>hasNextInt(), hasNextDouble()</strong><br><small class="text-muted">Verifican si el dato puede convertirse en el tipo solicitado.</small></div>
+                </div>
+                <div class="key-point">
+                    <span class="badge bg-success">2</span>
+                    <div><strong>nextInt(), nextDouble(), nextLine()</strong><br><small class="text-muted">Se usan para leer el dato una vez validado.</small></div>
+                </div>
+                <div class="key-point">
+                    <span class="badge bg-danger">3</span>
+                    <div><strong>Siempre usa teclado.next()</strong><br><small class="text-muted">Para descartar entradas incorrectas y evitar bucles infinitos.</small></div>
+                </div>
+                <div class="key-point">
+                    <span class="badge bg-warning text-dark">4</span>
+                    <div><strong>Valida tanto el tipo como el valor</strong><br><small class="text-muted">(por ejemplo, un entero entre 1 y 10).</small></div>
+                </div>
+                <div class="key-point">
+                    <span class="badge bg-info text-dark">5</span>
+                    <div><strong>trim()</strong><br><small class="text-muted">Útil para evitar cadenas vacías o solo espacios.</small></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fila 3: Resumen y Consejos -->
+    <div class="row g-4">
+        <!-- Resumen Rápido -->
+        <div class="col-lg-7">
+            <div class="card card-custom bg-card-7 p-3">
+                <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-circle-check"></i> Resumen rápido</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-custom mb-0 bg-white">
+                        <thead>
+                            <tr>
+                                <th>Tipo de dato / validación</th>
+                                <th>Método principal</th>
+                                <th>Ejemplo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Entero</td>
+                                <td><code>hasNextInt()</code></td>
+                                <td><code>teclado.hasNextInt()</code></td>
+                            </tr>
+                            <tr>
+                                <td>Decimal</td>
+                                <td><code>hasNextDouble()</code></td>
+                                <td><code>teclado.hasNextDouble()</code></td>
+                            </tr>
+                            <tr>
+                                <td>Texto (no vacío)</td>
+                                <td><code>trim().isEmpty()</code></td>
+                                <td><code>!nombre.trim().isEmpty()</code></td>
+                            </tr>
+                            <tr>
+                                <td>Rango de valores</td>
+                                <td>Condicionales</td>
+                                <td><code>numero >= 1 && numero <= 10</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Consejos Finales -->
+        <div class="col-lg-5">
+            <div class="card card-custom bg-card-8 p-3">
+                <h5 class="fw-bold mb-3 text-success"><i class="fa-solid fa-code"></i> Consejos finales</h5>
+                <ul class="mb-0 small">
+                    <li class="mb-2">Usa siempre un bucle (<code>while</code> o <code>do-while</code>) para repetir la entrada en caso de error.</li>
+                    <li class="mb-2">Muestra mensajes claros al usuario.</li>
+                    <li class="mb-2">Convierte el dato solo después de validarlo.</li>
+                    <li class="mb-3">Considera cerrar el scanner al finalizar (<code>teclado.close()</code>).</li>
+                </ul>
+                <div class="validation-summary mt-auto p-2 text-center text-white rounded">
+                    Una buena validación evita errores, mejora la experiencia del usuario y hace tu programa más robusto.
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Bootstrap JS (opcional, para componentes interactivos) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

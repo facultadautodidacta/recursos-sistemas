@@ -1,0 +1,138 @@
+.linked-list-page .guide-content {
+    width: min(1160px, calc(100% - 40px));
+    max-width: 1160px;
+    margin: 36px auto 64px;
+}
+
+.linked-list-page .hero {
+    margin: 0;
+    text-align: left;
+}
+
+.linked-list-page .guide-eyebrow {
+    margin-bottom: 10px;
+    color: rgba(255, 255, 255, .75);
+    font-size: 12px;
+    font-weight: 750;
+    letter-spacing: .12em;
+}
+
+.linked-list-page .indice {
+    top: 92px;
+}
+
+.linked-list-page .indice .list-group-item {
+    color: #554c4b;
+    border-color: var(--guide-line);
+}
+
+.linked-list-page .indice .list-group-item:hover,
+.linked-list-page .indice .list-group-item:focus-visible {
+    color: var(--guide-red-dark);
+    background: var(--guide-red-pale);
+    border-left-color: var(--guide-red);
+}
+
+.linked-list-page .section-card h2 {
+    color: var(--guide-red-dark);
+    border-bottom-color: #f3d9d6;
+}
+
+.linked-list-page .section-card h3 {
+    color: #514443;
+}
+
+.linked-list-page pre[class*="language-"] {
+    border-left-color: var(--guide-red);
+}
+
+.linked-list-page .nota,
+.linked-list-page .advertencia,
+.linked-list-page .exito {
+    margin: 18px 0;
+    padding: 15px 18px;
+    border-radius: 8px;
+}
+
+.linked-list-page .nota {
+    color: #554c4b;
+    background: #f4f7fb;
+    border-left: 4px solid #7393bd;
+}
+
+.linked-list-page .advertencia {
+    color: #5d4841;
+    background: #fff4e8;
+    border-left: 4px solid #d28a44;
+}
+
+.linked-list-page .exito {
+    color: #3d5741;
+    background: #edf7ef;
+    border-left: 4px solid #68a16e;
+}
+
+.linked-list-page .diagrama {
+    max-width: 100%;
+    padding: 18px;
+    overflow-x: auto;
+    color: #e8e2e1;
+    background: #292526;
+    border: 1px solid #443c3d;
+    border-radius: 9px;
+    font: 13px/1.65 ui-monospace, SFMono-Regular, Consolas, monospace;
+    white-space: pre;
+}
+
+.linked-list-page .termino {
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-color: #e8b7b3;
+    text-decoration-thickness: 3px;
+    text-underline-offset: 2px;
+}
+
+.linked-list-page .table-responsive {
+    margin: 16px 0 20px;
+}
+
+.linked-list-page .table thead {
+    color: #fff;
+    background: var(--guide-red-dark);
+}
+
+.linked-list-page .badge-o1 {
+    background: #43845a !important;
+}
+
+.linked-list-page .badge-on {
+    color: #332d2e !important;
+    background: #edc05b !important;
+}
+
+.linked-list-page .badge-on2 {
+    background: #b94343 !important;
+}
+
+.linked-list-page footer {
+    margin: 0;
+    padding: 24px;
+    color: #fff;
+    text-align: center;
+    background: #332d2e;
+}
+
+@media (max-width: 600px) {
+    .linked-list-page .guide-content {
+        width: calc(100% - 24px);
+        margin-block: 18px 36px;
+    }
+
+    .linked-list-page .indice {
+        top: 76px;
+    }
+
+    .linked-list-page .section-card {
+        padding: 18px;
+    }
+}

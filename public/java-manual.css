@@ -1,0 +1,128 @@
+.java-manual {
+    --acento: #c83b3e;
+    --acento-2: #a92d31;
+    --bs-primary: #c83b3e;
+    --bs-primary-rgb: 200, 59, 62;
+    accent-color: #c83b3e;
+}
+
+.java-manual .portada {
+    background: linear-gradient(135deg, #c83b3e 0%, #a92d31 100%);
+}
+
+.java-manual .portada h1,
+.java-manual .portada .subtitulo,
+.java-manual .portada .descripcion {
+    color: #fff;
+}
+
+.java-manual h2 { border-bottom-color: var(--acento); }
+.java-manual h3 { color: var(--acento-2); }
+.java-manual .sidebar .nav-link {
+    border-left: 3px solid transparent;
+    border-radius: .35rem;
+    transition: color .15s ease, background-color .15s ease, border-color .15s ease;
+}
+
+.java-manual .sidebar .nav-link:hover {
+    color: var(--acento-2);
+    background: rgba(200, 59, 62, .1);
+}
+
+.java-manual .sidebar .nav-link.active {
+    color: var(--acento-2) !important;
+    background: rgba(200, 59, 62, .12);
+    border-left-color: var(--acento);
+    font-weight: 700;
+}
+.java-manual .sidebar strong { color: var(--acento) !important; }
+
+.java-manual .btn-primary,
+.java-manual .btn-warning {
+    color: #fff;
+    background-color: var(--acento);
+    border-color: var(--acento);
+}
+
+.java-manual .btn-primary:hover,
+.java-manual .btn-warning:hover,
+.java-manual .btn-primary:focus-visible,
+.java-manual .btn-warning:focus-visible {
+    color: #fff;
+    background-color: var(--acento-2);
+    border-color: var(--acento-2);
+}
+
+.java-manual .btn-outline-secondary {
+    color: var(--acento-dark, #a92d31);
+    border-color: #d99a98;
+}
+
+.java-manual .btn-outline-secondary:hover {
+    color: #fff;
+    background-color: var(--acento);
+    border-color: var(--acento);
+}
+
+.java-manual .btn-copiar:hover { background: rgba(200, 59, 62, .32); }
+.java-manual .pieza { border-color: var(--acento); }
+.java-manual .btn-tema { right: 1rem; }
+
+.java-manual .manual-catalog-link {
+    position: fixed;
+    z-index: 1040;
+    top: 1rem;
+    left: 1rem;
+    padding: .45rem .75rem;
+    color: var(--acento-2);
+    background: rgba(255, 255, 255, .94);
+    border: 1px solid #f0d9d7;
+    border-radius: .5rem;
+    box-shadow: 0 4px 14px rgba(60, 30, 30, .08);
+    font-size: .82rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.java-manual .manual-catalog-link:hover {
+    color: #fff;
+    background: var(--acento);
+}
+
+.java-manual [data-bs-theme="dark"] .manual-catalog-link,
+[data-bs-theme="dark"] .java-manual .manual-catalog-link {
+    color: #ffdedd;
+    background: #292526;
+    border-color: #574040;
+}
+
+.java-manual [data-bs-theme="dark"] .manual-catalog-link:hover,
+[data-bs-theme="dark"] .java-manual .manual-catalog-link:hover {
+    color: #fff;
+    background: var(--acento);
+}
+
+@media (max-width: 991px) {
+    .java-manual .manual-catalog-link {
+        top: auto;
+        bottom: 1rem;
+        left: 1rem;
+        max-width: calc(100vw - 2rem);
+        font-size: .75rem;
+    }
+
+    .java-manual .btn-tema { right: 1rem; }
+}
+
+@media (max-width: 575px) {
+    .java-manual .portada { padding: 3rem 1.25rem; }
+    .java-manual .portada h1 { font-size: clamp(2rem, 9vw, 2.8rem); }
+    .java-manual .contenido { padding-inline: 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .java-manual *, .java-manual *::before, .java-manual *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+    }
+}

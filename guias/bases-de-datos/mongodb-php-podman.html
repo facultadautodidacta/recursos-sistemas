@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía: MongoDB + PHP 8.3 en LAMP con PIE y Podman</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .hero {
+            background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+            color: white;
+            padding: 4rem 0;
+            margin-bottom: 2rem;
+        }
+        .hero h1 {
+            font-weight: 700;
+        }
+        .section-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+            border: 1px solid #e9ecef;
+        }
+        .section-card h2 {
+            color: #0d6efd;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        pre {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            border: 1px solid #333;
+        }
+        code {
+            font-family: 'Fira Code', 'Cascadia Code', monospace;
+        }
+        .badge-step {
+            background-color: #0d6efd;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-right: 10px;
+        }
+        .alert-recommendation {
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+            border-radius: 0.5rem;
+            padding: 1rem 1.5rem;
+        }
+        .alert-warning-custom {
+            background-color: #f8d7da;
+            border-left: 5px solid #dc3545;
+            border-radius: 0.5rem;
+            padding: 1rem 1.5rem;
+        }
+        .alert-info-custom {
+            background-color: #cff4fc;
+            border-left: 5px solid #0dcaf0;
+            border-radius: 0.5rem;
+            padding: 1rem 1.5rem;
+        }
+        .icon-large {
+            font-size: 2rem;
+        }
+        .footer {
+            background-color: #212529;
+            color: #adb5bd;
+            padding: 2rem 0;
+            text-align: center;
+            margin-top: 3rem;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #0d6efd;
+        }
+        .nav-pills .nav-link {
+            color: #495057;
+        }
+    </style>
+    <link rel="stylesheet" href="../../public/guide.css">
+</head>
+<body class="guide-page">
+    <nav class="guide-site-header" aria-label="Navegación de la guía">
+        <a class="guide-brand" href="../../index.html"><span class="guide-brand-mark" aria-hidden="true">&lt;/&gt;</span> Recursos de Sistemas</a>
+        <a class="guide-back-link" href="../../index.html">← Volver a recursos</a>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero text-center">
+        <div class="container">
+            <h1 class="display-4">MongoDB en LAMP</h1>
+            <p class="lead">Guía completa para PHP 8.3 en Ubuntu usando PIE y Podman</p>
+            <span class="badge bg-light text-dark px-3 py-2">PHP 8.3</span>
+            <span class="badge bg-light text-dark px-3 py-2">Ubuntu</span>
+            <span class="badge bg-light text-dark px-3 py-2">Podman</span>
+        </div>
+    </div>
+
+    <div class="container guide-content">
+
+        <!-- Introducción -->
+        <div class="section-card">
+            <p class="lead">
+                Esta guía te muestra cómo instalar la extensión oficial de MongoDB para PHP 8.3 en un servidor LAMP (Linux, Apache, MySQL, PHP) sobre Ubuntu, utilizando la nueva herramienta <strong>PIE</strong> (PHP Installer for Extensions).
+            </p>
+            <p>
+                Además, incluimos la recomendación de usar <strong>MongoDB 7</strong> por compatibilidad con el kernel de Linux, y cómo desplegar MongoDB con <strong>Podman</strong> para que se inicie automáticamente con el sistema.
+            </p>
+        </div>
+
+        <!-- Sección 1: Instalar PIE -->
+        <div class="section-card">
+            <h2><span class="badge-step">1</span> Instalar PIE (PHP Installer for Extensions)</h2>
+            <p>
+                PIE es el reemplazo oficial de PECL para gestionar extensiones de PHP. Funciona como Composer, pero para extensiones.
+            </p>
+            
+            <h5>Requisitos previos</h5>
+            <ul>
+                <li>PHP 8.1 o superior (esta guía usa PHP 8.3).</li>
+                <li>Herramientas de compilación (PIE las instalará automáticamente si faltan).</li>
+            </ul>
+
+            <h5>Instalación de PIE</h5>
+            <p>Ejecuta este comando para descargar e instalar PIE en <code>/usr/local/bin/pie</code>:</p>
+            <pre><code>curl -fL --output /tmp/pie.phar https://github.com/php/pie/releases/latest/download/pie.phar \
+  && sudo mv /tmp/pie.phar /usr/local/bin/pie \
+  && sudo chmod +x /usr/local/bin/pie</code></pre>
+
+            <div class="alert-info-custom mt-3">
+                <strong>Nota:</strong> El comando original incluía una verificación con <code>gh attestation verify</code>, pero si no tienes GitHub CLI instalado, puedes omitirla como se muestra arriba.
+            </div>
+
+            <h5>Verificar instalación</h5>
+            <pre><code>pie --version</code></pre>
+        </div>
+
+        <!-- Sección 2: Instalar Extensión MongoDB -->
+        <div class="section-card">
+            <h2><span class="badge-step">2</span> Instalar la Extensión de MongoDB con PIE</h2>
+            <p>
+                Una vez que PIE esté instalado, puedes instalar la extensión oficial de MongoDB directamente desde Packagist.
+            </p>
+            
+            <pre><code>sudo pie install mongodb/mongodb-extension</code></pre>
+
+            <p>Este comando automáticamente:</p>
+            <ul>
+                <li>Descarga el código fuente de la extensión</li>
+                <li>La compila para tu versión de PHP</li>
+                <li>La instala en el directorio de extensiones de PHP</li>
+            </ul>
+
+            <h5>Verificar que la extensión se cargó</h5>
+            <pre><code>php -m | grep mongodb</code></pre>
+            <p>Deberías ver <code>mongodb</code> en la salida. Si no aparece, puede que necesites agregar manualmente <code>extension=mongodb.so</code> a tu <code>php.ini</code>.</p>
+
+            <h5>Reiniciar PHP-FPM y Apache</h5>
+            <pre><code>sudo systemctl restart php8.3-fpm
+sudo systemctl restart apache2</code></pre>
+        </div>
+
+        <!-- Sección 3: Recomendación MongoDB 7 -->
+        <div class="section-card">
+            <h2><span class="badge-step">3</span> Recomendación: Usar MongoDB 7</h2>
+            
+            <div class="alert-recommendation">
+                <h5 class="alert-heading">⚠️ Importante: Compatibilidad con el Kernel</h5>
+                <p class="mb-0">
+                    <strong>No uses MongoDB 8.x en kernels de Linux 6.19 o superiores.</strong> Existe un problema conocido con <code>tcmalloc</code> que impide que MongoDB 8.x arranque correctamente en estos kernels.
+                </p>
+            </div>
+
+            <h5 class="mt-4">Estado de Compatibilidad</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Versión de MongoDB</th>
+                            <th>Kernel 6.19+</th>
+                            <th>Recomendación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="table-success">
+                            <td><strong>MongoDB 7.0</strong></td>
+                            <td>✅ Compatible</td>
+                            <td><strong>Usar esta versión</strong></td>
+                        </tr>
+                        <tr class="table-warning">
+                            <td>MongoDB 8.0.4</td>
+                            <td>✅ Compatible (excepción)</td>
+                            <td>Alternativa válida</td>
+                        </tr>
+                        <tr class="table-danger">
+                            <td>MongoDB 8.x (otros)</td>
+                            <td>❌ Incompatible</td>
+                            <td>Evitar</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="mt-3">
+                <strong>Conclusión:</strong> Para tu Raspberry Pi con kernel moderno, <strong>MongoDB 7.0 es la opción más estable y recomendada</strong>. Evitarás caídas y problemas de arranque.
+            </p>
+        </div>
+
+        <!-- Sección 4: MongoDB con Podman -->
+        <div class="section-card">
+            <h2><span class="badge-step">4</span> Instalar MongoDB 7 con Podman</h2>
+            <p>
+                Podman es una alternativa a Docker que no requiere un daemon y funciona muy bien en Raspberry Pi. Usaremos la imagen oficial <code>mongo:7.0</code>.
+            </p>
+
+            <h5>Crear un volumen persistente</h5>
+            <p>Esto asegura que los datos no se pierdan al eliminar el contenedor:</p>
+            <pre><code>podman volume create mongodb_data</code></pre>
+
+            <h5>Levantar el contenedor de MongoDB 7</h5>
+            <pre><code>podman run -d \
+  --name mongodb \
+  -p 27017:27017 \
+  -v mongodb_data:/data/db \
+  docker.io/library/mongo:7.0</code></pre>
+
+            <h5>Verificar que está corriendo</h5>
+            <pre><code>podman ps</code></pre>
+            <p>Deberías ver un contenedor llamado <code>mongodb</code> en estado <code>Up</code>.</p>
+
+            <h5>Conectar con mongosh</h5>
+            <pre><code>mongosh</code></pre>
+        </div>
+
+        <!-- Sección 5: Inicio Automático con Podman -->
+        <div class="section-card">
+            <h2><span class="badge-step">5</span> Hacer que MongoDB se Inicie Automáticamente</h2>
+            <p>
+                Tienes dos opciones para que MongoDB arranque con el sistema y se reinicie si falla.
+            </p>
+
+            <!-- Opción A: Política de Reinicio -->
+            <h5 class="mt-4">Opción A: Política de Reinicio de Podman (Más Simple)</h5>
+            <p>
+                Si vuelves a crear el contenedor con la política <code>--restart=unless-stopped</code>, Podman lo reiniciará automáticamente incluso después de un reinicio, a menos que lo detengas manualmente.
+            </p>
+            <pre><code># Elimina el contenedor actual si existe
+podman rm -f mongodb
+
+# Créalo con la política de reinicio
+podman run -d \
+  --name mongodb \
+  --restart=unless-stopped \
+  -p 27017:27017 \
+  -v mongodb_data:/data/db \
+  docker.io/library/mongo:7.0</code></pre>
+
+            <div class="alert-info-custom mt-3">
+                <strong>Nota:</strong> Esta opción funciona bien, pero no ofrece la gestión completa de systemd (logs, dependencias, etc.).
+            </div>
+
+            <!-- Opción B: Quadlet (Recomendado) -->
+            <h5 class="mt-5">Opción B: Quadlet (Integración con systemd - Recomendado)</h5>
+            <p>
+                Quadlet es la forma moderna de integrar contenedores Podman con systemd. Creas un archivo <code>.container</code> y systemd lo gestiona como un servicio nativo.
+            </p>
+
+            <p><strong>Paso 1:</strong> Crea el directorio para Quadlets (si no existe):</p>
+            <pre><code>mkdir -p ~/.config/containers/systemd/</code></pre>
+
+            <p><strong>Paso 2:</strong> Crea el archivo <code>~/.config/containers/systemd/mongodb.container</code> con este contenido:</p>
+            <pre><code>[Unit]
+Description=MongoDB 7 Container
+After=network-online.target
+
+[Container]
+Image=docker.io/library/mongo:7.0
+ContainerName=mongodb
+PublishPort=27017:27017
+Volume=mongodb_data:/data/db
+
+[Service]
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target</code></pre>
+
+            <p><strong>Paso 3:</strong> Recarga systemd e inicia el servicio:</p>
+            <pre><code>systemctl --user daemon-reload
+systemctl --user start mongodb.service</code></pre>
+
+            <p><strong>Paso 4:</strong> Habilita el inicio automático (importante para que arranque al iniciar sesión):</p>
+            <pre><code>systemctl --user enable mongodb.service</code></pre>
+
+            <p><strong>Paso 5:</strong> Si quieres que arranque incluso sin que inicies sesión (para servidores), habilita "lingering":</p>
+            <pre><code>sudo loginctl enable-linger $USER</code></pre>
+
+            <h5 class="mt-4">Comandos de Gestión con Quadlet</h5>
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Acción</th>
+                            <th>Comando</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Iniciar</td>
+                            <td><code>systemctl --user start mongodb</code></td>
+                        </tr>
+                        <tr>
+                            <td>Detener</td>
+                            <td><code>systemctl --user stop mongodb</code></td>
+                        </tr>
+                        <tr>
+                            <td>Reiniciar</td>
+                            <td><code>systemctl --user restart mongodb</code></td>
+                        </tr>
+                        <tr>
+                            <td>Ver estado</td>
+                            <td><code>systemctl --user status mongodb</code></td>
+                        </tr>
+                        <tr>
+                            <td>Ver logs</td>
+                            <td><code>journalctl --user -u mongodb -f</code></td>
+                        </tr>
+                        <tr>
+                            <td>Deshabilitar auto-inicio</td>
+                            <td><code>systemctl --user disable mongodb</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="alert-warning-custom mt-3">
+                <strong>Importante:</strong> Con Quadlet, el contenedor se llama <code>systemd-mongodb</code> en Podman, pero lo gestionas con <code>systemctl --user</code>. No uses <code>podman stop</code> directamente; usa los comandos de systemctl para evitar conflictos.
+            </div>
+        </div>
+
+        <!-- Sección 6: Verificación Final -->
+        <div class="section-card">
+            <h2><span class="badge-step">6</span> Verificación Final</h2>
+            <p>Para confirmar que todo funciona:</p>
+            
+            <ol>
+                <li>Verifica que la extensión PHP esté cargada:
+                    <pre><code>php -m | grep mongodb</code></pre>
+                </li>
+                <li>Verifica que MongoDB esté corriendo (con Podman):
+                    <pre><code>podman ps</code></pre>
+                    O si usas Quadlet:
+                    <pre><code>systemctl --user status mongodb</code></pre>
+                </li>
+                <li>Conéctate con <code>mongosh</code>:
+                    <pre><code>mongosh</code></pre>
+                </li>
+                <li>Prueba desde PHP:
+                    <pre><code>php -r "var_dump(extension_loaded('mongodb'));"</code></pre>
+                    Debe devolver <code>bool(true)</code>.
+                </li>
+            </ol>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="container">
+            <p class="mb-1">Guía generada para PHP 8.3 + LAMP + Podman en Ubuntu</p>
+            <p class="small mb-0">MongoDB 7.0 · PIE Installer · Quadlet</p>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (opcional, para componentes interactivos) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

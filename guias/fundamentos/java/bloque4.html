@@ -1,0 +1,2171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual de Java — Bloque 4: for, break, continue</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+  :root {
+    --acento: #f89820;
+    --acento-2: #5382a1;
+    --code-bg: #1e1e2e;
+    --code-fg: #cdd6f4;
+  }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.7;
+    scroll-behavior: smooth;
+  }
+  .sidebar {
+    position: fixed; top: 0; left: 0;
+    width: 280px; height: 100vh;
+    overflow-y: auto; padding: 1rem;
+    background: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+    z-index: 1030;
+  }
+  [data-bs-theme="dark"] .sidebar { background: #16181d; border-right-color: #2a2d34; }
+  .sidebar h6 {
+    text-transform: uppercase; font-size: .75rem;
+    letter-spacing: .05em; color: #6c757d; margin-top: 1.25rem;
+  }
+  .sidebar .nav-link {
+    padding: .35rem .6rem; border-radius: .35rem;
+    font-size: .92rem; color: inherit;
+  }
+  .sidebar .nav-link:hover { background: rgba(248,152,32,.12); }
+  .sidebar .nav-link.active { background: var(--acento); color: #fff !important; font-weight: 600; }
+  .contenido { margin-left: 280px; padding: 2.5rem 3rem 6rem; max-width: 900px; }
+  .btn-menu, .btn-cerrar-menu { display: none; }
+  @media (max-width: 991px) {
+    .btn-menu {
+      display: inline-flex; position: fixed; top: 1rem; left: 1rem;
+      z-index: 1040; align-items: center; gap: .4rem;
+    }
+    .sidebar {
+      position: fixed; top: 0; left: 0; width: min(88vw, 320px); height: 100vh;
+      transform: translateX(-100%); transition: transform .2s ease;
+      box-shadow: 0 0 1.5rem rgba(0, 0, 0, .2);
+    }
+    .sidebar.abierto { transform: translateX(0); }
+    .btn-cerrar-menu { display: inline-flex; float: right; margin-top: -.25rem; }
+    body.menu-abierto { overflow: hidden; }
+    .contenido { margin-left: 0; padding: 1.5rem; }
+  }
+  h1, h2, h3 { font-weight: 700; }
+  h2 { margin-top: 3.5rem; padding-bottom: .5rem; border-bottom: 3px solid var(--acento); }
+  h3 { margin-top: 2.2rem; color: var(--acento-2); }
+  [data-bs-theme="dark"] h3 { color: #8ab4d6; }
+
+  .bloque-codigo {
+    position: relative; margin: 1.25rem 0;
+    border-radius: .5rem; overflow: hidden;
+    background: var(--code-bg);
+  }
+  .bloque-codigo pre {
+    margin: 0; padding: 1rem 1rem .9rem;
+    color: var(--code-fg); font-size: .9rem; line-height: 1.55;
+    overflow-x: auto;
+    font-family: "JetBrains Mono", Consolas, Menlo, monospace;
+  }
+  .bloque-codigo .btn-copiar {
+    position: absolute; top: .5rem; right: .5rem;
+    background: rgba(255,255,255,.08); color: #cdd6f4;
+    border: 1px solid rgba(255,255,255,.15);
+    font-size: .75rem; padding: .2rem .55rem;
+    border-radius: .3rem; opacity: 0; transition: opacity .15s;
+  }
+  .bloque-codigo:hover .btn-copiar { opacity: 1; }
+  .bloque-codigo .btn-copiar:hover { background: rgba(248,152,32,.3); }
+  .kw  { color: #cba6f7; }
+  .str { color: #a6e3a1; }
+  .num { color: #fab387; }
+  .cmt { color: #6c7086; font-style: italic; }
+  .cls { color: #f9e2af; }
+  .mth { color: #89b4fa; }
+
+  .caja { border-radius: .5rem; padding: 1rem 1.15rem; margin: 1.25rem 0; border-left: 5px solid; }
+  .caja-detente   { background: #fff8e6; border-color: #f0ad4e; }
+  .caja-error     { background: #fdecec; border-color: #dc3545; }
+  .caja-protocolo { background: #eef5ff; border-color: #4a7cff; }
+  .caja-idea      { background: #eefaf1; border-color: #28a745; }
+  .caja-anticipa  { background: #f3e8ff; border-color: #a855f7; }
+  [data-bs-theme="dark"] .caja-detente   { background: #2e2612; }
+  [data-bs-theme="dark"] .caja-error     { background: #2e1618; }
+  [data-bs-theme="dark"] .caja-protocolo { background: #14202e; }
+  [data-bs-theme="dark"] .caja-idea      { background: #12291b; }
+  [data-bs-theme="dark"] .caja-anticipa  { background: #231531; }
+  .caja h5 { margin-top: 0; font-size: 1rem; font-weight: 700; }
+  .caja p:last-child, .caja ul:last-child, .caja ol:last-child { margin-bottom: 0; }
+
+  .nivel {
+    display: inline-block; padding: .15rem .55rem;
+    border-radius: 999px; font-size: .72rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .03em; margin-right: .4rem;
+  }
+  .nivel-reconocer { background:#dbeafe; color:#1e40af; }
+  .nivel-completar { background:#dcfce7; color:#166534; }
+  .nivel-modificar { background:#fef3c7; color:#92400e; }
+  .nivel-construir { background:#fae8ff; color:#86198f; }
+  .nivel-combinar  { background:#ffe4e6; color:#9f1239; }
+  .nivel-crear     { background:#e0e7ff; color:#3730a3; }
+
+  .simulacion table { font-size: .9rem; }
+  .simulacion th { background: #f1f3f5; }
+  [data-bs-theme="dark"] .simulacion th { background: #23262e; }
+
+  details.solucion {
+    margin: .75rem 0; border: 1px solid #dee2e6;
+    border-radius: .4rem; padding: .6rem .9rem; background: #fbfbfb;
+  }
+  [data-bs-theme="dark"] details.solucion { background: #16181d; border-color: #2a2d34; }
+  details.solucion summary { cursor: pointer; font-weight: 600; color: #495057; }
+  [data-bs-theme="dark"] details.solucion summary { color: #adb5bd; }
+
+  .btn-tema { position: fixed; top: 1rem; right: 1rem; z-index: 1040; }
+
+  .portada {
+    background: linear-gradient(135deg, var(--acento) 0%, var(--acento-2) 100%);
+    color: #fff; padding: 3rem 2rem; border-radius: 1rem; margin-bottom: 2rem;
+  }
+  .portada h1 { font-size: 2.2rem; }
+
+  .flujo {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: .5rem;
+    padding: 1rem 1.25rem;
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: .85rem;
+    line-height: 1.5;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  [data-bs-theme="dark"] .flujo { background: #16181d; border-color: #2a2d34; }
+</style>
+    <link rel="stylesheet" href="../../../public/java-manual.css">
+</head>
+<body class="java-manual">
+
+<button class="btn btn-outline-secondary btn-sm btn-tema" id="btnTema" title="Cambiar tema">
+  <i class="bi bi-moon-stars"></i>
+</button>
+
+<button class="btn btn-primary btn-sm btn-menu" id="btnMenu" type="button"
+        aria-controls="sidebar" aria-expanded="false">
+  <i class="bi bi-list"></i>
+  <span>Menú</span>
+</button>
+
+<nav class="sidebar" id="sidebar" aria-label="Navegación del bloque 4">
+  <div class="px-2 pb-2 border-bottom">
+    <button class="btn btn-outline-secondary btn-sm btn-cerrar-menu" id="btnCerrarMenu"
+            type="button" aria-label="Cerrar menú">
+      <i class="bi bi-x-lg"></i>
+    </button>
+    <strong style="color:var(--acento)">Manual Java</strong><br>
+    <small class="text-secondary">Bloque 4 · El <code>for</code></small>
+  </div>
+  <a class="nav-link mt-2" href="index.html">
+    <i class="bi bi-house-door me-1"></i> Volver al índice
+  </a>
+
+  <h6>Antes de empezar</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#bienvenida-4">Bienvenida al Bloque 4</a></li>
+    <li><a class="nav-link" href="#anticipo-for">Vas a reacomodar otra vez</a></li>
+  </ul>
+
+  <h6>El ciclo controlado</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#for">El <code>for</code></a></li>
+    <li><a class="nav-link" href="#anatomia-for">Anatomía: las tres partes</a></li>
+    <li><a class="nav-link" href="#simulacion-for">Simulación paso a paso</a></li>
+    <li><a class="nav-link" href="#for-vs-while"><code>for</code> vs <code>while</code></a></li>
+    <li><a class="nav-link" href="#ejemplos-for">Ejemplos progresivos</a></li>
+    <li><a class="nav-link" href="#errores-for">Errores comunes</a></li>
+    <li><a class="nav-link" href="#ejercicios-for">Ejercicios de <code>for</code></a></li>
+  </ul>
+
+  <h6>Control fino dentro del ciclo</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#break">Salir antes: <code>break</code></a></li>
+    <li><a class="nav-link" href="#continue">Saltar una vuelta: <code>continue</code></a></li>
+    <li><a class="nav-link" href="#break-vs-continue"><code>break</code> vs <code>continue</code></a></li>
+    <li><a class="nav-link" href="#etiquetas">Un detalle avanzado (opcional)</a></li>
+    <li><a class="nav-link" href="#ejemplos-break-continue">Ejemplos progresivos</a></li>
+    <li><a class="nav-link" href="#errores-break-continue">Errores comunes</a></li>
+    <li><a class="nav-link" href="#ejercicios-break-continue">Ejercicios</a></li>
+  </ul>
+
+  <h6>Ciclos dentro de ciclos</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#anidados-4">Un <code>for</code> dentro de otro</a></li>
+    <li><a class="nav-link" href="#simulacion-anidados">Simulación paso a paso</a></li>
+    <li><a class="nav-link" href="#ejemplos-anidados">Ejemplos progresivos</a></li>
+    <li><a class="nav-link" href="#errores-anidados">Errores comunes</a></li>
+    <li><a class="nav-link" href="#ejercicios-anidados">Ejercicios</a></li>
+  </ul>
+
+  <h6>Consolidación</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#mezclar-4">Mezclar todo lo aprendido</a></li>
+    <li><a class="nav-link" href="#reto-final-4">Reto del Bloque 4</a></li>
+    <li><a class="nav-link" href="#resumen-4">Lo que llevas construido</a></li>
+  </ul>
+</nav>
+
+<main class="contenido">
+
+  <div class="portada">
+    <h1>El <code>for</code> y el control fino de ciclos</h1>
+    <p class="mb-0 fs-5">Bloque 4 — <code>for</code>, <code>break</code>, <code>continue</code></p>
+    <p class="mb-0"><small>La pieza que vas a escribir más veces que cualquier otra.</small></p>
+  </div>
+
+  <!-- ============================================================ -->
+  <section id="bienvenida-4">
+    <h2>Bienvenida al Bloque 4</h2>
+
+    <p>Ya tienes dos ciclos: <code>while</code> y <code>do while</code>. Con ellos puedes repetir algo mientras se cumpla una condición. Pero hay un tipo de repetición que aparece muchísimo y que el <code>while</code> maneja con incomodidad: <strong>repetir una cantidad conocida de veces</strong>. Por ejemplo, "recorre los 10 elementos de una lista", "imprime los números del 1 al 100", "cuenta las vocales de esta palabra".</p>
+
+    <p>Para esos casos, Java tiene el <code>for</code>. Es probablemente la estructura que más vas a escribir en tu vida programando. Aparece en todos los lenguajes, con variaciones, y es la que más veces vas a leer en código de otras personas.</p>
+
+    <p>También vas a conocer dos instrucciones que te dan control fino dentro de un ciclo:</p>
+
+    <ul>
+      <li><strong><code>break</code></strong> — salir del ciclo antes de que termine por su cuenta.</li>
+      <li><strong><code>continue</code></strong> — saltar el resto de la vuelta actual y pasar directamente a la siguiente.</li>
+    </ul>
+
+    <p>Con esto, tu repertorio de estructuras de control queda casi completo. Solo faltan Scanner (que ya tratamos parcialmente en el Bloque 1 y volveremos a ver con más detalle en el Bloque 5) y arreglos (Bloque 6). Después de este bloque, ya puedes escribir programas de verdad.</p>
+
+    <p>Vamos paso a paso, como siempre. Primero el <code>for</code> solo. Después <code>break</code> y <code>continue</code>. Y al final, el momento más difícil del manual: <strong>ciclos dentro de ciclos</strong>.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="anticipo-for">
+    <h2>Vas a reacomodar otra vez (léelo antes de que pase)</h2>
+
+    <p>Este bloque tiene dos momentos donde las piezas se te van a reacomodar, y los dos son predecibles:</p>
+
+    <p><strong>Primer momento: el <code>for</code>.</strong> Es muy probable que al principio te parezca más complicado que <code>while</code>, aunque en realidad hace lo mismo. Eso pasa porque el <code>for</code> empaqueta <em>tres cosas a la vez</em> en una sola línea: la inicialización, la condición, y el incremento. Tres piezas juntas en el mismo renglón. Es normal que cueste al principio separarlas mentalmente.</p>
+
+    <p>Cuando sientas eso, aquí está el truco que va a resolverlo: <strong>reescribe el <code>for</code> como un <code>while</code></strong> y compáralos. En cuanto veas que son la misma cosa con la sintaxis apretada, el <code>for</code> deja de parecer raro. Este manual te va a mostrar esa equivalencia explícitamente, para que no la tengas que descubrir sola.</p>
+
+    <p><strong>Segundo momento: <code>for</code> dentro de <code>for</code>.</strong> Este es el punto más difícil de todo el manual. Un solo ciclo con una decisión dentro ya te costó en el Bloque 3. Dos ciclos anidados con lógica dentro te van a costar más. Y está bien: es la estructura más compleja que vas a ver antes de arreglos, y es normal que se sienta como un nudo.</p>
+
+    <p>Cuando llegues a esa parte, es probable que aparezca alguna de estas sensaciones:</p>
+
+    <ul>
+      <li>"No sé qué variable controla qué cosa".</li>
+      <li>"No entiendo cuántas veces se ejecuta el de adentro".</li>
+      <li>"Se me pierde el valor de <code>i</code> y <code>j</code>".</li>
+      <li>"Pensé que había entendido ciclos, pero ahora no sé".</li>
+    </ul>
+
+    <div class="caja caja-anticipa">
+      <h5>Anticipa esto antes de que pase</h5>
+      <p class="mb-0">El <code>for</code> dentro de <code>for</code> es el tipo de cosa que <strong>no se entiende leyéndola; se entiende simulándola</strong>. En la sección de anidados vas a encontrar tablas de simulación paso a paso. Léelas con papel y lápiz al lado, marca los valores de <code>i</code> y <code>j</code> en cada vuelta, dibuja el árbol. No intentes "razonarlo de golpe". Va paso a paso, y va a funcionar. Cuando lo entiendas, vas a sentir que se te abrió una puerta. Antes de eso, la sensación va a ser de nudo. Es esperado.</p>
+    </div>
+
+    <p>Un dato que ayuda: el 90% de las veces que un programador se atora con dos ciclos anidados, el problema no es que "no entienda el concepto", sino que no ha simulado suficiente con papel. El concepto es simple: <em>el de afuera da una vuelta, y el de adentro da todas sus vueltas por cada vuelta del de afuera</em>. Lo que cuesta es imaginar eso ocurriendo en el tiempo. Y eso se entrena simulando.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="for">
+    <h2>El <code>for</code>: repetir cuando sabes cuántas veces</h2>
+
+    <h3>Antes de Java (situación cotidiana)</h3>
+
+    <p>Piensa en un entrenamiento con series. Te dicen: "haz 12 repeticiones". Sabes de antemano cuántas veces vas a repetir el ejercicio. No es "hazlo hasta que te canses" (eso sería un <code>while</code>), es una cantidad exacta. Empiezas en 1, y terminas cuando llegas a 12.</p>
+
+    <p>O piensa en ir al supermercado con una lista de 8 productos. Vas a recorrer los pasillos 8 veces (una por producto), ni más ni menos. La cantidad de vueltas está definida desde el principio.</p>
+
+    <p>O piensa en hojear un libro de 300 páginas. Sabes que vas a recorrer 300 páginas. Empiezas en la 1, y sigues hasta la 300. Después cierras el libro. La cantidad de vueltas se conoce de antemano.</p>
+
+    <p>Esa es la situación que <code>for</code> resuelve mejor que <code>while</code>: cuando <strong>sabes de antemano cuántas veces necesitas repetir algo</strong>, o puedes calcularlo fácilmente (por ejemplo, "tantas veces como elementos tenga esta lista").</p>
+
+    <h3>La idea en español</h3>
+
+    <p>Un <code>for</code> significa: <em>"desde tal valor, hasta que se cumpla tal condición, avanzando así"</em>. Es decir, incluye en su propia sintaxis las tres cosas que en un <code>while</code> tendrías que escribir por separado:</p>
+
+    <ul>
+      <li><strong>Con qué valor empiezo</strong> (inicialización).</li>
+      <li><strong>Hasta cuándo sigo</strong> (condición).</li>
+      <li><strong>Cómo avanzo en cada vuelta</strong> (incremento o decremento).</li>
+    </ul>
+
+    <p>Todo eso en una sola línea, con punto y coma separando las tres partes.</p>
+
+    <h3>La nueva pieza</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (inicialización; condición; incremento) {
+    <span class="cmt">// esto se repite mientras la condición sea true</span>
+}</pre>
+    </div>
+
+    <p>Un ejemplo concreto: contar del 1 al 5.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">5</span>; i = i + <span class="num">1</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+}</pre>
+    </div>
+
+    <p>Lee eso en español: "para <code>i</code> desde 1, mientras <code>i</code> sea menor o igual a 5, aumentando <code>i</code> de 1 en 1: imprime <code>i</code>". El resultado es idéntico al del <code>while</code> del Bloque 3:</p>
+
+    <div class="flujo">1
+2
+3
+4
+5</div>
+
+    <p>Este es el <strong>mismo programa</strong> que ya viste con <code>while</code>, solo escrito con <code>for</code>. Y aquí está la clave para no asustarte con la sintaxis: un <code>for</code> es un <code>while</code> con las tres piezas que ya conoces, puestas en una sola línea. Vamos a verlo explícitamente.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Con while</span>
+<span class="kw">int</span> i = <span class="num">1</span>;                <span class="cmt">// ← inicialización</span>
+<span class="kw">while</span> (i &lt;= <span class="num">5</span>) {            <span class="cmt">// ← condición</span>
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+    i = i + <span class="num">1</span>;            <span class="cmt">// ← incremento</span>
+}
+
+<span class="cmt">// Con for (lo mismo, en una línea)</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">5</span>; i = i + <span class="num">1</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+}</pre>
+    </div>
+
+    <p>Los dos programas hacen exactamente lo mismo. El <code>for</code> solo mueve la inicialización <em>dentro</em> de la sintaxis, y el incremento también. Esto significa que <strong>todo lo que ya sabes sobre <code>while</code> aplica al <code>for</code></strong>: el ciclo puede no ejecutarse nunca si la condición es falsa al principio, puede quedar en bucle infinito si no avanza, la condición se evalúa antes de cada vuelta, etc. La lógica es la misma.</p>
+
+    <p>Si alguna vez te confundes con un <code>for</code> complejo, la solución más rápida es esta: <strong>reescríbelo como un <code>while</code></strong> y léelo así. Ahí ya sabes leerlo. Este truco lo vas a usar más veces de las que imaginas.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="anatomia-for">
+    <h2>Anatomía: las tres partes del <code>for</code></h2>
+
+    <p>Vale la pena ver las tres partes por separado, porque cada una tiene su rol y sus errores típicos.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">5</span>; i = i + <span class="num">1</span>) {
+    <span class="cmt">//   └─A─┘  └──B──┘  └──C──┘</span>
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+}</pre>
+    </div>
+
+    <h3>Parte A — Inicialización</h3>
+
+    <p>Se ejecuta <strong>una sola vez</strong>, antes de cualquier evaluación de la condición. Es donde declaras la variable del ciclo y le das su valor inicial. Casi siempre verás <code>int i = 0</code> o <code>int i = 1</code>, pero puede ser cualquier valor.</p>
+
+    <p>Algo importante: si declaras la variable <em>dentro</em> del <code>for</code> (como <code>int i = 1</code>), esa variable solo existe dentro del ciclo. Fuera del <code>for</code>, <code>i</code> no está definida y no la puedes usar. Esto sorprende al principio, pero es útil: mantiene limpio el resto del programa, y evita confusiones si tienes otros ciclos con sus propias variables.</p>
+
+    <h3>Parte B — Condición</h3>
+
+    <p>Se evalúa <strong>antes de cada vuelta</strong>, igual que en el <code>while</code>. Si es <code>true</code>, el cuerpo se ejecuta. Si es <code>false</code>, el ciclo termina y se sale. Como el <code>while</code>, si la condición es falsa desde el principio, el cuerpo no se ejecuta nunca.</p>
+
+    <p>Esta es la condición que tiene que volverse falsa en algún momento. Si no puede, hay bucle infinito (aunque, como veremos, los bucles infinitos con <code>for</code> son más raros porque el incremento casi siempre avanza hacia la salida).</p>
+
+    <h3>Parte C — Incremento</h3>
+
+    <p>Se ejecuta <strong>al final de cada vuelta</strong>, después del cuerpo, antes de volver a evaluar la condición. Es el paso que hace avanzar la variable del ciclo. Casi siempre verás:</p>
+
+    <ul>
+      <li><code>i = i + 1</code> o <code>i++</code> (más común) — avanzar de 1 en 1.</li>
+      <li><code>i = i - 1</code> o <code>i--</code> — retroceder de 1 en 1 (para contar hacia atrás).</li>
+      <li><code>i = i + 2</code> o <code>i += 2</code> — avanzar de 2 en 2 (para saltar).</li>
+    </ul>
+
+    <p>El formato <code>i++</code> es una forma abreviada de escribir <code>i = i + 1</code>. En Java, <code>i++</code> y <code>++i</code> significan lo mismo cuando los usas solos en una línea. La diferencia entre los dos existe pero solo importa en casos muy específicos que no vas a necesitar por ahora. Si te sientes cómodo, usa <code>i++</code> porque es lo más común y es lo que vas a leer en el código de otros.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Estas tres formas son equivalentes:</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">5</span>; i = i + <span class="num">1</span>) { ... }
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">5</span>; i += <span class="num">1</span>)    { ... }
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">5</span>; i++)          { ... }</pre>
+    </div>
+
+    <p>Las tres versiones hacen exactamente lo mismo. La más común, con diferencia, es <code>i++</code>. La vas a ver tanto que tu ojo va a reconocerla al instante. Pero para tus primeros ejercicios, no hay problema si prefieres escribir <code>i = i + 1</code>: es más explícito y se lee mejor cuando estás empezando.</p>
+
+    <h3>El orden de ejecución de las tres partes</h3>
+
+    <p>Este es el detalle más importante y el que más confunde al principio. Las tres partes no se ejecutan en el orden en que se escriben, sino en este orden:</p>
+
+    <div class="flujo">1. Inicialización (una sola vez)
+       ↓
+2. ¿Condición es true?
+       │
+   ┌───┴───┐
+   │       │
+  sí      no ────► Fin del ciclo
+   │
+   ▼
+3. Cuerpo del for
+   │
+   ▼
+4. Incremento
+   │
+   ▼
+   (vuelve al paso 2)</div>
+
+    <p>Fíjate: el incremento <strong>no se ejecuta antes del cuerpo</strong>, se ejecuta <em>después</em>, al final de cada vuelta. Y la condición se evalúa al inicio de cada vuelta, incluso la primera. Esto es lo mismo que pasa en el <code>while</code>, solo que aquí está todo junto en la línea del <code>for</code>.</p>
+
+    <p>Esta es la razón por la que muchas personas se confunden al principio: miran la línea del <code>for</code> y piensan que las tres partes se ejecutan en secuencia, de izquierda a derecha. Pero no: la inicialización va una vez, y después la condición y el incremento se van turnando, con el cuerpo en medio. Es un ritmo, no una línea recta. Lo vas a ver clarísimo en la siguiente sección, con la simulación paso a paso.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="simulacion-for">
+    <h2>Simulación paso a paso</h2>
+
+    <p>Esta es la parte que te va a quitar la confusión con el <code>for</code>. Vamos a ejecutar línea por línea el ejemplo del contador, marcando cada paso.</p>
+
+    <h3>El programa</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">5</span>; i++) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Fin"</span>);</pre>
+    </div>
+
+    <h3>Paso a paso</h3>
+
+    <div class="simulacion">
+      <table class="table table-bordered">
+        <thead>
+          <tr><th>#</th><th>Qué hace Java</th><th><code>i</code></th><th>Salida</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td><strong>Inicialización:</strong> ejecuta <code>int i = 1</code></td><td><code>i = 1</code></td><td>—</td></tr>
+          <tr><td>2</td><td><strong>Condición:</strong> evalúa <code>1 &lt;= 5</code> → <code>true</code></td><td><code>i = 1</code></td><td>—</td></tr>
+          <tr><td>3</td><td><strong>Cuerpo:</strong> ejecuta <code>println(i)</code></td><td><code>i = 1</code></td><td><code>1</code></td></tr>
+          <tr><td>4</td><td><strong>Incremento:</strong> ejecuta <code>i++</code></td><td><code>i = 2</code></td><td>—</td></tr>
+          <tr><td>5</td><td><strong>Condición:</strong> evalúa <code>2 &lt;= 5</code> → <code>true</code></td><td><code>i = 2</code></td><td>—</td></tr>
+          <tr><td>6</td><td><strong>Cuerpo:</strong> <code>println(i)</code></td><td><code>i = 2</code></td><td><code>2</code></td></tr>
+          <tr><td>7</td><td><strong>Incremento:</strong> <code>i++</code></td><td><code>i = 3</code></td><td>—</td></tr>
+          <tr><td>8</td><td><strong>Condición:</strong> <code>3 &lt;= 5</code> → <code>true</code></td><td><code>i = 3</code></td><td>—</td></tr>
+          <tr><td>9</td><td><strong>Cuerpo:</strong> <code>println(i)</code></td><td><code>i = 3</code></td><td><code>3</code></td></tr>
+          <tr><td>10</td><td><strong>Incremento:</strong> <code>i++</code></td><td><code>i = 4</code></td><td>—</td></tr>
+          <tr><td>11</td><td><strong>Condición:</strong> <code>4 &lt;= 5</code> → <code>true</code></td><td><code>i = 4</code></td><td>—</td></tr>
+          <tr><td>12</td><td><strong>Cuerpo:</strong> <code>println(i)</code></td><td><code>i = 4</code></td><td><code>4</code></td></tr>
+          <tr><td>13</td><td><strong>Incremento:</strong> <code>i++</code></td><td><code>i = 5</code></td><td>—</td></tr>
+          <tr><td>14</td><td><strong>Condición:</strong> <code>5 &lt;= 5</code> → <code>true</code></td><td><code>i = 5</code></td><td>—</td></tr>
+          <tr><td>15</td><td><strong>Cuerpo:</strong> <code>println(i)</code></td><td><code>i = 5</code></td><td><code>5</code></td></tr>
+          <tr><td>16</td><td><strong>Incremento:</strong> <code>i++</code></td><td><code>i = 6</code></td><td>—</td></tr>
+          <tr><td>17</td><td><strong>Condición:</strong> <code>6 &lt;= 5</code> → <code>false</code></td><td><code>i = 6</code></td><td>—</td></tr>
+          <tr><td>18</td><td>Sale del <code>for</code></td><td><code>i = 6</code></td><td>—</td></tr>
+          <tr><td>19</td><td>Ejecuta <code>println("Fin")</code></td><td><code>i</code> ya no existe</td><td><code>Fin</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Salida completa:</p>
+    <div class="flujo">1
+2
+3
+4
+5
+Fin</div>
+
+    <p>Observa con atención varias cosas:</p>
+
+    <ul>
+      <li><strong>El incremento ocurre 6 veces, pero solo sirve 5 veces.</strong> La primera vez que se ejecuta el incremento es después de la primera vuelta del cuerpo. La última vez (que lleva <code>i</code> de 5 a 6) no sirve para ejecutar otra vuelta, porque la condición ya va a fallar. Ese incremento "de más" es parte normal del mecanismo.</li>
+      <li><strong>La condición se evalúa 6 veces.</strong> Cinco veces da <code>true</code> (una por cada vuelta del cuerpo), y la sexta da <code>false</code> (y termina).</li>
+      <li><strong>El cuerpo se ejecuta 5 veces.</strong> Exactamente la cantidad que queríamos.</li>
+      <li><strong>Al terminar, <code>i</code> vale 6</strong>, no 5. Aunque el último número impreso fue 5. Esto es igual que en el <code>while</code>, y sorprende la primera vez.</li>
+      <li><strong>Si haces <code>println(i)</code> después del <code>for</code>, no compila</strong>: la variable <code>i</code> solo existe dentro del ciclo. El último paso dice "<code>i</code> ya no existe", y es literal.</li>
+    </ul>
+
+    <div class="caja caja-detente">
+      <h5>Detente un momento y piensa</h5>
+      <p class="mb-0">Antes de seguir, escribe en un papel qué haría este mismo programa si cambiaras el incremento a <code>i = i + 2</code>. ¿Qué números imprimiría? ¿Cuántas vueltas daría? Después compáralo con la realidad. Y después cambia la condición a <code>i &lt; 5</code>: ¿qué imprime ahora? Estos dos cambios cubren casi todos los casos que vas a ver en la práctica.</p>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver las respuestas a los dos cambios</summary>
+      <p class="mt-2 mb-2"><strong>Con <code>i = i + 2</code>:</strong> imprime 1, 3, 5. Da 3 vueltas. En la cuarta evaluación, <code>i</code> vale 7, y <code>7 &lt;= 5</code> es falso. El ciclo termina con <code>i = 7</code>.</p>
+      <p class="mb-0"><strong>Con <code>i &lt; 5</code>:</strong> imprime 1, 2, 3, 4. Da 4 vueltas. En la quinta evaluación, <code>i</code> vale 5, y <code>5 &lt; 5</code> es falso. Ya no imprime el 5. Este tipo de cambio (<code>&lt;=</code> vs <code>&lt;</code>) es uno de los errores más comunes: te imprime uno de menos o uno de más según qué lado del borde caiga.</p>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="for-vs-while">
+    <h2><code>for</code> vs <code>while</code>: cuándo usar cada uno</h2>
+
+    <p>Ya viste que hacen lo mismo. La pregunta es: <strong>¿cuál usar cuándo?</strong> No hay una regla absoluta, pero hay una heurística que funciona muy bien:</p>
+
+    <ul>
+      <li><strong>Usa <code>for</code></strong> cuando sabes de antemano cuántas vueltas va a dar el ciclo, o cuando puedes expresar la cantidad con una variable clara ("tantos elementos tiene la lista", "del 1 al 100", "hasta la letra 'z'").</li>
+      <li><strong>Usa <code>while</code></strong> cuando el ciclo depende de algo que no conoces de antemano, o que se decide dentro ("mientras no se cumpla la condición X", "mientras el usuario no ingrese 0").</li>
+      <li><strong>Usa <code>do while</code></strong> cuando además el cuerpo debe ejecutarse al menos una vez sin importar la condición.</li>
+    </ul>
+
+    <p>La regla mental es: <em>"¿puedo expresar esto como un rango conocido?"</em>. Si la respuesta es sí, <code>for</code>. Si es no, <code>while</code>.</p>
+
+    <p>Algunos ejemplos para que lo veas:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// for: se sabe cuántas vueltas</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">100</span>; i++) {
+    suma = suma + i;
+}
+
+<span class="cmt">// for: recorrer una palabra letra por letra</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; palabra.<span class="mth">length</span>(); i++) {
+    <span class="cmt">// ...</span>
+}
+
+<span class="cmt">// while: no se sabe cuántas vueltas de antemano</span>
+<span class="kw">while</span> (!encontrado) {
+    <span class="cmt">// seguir buscando</span>
+}
+
+<span class="cmt">// while: depende de la entrada del usuario</span>
+<span class="kw">while</span> (opcion != <span class="num">0</span>) {
+    <span class="cmt">// ...</span>
+}
+
+<span class="cmt">// do while: al menos una vuelta garantizada</span>
+<span class="kw">do</span> {
+    <span class="cmt">// pedir algo al usuario</span>
+} <span class="kw">while</span> (noEsValido);</pre>
+    </div>
+
+    <p>Cuando dudes, pregúntate en español: <em>"¿cuántas veces voy a repetir esto?"</em>. Si puedes responder con un número, o con algo como "tantas como elementos tenga esto", es <code>for</code>. Si la respuesta es "no sé, hasta que pase algo", es <code>while</code>.</p>
+
+    <p>Algo que vale la pena saber: los tres ciclos son <strong>intercambiables</strong>. Cualquier cosa que escribas con <code>for</code>, la puedes escribir con <code>while</code>, y viceversa. La diferencia es de claridad y de intención. Usar la pieza correcta comunica al lector (incluido tú mismo en el futuro) <em>qué tipo de repetición es</em> sin que tenga que leer el cuerpo entero. Esto es importante cuando el código crece.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejemplos-for">
+    <h2>Ejemplos progresivos con <code>for</code></h2>
+
+    <h3>Ejemplo 1 — Contar del 1 al 10</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">10</span>; i++) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+}</pre>
+    </div>
+    <p>El ejemplo más básico. Todo el esqueleto del <code>for</code> en una línea. Si lo has seguido hasta aquí, ya puedes escribirlo de memoria.</p>
+
+    <h3>Ejemplo 2 — Contar hacia atrás</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">10</span>; i &gt;= <span class="num">1</span>; i--) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+}
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"¡Despegue!"</span>);</pre>
+    </div>
+    <p>Cuenta de 10 hacia abajo. Fíjate en dos cosas: la condición ahora es <code>i &gt;= 1</code> (no <code>i &lt;= 10</code>), y el incremento es <code>i--</code> (decremento). Cuando el ciclo va hacia atrás, la condición también cambia de dirección. Es un error muy común dejar la condición del lado "hacia adelante" cuando el ciclo va hacia atrás: se queda en bucle infinito.</p>
+
+    <h3>Ejemplo 3 — Saltar de 2 en 2</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Números pares del 0 al 10</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt;= <span class="num">10</span>; i = i + <span class="num">2</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+}</pre>
+    </div>
+    <p>Imprime 0, 2, 4, 6, 8, 10. Cuando el incremento no es de 1 en 1, hay que tener cuidado con el borde de la condición: con <code>i &lt;= 10</code> llegamos al 10, con <code>i &lt; 10</code> no llegaríamos. Elegir bien el operador de la condición es la clave para que el último valor aparezca o no.</p>
+
+    <h3>Ejemplo 4 — Sumar los primeros N números</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> n = <span class="num">100</span>;
+<span class="kw">int</span> suma = <span class="num">0</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= n; i++) {
+    suma = suma + i;
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Suma de 1 a "</span> + n + <span class="str">": "</span> + suma);</pre>
+    </div>
+    <p>Suma 1+2+...+100 = 5050. Aquí <code>suma</code> es un acumulador: se declara <em>antes</em> del ciclo (con valor 0), y se modifica <em>dentro</em>. Patrón igual que en el <code>while</code>, pero con la estructura del <code>for</code>.</p>
+
+    <h3>Ejemplo 5 — Recorrer los caracteres de una palabra</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span> palabra = <span class="str">"Java"</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; palabra.<span class="mth">length</span>(); i++) {
+    <span class="kw">char</span> c = palabra.<span class="mth">charAt</span>(i);
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Posición "</span> + i + <span class="str">": "</span> + c);
+}</pre>
+    </div>
+    <p>Imprime cada letra con su posición. Fíjate en dos detalles:</p>
+    <ul>
+      <li>El ciclo empieza en <strong>0</strong>, no en 1. Esto es porque los caracteres de un <code>String</code> se numeran desde 0 (el primer carácter es <code>charAt(0)</code>). Esta convención la vas a ver también con arreglos en el Bloque 6.</li>
+      <li>La condición es <code>i &lt; palabra.length()</code>, con <strong>menor estricto</strong>, no <code>&lt;=</code>. Esto es porque si la palabra tiene 4 letras, sus posiciones válidas son 0, 1, 2 y 3. La posición 4 no existe. Este es otro detalle que sorprende al principio, y que se vuelve natural después.</li>
+    </ul>
+    <p>Este es el patrón que vas a usar muchísimo cuando llegues a arreglos: recorrer desde 0 hasta <code>length() - 1</code>, o lo que es lo mismo, <code>i &lt; length()</code>.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="errores-for">
+    <h2>Errores comunes con <code>for</code></h2>
+
+    <h3>1. Confundir los <code>;</code> con las <code>,</code></h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// MAL</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>, i &lt;= <span class="num">5</span>, i++) { ... }
+
+<span class="cmt">// BIEN</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">5</span>; i++) { ... }</pre>
+    </div>
+
+    <p>Las tres partes del <code>for</code> van separadas por <strong>punto y coma</strong>, no por comas. Las comas sí existen dentro del <code>for</code>, pero para otra cosa (declarar varias variables a la vez), y ese uso es poco común. Regla: si tienes tres partes separadas, son punto y coma.</p>
+
+    <h3>2. Usar <code>&lt;=</code> cuando querías <code>&lt;</code> (o al revés)</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span> palabra = <span class="str">"Java"</span>;
+
+<span class="cmt">// MAL: intenta acceder a charAt(4) que no existe</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt;= palabra.<span class="mth">length</span>(); i++) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(palabra.<span class="mth">charAt</span>(i));
+}
+
+<span class="cmt">// BIEN</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; palabra.<span class="mth">length</span>(); i++) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(palabra.<span class="mth">charAt</span>(i));
+}</pre>
+    </div>
+
+    <p>Cuando recorres algo que empieza en 0 (como un <code>String</code> o un arreglo), la condición correcta es <code>i &lt; length()</code>, no <code>&lt;=</code>. Con <code>&lt;=</code> intentas acceder a la posición 4 de "Java", que no existe, y el programa lanza un error (una <em>excepción</em>) al ejecutarse. Este error es tan común que tiene nombre propio: <em>off-by-one</em>, "el error del uno de más". Lo vas a cometer varias veces. Está bien: es parte del proceso, y con el tiempo lo reconoces en segundos.</p>
+
+    <h3>3. Dejar el incremento vacío sin querer</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// ESTO ES BUCLE INFINITO si no cambias i dentro del cuerpo</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">5</span>; ) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+    <span class="cmt">// falta i++ o i = i + 1</span>
+}</pre>
+    </div>
+
+    <p>Si la parte del incremento está vacía y no modificas <code>i</code> dentro del cuerpo, el ciclo nunca termina. Java permite dejar la parte del incremento vacía (separa con punto y coma y no ponga nada), pero casi nunca es lo que quieres.</p>
+
+    <h3>4. Declarar la variable <code>i</code> antes del <code>for</code> y luego volverla a declarar dentro</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">1</span>;
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">5</span>; i++) {   <span class="cmt">// ← error: i ya existe</span>
+    ...
+}</pre>
+    </div>
+
+    <p>Java no permite declarar la misma variable dos veces en el mismo ámbito. Si ya declaraste <code>int i</code> afuera, adentro del <code>for</code> no puedes poner <code>int</code> de nuevo. Solución: usa un nombre distinto, o mueve la declaración adentro del <code>for</code> (que es lo más común). La mayoría de las veces, la variable del <code>for</code> se declara dentro del propio <code>for</code>, porque no la necesitas fuera.</p>
+
+    <h3>5. Confundir el orden de las partes</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// MAL: la condición está al principio y el inicio al medio</span>
+<span class="kw">for</span> (i &lt;= <span class="num">5</span>; <span class="kw">int</span> i = <span class="num">1</span>; i++) { ... }
+
+<span class="cmt">// BIEN: primero la inicialización, luego la condición, luego el incremento</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">5</span>; i++) { ... }</pre>
+    </div>
+
+    <p>El orden es fijo: inicialización, condición, incremento. Si te confundes, acuérdate del ritmo: <em>"empiezo, verifico, avanzo"</em>. Ese es el orden en que se escriben las tres partes.</p>
+
+    <h3>6. Usar <code>&lt;=</code> cuando el índice empieza en 0</h3>
+
+    <p>Ya lo mencionamos en el punto 2, pero conviene repetirlo porque es el error más frecuente al recorrer <code>String</code>s y arreglos. Cuando el ciclo empieza en 0, la condición correcta para recorrer <code>n</code> elementos es <code>i &lt; n</code>, no <code>i &lt;= n</code>. Con <code>&lt;=</code> te pasas de un elemento. Recuerda: si <code>length()</code> es 4, las posiciones son 0, 1, 2, 3. El 4 no existe.</p>
+
+    <div class="caja caja-error">
+      <h5>Si tu <code>for</code> da "ArrayIndexOutOfBoundsException" o error de índice</h5>
+      <p class="mb-0">Es casi siempre esto. Revisa la condición del <code>for</code>. ¿Es <code>&lt;=</code>? ¿Debería ser <code>&lt;</code>? Es un error tan común que el compilador y el runtime no te lo detectan por adelantado: solo explota cuando el programa llega a esa línea con el índice de más.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejercicios-for">
+    <h2>Ejercicios de <code>for</code></h2>
+
+    <h3><span class="nivel nivel-reconocer">Reconocer</span></h3>
+    <p>¿Qué imprime este <code>for</code>?</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">2</span>; i &lt;= <span class="num">8</span>; i = i + <span class="num">2</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-0">Imprime <code>2</code>, <code>4</code>, <code>6</code>, <code>8</code>. Cada vuelta suma 2. La condición es <code>i &lt;= 8</code>, así que cuando <code>i</code> vale 8, entra y lo imprime. Después <code>i</code> pasa a 10, y la condición falla. Fíjate: si la condición hubiera sido <code>i &lt; 8</code>, no imprimiría el 8. Elegir bien el operador de la condición es lo que decide si el último valor cae o no.</p>
+    </details>
+
+    <h3><span class="nivel nivel-completar">Completar</span></h3>
+    <p>Completa el <code>for</code> para que imprima los números del 5 al 15 (ambos incluidos).</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> i = ______; ______; ______) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-0"><code>for (int i = 5; i &lt;= 15; i++)</code>. El inicio es 5, la condición es <code>&lt;= 15</code> (para incluir el 15), y el incremento es <code>i++</code>. Fíjate que con <code>i &lt; 15</code> no imprimiría el 15.</p>
+    </details>
+
+    <h3><span class="nivel nivel-modificar">Modificar</span></h3>
+    <p>Este programa debería imprimir los números del 10 al 1 en orden descendente, pero está roto. Encuentra y corrige el error.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">10</span>; i &lt;= <span class="num">1</span>; i--) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-2">La condición está mal. Con <code>i = 10</code> y condición <code>i &lt;= 1</code>, la primera evaluación ya es falsa (<code>10 &lt;= 1</code> es falso), así que el ciclo no ejecuta ni una vez. Y si el ciclo empezara en 0, la condición nunca se volvería falsa (siempre menor o igual a 1 al decrecer). La condición correcta para ir hacia abajo es <code>i &gt;= 1</code>:</p>
+      <div class="bloque-codigo">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">10</span>; i &gt;= <span class="num">1</span>; i--) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+}</pre>
+      </div>
+      <p class="mb-0">Regla: cuando el ciclo va hacia abajo, la condición debe apuntar hacia abajo también (<code>&gt;</code> o <code>&gt;=</code>). Cuando va hacia arriba, la condición apunta hacia arriba (<code>&lt;</code> o <code>&lt;=</code>). Si mezclas direcciones, el ciclo o no entra, o no sale.</p>
+    </details>
+
+    <h3><span class="nivel nivel-construir">Construir</span></h3>
+    <p>Escribe un <code>for</code> que sume los números pares del 1 al 50 e imprima el resultado al final.</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> suma = <span class="num">0</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">50</span>; i++) {
+    <span class="kw">if</span> (i % <span class="num">2</span> == <span class="num">0</span>) {
+        suma = suma + i;
+    }
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Suma de pares: "</span> + suma);</pre>
+      </div>
+      <p class="mb-0">El resultado es 650. Fíjate que también podrías escribir esto mismo con el <code>for</code> incrementando de 2 en 2 desde el 2: <code>for (int i = 2; i &lt;= 50; i += 2)</code>, y así te ahorras el <code>if</code>. Las dos versiones son válidas. La segunda es más directa si sabes que solo quieres pares; la primera es más fácil si la condición de "par" es más compleja o cambia.</p>
+    </details>
+
+    <h3><span class="nivel nivel-combinar">Combinar</span></h3>
+    <p>Escribe un programa que cuente cuántas letras 'a' tiene la palabra <code>"banana"</code>, usando un <code>for</code> que recorra la palabra y un <code>if</code> que cuente.</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span> palabra = <span class="str">"banana"</span>;
+<span class="kw">int</span> contador = <span class="num">0</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; palabra.<span class="mth">length</span>(); i++) {
+    <span class="kw">if</span> (palabra.<span class="mth">charAt</span>(i) == <span class="str">'a'</span>) {
+        contador = contador + <span class="num">1</span>;
+    }
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Letras 'a': "</span> + contador);</pre>
+      </div>
+      <p class="mb-0">Imprime "Letras 'a': 3". Fíjate en el detalle de la condición: <code>i &lt; palabra.length()</code>, no <code>&lt;=</code>. Si pusieras <code>&lt;=</code>, intentarías leer el carácter en la posición 6, que no existe, y el programa fallaría en la última vuelta. Este es el error del que te hablé en los "errores comunes", y si cometes ese error, el compilador ni siquiera se queja: el programa se compila bien y explota al ejecutarse.</p>
+    </details>
+
+    <h3><span class="nivel nivel-crear">Crear</span></h3>
+    <p>Escribe un programa que determine si un número <code>n</code> es primo, usando un <code>for</code>. Un número primo es mayor que 1 y solo divisible por 1 y por sí mismo.</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> n = <span class="num">17</span>;
+<span class="kw">boolean</span> esPrimo = <span class="kw">true</span>;
+
+<span class="kw">if</span> (n &lt;= <span class="num">1</span>) {
+    esPrimo = <span class="kw">false</span>;
+} <span class="kw">else</span> {
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">2</span>; i &lt; n; i++) {
+        <span class="kw">if</span> (n % i == <span class="num">0</span>) {
+            esPrimo = <span class="kw">false</span>;
+        }
+    }
+}
+
+<span class="kw">if</span> (esPrimo) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(n + <span class="str">" es primo"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(n + <span class="str">" no es primo"</span>);
+}</pre>
+      </div>
+      <p class="mb-0">El ciclo prueba si <code>n</code> es divisible por algún número entre 2 y n-1. Si encuentra uno, marca <code>esPrimo = false</code>. Fíjate en el uso de un <code>boolean</code> como "bandera": empieza en <code>true</code> (asumimos que es primo), y cualquier divisor lo cambia a <code>false</code>. Este patrón —declarar un boolean, modificarlo dentro del ciclo, y consultarlo después— es muy útil y aparece muchísimo. Ojo: cuando el ciclo ya sabe que no es primo, sigue revisando el resto de los números aunque ya no necesite. Eso se puede optimizar con <code>break</code>, que es exactamente lo que vas a ver en la siguiente sección.</p>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="break">
+    <h2>Salir antes de tiempo: <code>break</code></h2>
+
+    <h3>Antes de Java (situación cotidiana)</h3>
+
+    <p>Piensa en buscar las llaves en tu casa. Empiezas revisando la sala, después la cocina, después el cuarto. Si las encuentras en la cocina, <strong>ya no sigues revisando el resto de la casa</strong>. No tiene sentido: ya las encontraste, el objetivo está cumplido. Eso es <code>break</code>: interrumpir la búsqueda en cuanto se cumple el objetivo.</p>
+
+    <p>Otro ejemplo: un cajero automático que te da 3 intentos para poner el PIN. Si al segundo intento aciertas, no te da un tercero "porque faltaba uno". Se detiene porque ya logró lo que quería. <code>break</code> hace exactamente eso dentro de un ciclo: salta afuera en cuanto la condición de parada se cumple, sin completar las vueltas que faltaban.</p>
+
+    <h3>La idea en español</h3>
+
+    <p><code>break</code> significa: <em>"sal del ciclo ahora, sin terminar la vuelta actual ni las que faltaban"</em>. Cuando Java encuentra un <code>break</code>, abandona inmediatamente el ciclo en el que está, y sigue con la siguiente instrucción después del ciclo.</p>
+
+    <p>Un <code>break</code> casi siempre va <em>dentro</em> de un <code>if</code>. Porque la razón para salir del ciclo casi siempre es condicional: "si pasa esto, sal". Si pusieras un <code>break</code> sin condición, el ciclo terminaría en la primera vuelta siempre, y no tendría sentido tener un ciclo.</p>
+
+    <h3>La nueva pieza</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">10</span>; i++) {
+    <span class="kw">if</span> (i == <span class="num">5</span>) {
+        <span class="kw">break</span>;   <span class="cmt">// sale del ciclo cuando i llega a 5</span>
+    }
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+}</pre>
+    </div>
+
+    <p>Este programa imprime 1, 2, 3, 4, y después termina. Aunque el ciclo estaba declarado para ir hasta 10, cuando <code>i</code> vale 5, el <code>break</code> lo corta antes. <strong>La vuelta con <code>i = 5</code> no llega a imprimir el 5</strong>, porque el <code>break</code> ocurre antes del <code>println</code>.</p>
+
+    <p>Cuando termina el ciclo, el programa sigue con la siguiente instrucción después del <code>for</code>. Esto es importante: <code>break</code> solo sale del ciclo actual, no del programa entero.</p>
+
+    <h3>Cuándo <code>break</code> es útil</h3>
+
+    <p>El caso más común es cuando estás <em>buscando algo</em>. Una vez que lo encuentras, no tiene sentido seguir buscando. Por ejemplo:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] numeros = {<span class="num">4</span>, <span class="num">8</span>, <span class="num">15</span>, <span class="num">16</span>, <span class="num">23</span>, <span class="num">42</span>};
+<span class="kw">int</span> buscado = <span class="num">16</span>;
+<span class="kw">boolean</span> encontrado = <span class="kw">false</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; numeros.length; i++) {
+    <span class="kw">if</span> (numeros[i] == buscado) {
+        encontrado = <span class="kw">true</span>;
+        <span class="kw">break</span>;   <span class="cmt">// ya lo encontré, no sigo buscando</span>
+    }
+}
+
+<span class="kw">if</span> (encontrado) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Encontrado"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"No está"</span>);
+}</pre>
+    </div>
+
+    <p>Aquí usamos arreglos (los vas a ver en el Bloque 6), pero la idea se entiende: recorro la lista, y en cuanto encuentro el valor buscado, salgo del ciclo con <code>break</code>. Si el número hubiera estado en la primera posición, el ciclo daría una sola vuelta. Si no estuviera en ningún lado, el ciclo daría todas las vueltas y terminaría naturalmente.</p>
+
+    <p>Otro caso típico: bucles infinitos con <code>while (true)</code> en los que el <code>break</code> es la única salida. Por ejemplo, un menú que se repite hasta que el usuario escribe "salir". Lo vas a ver con más detalle más adelante.</p>
+
+    <h3>El patrón de "bandera" (bandera + break)</h3>
+
+    <p>El ejemplo anterior muestra un patrón común: declaras un <code>boolean</code> antes del ciclo, lo marcas dentro si encuentras algo, y sales con <code>break</code>. Después del ciclo, consultas el <code>boolean</code> para saber qué pasó. Este patrón aparece muchísimo y conviene reconocerlo.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">boolean</span> encontrado = <span class="kw">false</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; n; i++) {
+    <span class="kw">if</span> (algo_que_busco) {
+        encontrado = <span class="kw">true</span>;
+        <span class="kw">break</span>;
+    }
+}
+
+<span class="kw">if</span> (encontrado) { ... }</pre>
+    </div>
+
+    <p>Fíjate en que la bandera es una forma de "recordar" para después del ciclo si algo pasó dentro. Sin la bandera, no sabrías si el ciclo terminó por agotar las vueltas o porque encontró algo.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="continue">
+    <h2>Saltar una vuelta: <code>continue</code></h2>
+
+    <h3>Antes de Java (situación cotidiana)</h3>
+
+    <p>Piensa en un examen de opción múltiple donde decides saltar las preguntas que no sabes y seguir con las siguientes. No abandonas el examen: solo <strong>saltas esa pregunta puntual</strong> y sigues con la próxima. Eso es <code>continue</code>: en lugar de salir del ciclo, saltas el resto de la vuelta actual y pasas a la siguiente.</p>
+
+    <p>Otro ejemplo: un filtro de correo que descarta los mensajes de ciertos remitentes y sigue mostrando el resto. No cierra la bandeja de entrada: solo ignora esos mensajes concretos.</p>
+
+    <h3>La idea en español</h3>
+
+    <p><code>continue</code> significa: <em>"en esta vuelta, no hagas el resto. Salta directamente a la siguiente vuelta"</em>. La diferencia con <code>break</code> es que <code>break</code> sale del ciclo entero, mientras que <code>continue</code> solo salta <em>esta vuelta</em>. El ciclo sigue funcionando normalmente después.</p>
+
+    <h3>La nueva pieza</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">10</span>; i++) {
+    <span class="kw">if</span> (i % <span class="num">2</span> == <span class="num">0</span>) {
+        <span class="kw">continue</span>;   <span class="cmt">// salta los números pares</span>
+    }
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+}</pre>
+    </div>
+
+    <p>Este programa imprime 1, 3, 5, 7, 9. Cuando <code>i</code> es par, el <code>continue</code> salta directamente a la siguiente vuelta, sin ejecutar el <code>println</code>. Cuando es impar, la condición del <code>if</code> es falsa, así que no se ejecuta el <code>continue</code>, y el <code>println</code> sí se ejecuta.</p>
+
+    <p>Fíjate en la diferencia con <code>break</code>: si hubiera usado <code>break</code> en lugar de <code>continue</code>, el programa imprimiría solo el 1 y terminaría. Con <code>continue</code>, el ciclo sigue hasta 10, solo que ignora los pares.</p>
+
+    <h3>Cuándo <code>continue</code> es útil</h3>
+
+    <p>Es útil cuando quieres ignorar algunos casos sin afectar el resto. Por ejemplo: procesar solo los valores positivos de una lista, o solo los usuarios que no están bloqueados.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Sumar solo los números positivos de un arreglo</span>
+<span class="kw">int</span> suma = <span class="num">0</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; numeros.length; i++) {
+    <span class="kw">if</span> (numeros[i] &lt;= <span class="num">0</span>) {
+        <span class="kw">continue</span>;   <span class="cmt">// ignora negativos y ceros</span>
+    }
+    suma = suma + numeros[i];
+}</pre>
+    </div>
+
+    <p>Sin <code>continue</code>, tendrías que anidar el <code>suma += ...</code> dentro de un <code>if</code> que verifique que el número es positivo. Con <code>continue</code>, la lógica se lee más lineal: <em>"si no es positivo, sáltalo. Si llegaste aquí, es positivo, súmalo"</em>. A veces esta forma es más clara, a veces es más enredada. Depende del caso.</p>
+
+    <h3>El patrón de "guard clause" (salida temprana)</h3>
+
+    <p>Cuando tienes varias condiciones que podrían descartar un elemento, en lugar de anidar <code>if</code>s cada vez más profundos, puedes usar <code>continue</code> para descartar y volver a la siguiente vuelta:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Forma con anidamiento creciente (cuesta leer)</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; n; i++) {
+    <span class="kw">if</span> (esValido(i)) {
+        <span class="kw">if</span> (!estaBloqueado(i)) {
+            <span class="kw">if</span> (tienePermiso(i)) {
+                procesar(i);
+            }
+        }
+    }
+}
+
+<span class="cmt">// Con continue (más plano)</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; n; i++) {
+    <span class="kw">if</span> (!esValido(i))       <span class="kw">continue</span>;
+    <span class="kw">if</span> (estaBloqueado(i))    <span class="kw">continue</span>;
+    <span class="kw">if</span> (!tienePermiso(i))    <span class="kw">continue</span>;
+
+    procesar(i);
+}</pre>
+    </div>
+
+    <p>La segunda versión se lee mejor: filtra los casos malos primero, y después procesa lo bueno. Muchos programadores prefieren este estilo cuando hay más de dos condiciones que descartan un elemento. No es obligatorio usarlo, pero vale la pena conocerlo.</p>
+
+    <p>Ojo: hay estilos de programación que recomiendan <strong>no usar <code>continue</code> ni <code>break</code></strong> porque interrumpen el flujo. Este manual no adopta esa postura: son herramientas legítimas, y cuando se usan con moderación, hacen el código más claro. La regla es: si sacan <code>continue</code>s y <code>break</code>s y el código se vuelve más enredado, es porque estás abusando. Si al quitarlos el código se anida tres veces sin razón, es porque los estás usando bien.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="break-vs-continue">
+    <h2><code>break</code> vs <code>continue</code>: la diferencia exacta</h2>
+
+    <p>Es fácil confundirlos al principio. La diferencia está en <em>a dónde va el control</em> después de la instrucción:</p>
+
+    <ul>
+      <li><strong><code>break</code></strong>: sale del ciclo <em>por completo</em>. Se ejecuta la siguiente instrucción después del ciclo.</li>
+      <li><strong><code>continue</code></strong>: salta el resto del cuerpo de la <em>vuelta actual</em>. Se sigue con la siguiente vuelta del ciclo (evaluando la condición de nuevo, y ejecutando el incremento si es un <code>for</code>).</li>
+    </ul>
+
+    <p>Un diagrama ayuda:</p>
+
+    <div class="flujo"><strong>break</strong>:
+    vuelta → cuerpo → break → SALE del ciclo
+                        └── sigue con la instrucción siguiente
+
+<strong>continue</strong>:
+    vuelta → cuerpo → continue → salta al final del cuerpo
+                        │
+                        └── incremento → condición → siguiente vuelta</div>
+
+    <p>Veamos el mismo ciclo con cada uno, para notar la diferencia:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Con break: cuando i llega a 5, se sale del ciclo entero</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">10</span>; i++) {
+    <span class="kw">if</span> (i == <span class="num">5</span>) <span class="kw">break</span>;
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+}
+<span class="cmt">// Imprime: 1, 2, 3, 4</span>
+
+<span class="cmt">// Con continue: cuando i llega a 5, se salta esa vuelta y sigue con las demás</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">10</span>; i++) {
+    <span class="kw">if</span> (i == <span class="num">5</span>) <span class="kw">continue</span>;
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+}
+<span class="cmt">// Imprime: 1, 2, 3, 4, 6, 7, 8, 9, 10</span></pre>
+    </div>
+
+    <p>Este es el ejemplo más claro que puedes tener. La diferencia en la salida es enorme: con <code>break</code> el ciclo termina; con <code>continue</code> el ciclo sigue (solo salta el 5).</p>
+
+    <p>Otro detalle importante: el incremento <strong>sí se ejecuta</strong> cuando usas <code>continue</code> en un <code>for</code>. Si tienes <code>for (int i = 1; i &lt;= 10; i++)</code> y en la vuelta donde <code>i = 5</code> ejecutas <code>continue</code>, el ciclo <em>igualmente</em> ejecuta <code>i++</code>, y la siguiente vuelta arranca con <code>i = 6</code>. Esto no es obvio, y a veces se presta a confusión cuando el incremento es más complejo que <code>i++</code>.</p>
+
+    <div class="caja caja-detente">
+      <h5>Detente un momento y piensa</h5>
+      <p class="mb-0">Antes de seguir, mira este fragmento y predice qué imprime: <br><br><code>for (int i = 1; i &lt;= 6; i++) { if (i % 3 == 0) continue; System.out.println(i); }</code><br><br>Después de predecir, verifica mentalmente. Salta los múltiplos de 3 (que son 3 y 6). Imprime: 1, 2, 4, 5.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="etiquetas">
+    <h2>Un detalle avanzado (opcional): etiquetas en Java</h2>
+
+    <p>Esto es un poco más allá de lo que necesitas dominar por ahora. Lo menciono porque lo vas a ver en código de otras personas, y es bueno que no te sorprenda cuando aparezca. Si te resulta confuso, puedes saltarlo y volver después.</p>
+
+    <p>Cuando tienes un <code>for</code> dentro de otro <code>for</code> y quieres salir <strong>de los dos a la vez</strong>, un <code>break</code> normal solo sale del <code>for</code> interno. Para salir del externo también, Java permite <em>etiquetar</em> el ciclo externo y usar <code>break etiqueta</code>:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">externo</span>:
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; <span class="num">5</span>; i++) {
+    <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">0</span>; j &lt; <span class="num">5</span>; j++) {
+        <span class="kw">if</span> (i * j &gt; <span class="num">6</span>) {
+            <span class="kw">break</span> externo;   <span class="cmt">// sale de los DOS ciclos</span>
+        }
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"i="</span> + i + <span class="str">", j="</span> + j);
+    }
+}</pre>
+    </div>
+
+    <p>Fíjate en que el ciclo externo tiene una etiqueta (<code>externo:</code>) antes del <code>for</code>. Y el <code>break externo;</code> sale hasta ese ciclo etiquetado. Sin la etiqueta, el <code>break</code> solo saldría del ciclo interno.</p>
+
+    <p>Un consejo honesto: <strong>usar etiquetas casi siempre es señal de que tu código se está complicando</strong>. La mayoría de las veces, hay una forma más clara de estructurarlo (extrayendo el ciclo interno a un método, por ejemplo). Pero saber que existen te va a ayudar a leer código que las use. La regla práctica es: si necesitas <code>break externo</code>, detente y pregúntate si no hay una forma más limpia de escribir lo mismo. Casi siempre la hay.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejemplos-break-continue">
+    <h2>Ejemplos progresivos con <code>break</code> y <code>continue</code></h2>
+
+    <h3>Ejemplo 1 — Encontrar el primer múltiplo de 7 mayor a 50</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">51</span>; i &lt;= <span class="num">100</span>; i++) {
+    <span class="kw">if</span> (i % <span class="num">7</span> == <span class="num">0</span>) {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Encontrado: "</span> + i);
+        <span class="kw">break</span>;
+    }
+}</pre>
+    </div>
+    <p>Imprime 56. El ciclo va del 51 al 100, pero en cuanto encuentra el primer múltiplo de 7 (que es 56), sale con <code>break</code>. Sin <code>break</code>, el ciclo seguiría hasta el 100, aunque ya hubiera encontrado lo que buscaba. <strong>Este es el uso más típico de <code>break</code>: parar la búsqueda cuando el objetivo ya se cumplió.</strong></p>
+
+    <h3>Ejemplo 2 — Sumar solo los números impares del 1 al 20</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> suma = <span class="num">0</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">20</span>; i++) {
+    <span class="kw">if</span> (i % <span class="num">2</span> == <span class="num">0</span>) {
+        <span class="kw">continue</span>;   <span class="cmt">// ignora los pares</span>
+    }
+    suma = suma + i;
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Suma de impares: "</span> + suma);</pre>
+    </div>
+    <p>La suma de los impares del 1 al 20 es 100. Fíjate cómo el <code>continue</code> deja la lógica más lineal: primero descartamos lo que no queremos, después sumamos. La alternativa (sin <code>continue</code>) sería poner el <code>suma += i</code> dentro de un <code>if</code> que verifique que <code>i</code> es impar. Las dos formas funcionan; elige la que te parezca más clara.</p>
+
+    <h3>Ejemplo 3 — Buscar en una lista, parar al encontrar</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span>[] nombres = {<span class="str">"Ana"</span>, <span class="str">"Luis"</span>, <span class="str">"Pedro"</span>, <span class="str">"María"</span>, <span class="str">"Sofía"</span>};
+<span class="cls">String</span> buscado = <span class="str">"Pedro"</span>;
+<span class="kw">int</span> posicion = <span class="num">-1</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; nombres.length; i++) {
+    <span class="kw">if</span> (nombres[i].<span class="mth">equals</span>(buscado)) {
+        posicion = i;
+        <span class="kw">break</span>;
+    }
+}
+
+<span class="kw">if</span> (posicion != <span class="num">-1</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(buscado + <span class="str">" está en la posición "</span> + posicion);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(buscado + <span class="str">" no está en la lista"</span>);
+}</pre>
+    </div>
+    <p>Aquí se ve el patrón clásico de búsqueda. Se declara <code>posicion = -1</code> (que significa "no encontrado"), y si encontramos el elemento, guardamos la posición y salimos con <code>break</code>. Después del ciclo, verificamos si seguimos en <code>-1</code> (no estaba) o tenemos una posición válida (sí estaba). Usar <code>-1</code> como "no encontrado" es una convención muy común: la posición nunca puede ser negativa, así que <code>-1</code> no colisiona con ninguna posición real.</p>
+
+    <h3>Ejemplo 4 — Leer números hasta encontrar uno negativo (con bandera)</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] numeros = {<span class="num">4</span>, <span class="num">7</span>, <span class="num">12</span>, <span class="num">-3</span>, <span class="num">8</span>, <span class="num">1</span>};
+<span class="kw">boolean</span> negativoEncontrado = <span class="kw">false</span>;
+<span class="kw">int</span> posicion = <span class="num">-1</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; numeros.length; i++) {
+    <span class="kw">if</span> (numeros[i] &lt; <span class="num">0</span>) {
+        negativoEncontrado = <span class="kw">true</span>;
+        posicion = i;
+        <span class="kw">break</span>;
+    }
+}
+
+<span class="kw">if</span> (negativoEncontrado) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Primer negativo en posición "</span> + posicion + <span class="str">": "</span> + numeros[posicion]);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"No hay negativos"</span>);
+}</pre>
+    </div>
+    <p>Variación del ejemplo anterior, con <code>boolean</code> + <code>int</code> para almacenar "encontrado" y "dónde". Imprime "Primer negativo en posición 3: -3". Fíjate en que la bandera y la posición son redundantes (si <code>posicion != -1</code>, es porque se encontró), pero tener ambos puede hacer el código más legible. Cada programador elige el nivel de redundancia que le resulta cómodo.</p>
+
+    <h3>Ejemplo 5 — Ignorar errores y seguir procesando</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] notas = {<span class="num">85</span>, <span class="num">-1</span>, <span class="num">92</span>, <span class="num">-1</span>, <span class="num">78</span>, <span class="num">-5</span>, <span class="num">90</span>};
+
+<span class="kw">int</span> suma = <span class="num">0</span>;
+<span class="kw">int</span> validas = <span class="num">0</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; notas.length; i++) {
+    <span class="kw">if</span> (notas[i] &lt; <span class="num">0</span>) {
+        <span class="kw">continue</span>;   <span class="cmt">// ignora las notas inválidas</span>
+    }
+    suma = suma + notas[i];
+    validas = validas + <span class="num">1</span>;
+}
+
+<span class="kw">if</span> (validas &gt; <span class="num">0</span>) {
+    <span class="kw">double</span> promedio = (<span class="kw">double</span>) suma / validas;
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Promedio de notas válidas: "</span> + promedio);
+}</pre>
+    </div>
+    <p>Un ejemplo más cercano a la realidad: tienes una lista de notas, algunas inválidas (negativas, marcadas con -1). Usas <code>continue</code> para saltarlas, y sigues procesando las válidas. El promedio que sale es de las notas válidas solamente. Este es un caso típico donde <code>continue</code> es más claro que un <code>if</code> anidando todo el cuerpo.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="errores-break-continue">
+    <h2>Errores comunes con <code>break</code> y <code>continue</code></h2>
+
+    <h3>1. Usar <code>break</code> cuando querías <code>continue</code> (o al revés)</h3>
+
+    <p>Es el error más frecuente. Se ve así: querías saltar solo los pares, pero escribiste <code>break</code>, y el ciclo termina en la primera iteración con par. La salida es totalmente distinta. La forma de detectarlo: si el ciclo termina "demasiado pronto", sospecha de un <code>break</code> donde iba <code>continue</code>.</p>
+
+    <h3>2. Poner <code>break</code> fuera de un ciclo o <code>switch</code></h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">if</span> (algo) {
+    <span class="kw">break</span>;   <span class="cmt">// ← error: no hay ciclo ni switch arriba</span>
+}</pre>
+    </div>
+
+    <p><code>break</code> y <code>continue</code> solo tienen sentido dentro de un ciclo (o <code>switch</code> para <code>break</code>). Si los pones fuera, Java te da error de compilación. Es una de esas cosas que al principio te parece que "debería funcionar" pero no.</p>
+
+    <h3>3. <code>continue</code> en un <code>while</code> sin actualizar la variable</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">1</span>;
+
+<span class="kw">while</span> (i &lt;= <span class="num">10</span>) {
+    <span class="kw">if</span> (i % <span class="num">2</span> == <span class="num">0</span>) {
+        <span class="kw">continue</span>;   <span class="cmt">// ← bucle infinito si i no cambia antes</span>
+    }
+    i = i + <span class="num">1</span>;
+}</pre>
+    </div>
+
+    <p>Este ciclo es infinito. Cuando <code>i</code> es par, el <code>continue</code> salta al inicio del <code>while</code>, pero como <code>i = i + 1</code> está <em>después</em> del <code>continue</code>, nunca se ejecuta en esa vuelta. Y como <code>i</code> sigue valiendo lo mismo (par), el ciclo repite infinitamente. Es un error específico del <code>continue</code> dentro de un <code>while</code>: la variable debe actualizarse antes del <code>continue</code>, o el <code>continue</code> debe estar después del incremento.</p>
+
+    <p>En un <code>for</code> esto no pasa, porque el incremento se ejecuta automáticamente al final de cada vuelta, incluso con <code>continue</code>. Otra ventaja del <code>for</code>.</p>
+
+    <h3>4. Abusar de <code>break</code> y <code>continue</code></h3>
+
+    <p>A veces el código queda ilegible porque hay demasiados <code>break</code> y <code>continue</code> repartidos. Si un ciclo tiene más de 3 o 4 de estas instrucciones, probablemente sea mejor reorganizarlo. Por ejemplo, extrayendo el cuerpo del ciclo a un método (que verás en otro bloque), o reescribiendo las condiciones. Un <code>break</code> bien puesto aclara; cinco <code>break</code>s enredan.</p>
+
+    <h3>5. Poner código después de un <code>break</code> o <code>continue</code> en la misma rama</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">if</span> (algo) {
+    <span class="kw">break</span>;
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Esto nunca se ejecuta"</span>);   <span class="cmt">// ← código muerto</span>
+}</pre>
+    </div>
+
+    <p>Lo que escribas después de un <code>break</code> o <code>continue</code> en la misma rama nunca se ejecuta. Java te lo advierte (a veces con un warning), pero es fácil de cometer cuando se edita código y se mueven líneas. Cuando reescribas un bloque, asegúrate de que no haya código después de un <code>break</code> o <code>continue</code> sin salida condicional.</p>
+
+    <div class="caja caja-protocolo">
+      <h5>Si tu ciclo se comporta raro y sospechas de <code>break</code>/<code>continue</code></h5>
+      <p class="mb-0">El protocolo de siempre: aísla el ciclo, quítale el <code>break</code> o el <code>continue</code>, y mira qué pasa. Si el comportamiento cambia dramáticamente, ahí está el problema. Después vuelve a agregarlo, y verifica cuál es exactamente el caso donde se ejecuta. En el 90% de los casos, el error es que está en el lugar equivocado (dentro del <code>if</code> en lugar de fuera, o al revés).</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejercicios-break-continue">
+    <h2>Ejercicios con <code>break</code> y <code>continue</code></h2>
+
+    <h3><span class="nivel nivel-reconocer">Reconocer</span></h3>
+    <p>¿Qué imprime cada uno?</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Fragmento A</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">5</span>; i++) {
+    <span class="kw">if</span> (i == <span class="num">3</span>) <span class="kw">break</span>;
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+}
+
+<span class="cmt">// Fragmento B</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">5</span>; i++) {
+    <span class="kw">if</span> (i == <span class="num">3</span>) <span class="kw">continue</span>;
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-2"><strong>Fragmento A:</strong> imprime 1 y 2. Cuando <code>i</code> llega a 3, sale del ciclo. El 3 no se imprime (el <code>break</code> está antes del <code>println</code>).</p>
+      <p class="mb-0"><strong>Fragmento B:</strong> imprime 1, 2, 4, 5. Cuando <code>i</code> llega a 3, salta esa vuelta, pero el ciclo sigue. Los demás números sí se imprimen.</p>
+    </details>
+
+    <h3><span class="nivel nivel-completar">Completar</span></h3>
+    <p>Completa el código para que el ciclo imprima los números del 1 al 100 pero se detenga cuando encuentre el primer múltiplo de 17.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">100</span>; i++) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+
+    <span class="kw">if</span> (_______________) {
+        <span class="kw">break</span>;
+    }
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-0"><code>i % 17 == 0</code>. Cuando <code>i</code> es múltiplo de 17 (el primer múltiplo en el rango es 17), el ciclo imprime el número (porque el <code>println</code> está antes del <code>if</code>) y después sale con <code>break</code>. Los números que se imprimen son del 1 al 17.</p>
+    </details>
+
+    <h3><span class="nivel nivel-modificar">Modificar</span></h3>
+    <p>Este programa debería imprimir solo los números pares del 1 al 20, pero solo imprime el 1 y termina. Encuentra y corrige el error.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">20</span>; i++) {
+    <span class="kw">if</span> (i % <span class="num">2</span> != <span class="num">0</span>) {
+        <span class="kw">break</span>;
+    }
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-2">El problema es que <code>break</code> debería ser <code>continue</code>. Con <code>break</code>, la primera vez que <code>i</code> es impar (que es en <code>i = 1</code>), el ciclo sale. Por eso solo se imprime... espera, en realidad ni siquiera se imprime el 1, porque el <code>break</code> ocurre antes del <code>println</code>. Con <code>continue</code>:</p>
+      <div class="bloque-codigo">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">20</span>; i++) {
+    <span class="kw">if</span> (i % <span class="num">2</span> != <span class="num">0</span>) {
+        <span class="kw">continue</span>;
+    }
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+}</pre>
+      </div>
+      <p class="mb-0">Ahora imprime 2, 4, 6, 8, ..., 20. La condición <code>i % 2 != 0</code> significa "es impar". Con <code>continue</code>, saltamos los impares, y solo se imprimen los pares.</p>
+    </details>
+
+    <h3><span class="nivel nivel-construir">Construir</span></h3>
+    <p>Escribe un programa que busque el primer número mayor a 100 que sea divisible por 7. Usa un <code>for</code> con <code>break</code>.</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">101</span>; ; i++) {   <span class="cmt">// sin condición: bucle infinito controlado</span>
+    <span class="kw">if</span> (i % <span class="num">7</span> == <span class="num">0</span>) {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Encontrado: "</span> + i);
+        <span class="kw">break</span>;
+    }
+}</pre>
+      </div>
+      <p class="mb-0">El resultado es 105. Fíjate en dos cosas. Primero, la condición del <code>for</code> está vacía (nada entre los dos <code>;</code>). Esto crea un bucle infinito, pero lo controlamos con el <code>break</code> de adentro. Segundo, este estilo no es ideal: es mejor poner una condición clara si puedes. Por ejemplo, <code>for (int i = 101; i &lt;= 1000; i++)</code>, y así si por alguna razón nunca encuentra, no se queda infinito. Pero técnicamente, el ciclo con condición vacía + <code>break</code> funciona.</p>
+    </details>
+
+    <h3><span class="nivel nivel-combinar">Combinar</span></h3>
+    <p>Escribe un programa que, dado un <code>String texto = "Programar es aprender a pensar"</code>, cuente cuántas vocales tiene, pero se detenga si encuentra el carácter 'z'.</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span> texto = <span class="str">"Programar es aprender a pensar"</span>;
+<span class="kw">int</span> vocales = <span class="num">0</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; texto.<span class="mth">length</span>(); i++) {
+    <span class="kw">char</span> c = texto.<span class="mth">charAt</span>(i);
+
+    <span class="kw">if</span> (c == <span class="str">'z'</span>) {
+        <span class="kw">break</span>;
+    }
+
+    <span class="kw">if</span> (c == <span class="str">'a'</span> || c == <span class="str">'e'</span> || c == <span class="str">'i'</span> || c == <span class="str">'o'</span> || c == <span class="str">'u'</span>) {
+        vocales = vocales + <span class="num">1</span>;
+    }
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Vocales encontradas: "</span> + vocales);</pre>
+      </div>
+      <p class="mb-0">El texto no tiene 'z', así que en este caso particular el ciclo recorre todo el string. Pero si el texto fuera "Programar es aprender a pensar en zigzag", el ciclo se detendría al llegar a la primera 'z'. Fíjate en la estructura: el <code>if</code> del <code>break</code> va <em>primero</em>, para que la 'z' ni siquiera se considere como posible vocal. El orden de las verificaciones importa.</p>
+    </details>
+
+    <h3><span class="nivel nivel-crear">Crear</span></h3>
+    <p>Escribe un programa que simule una validación de contraseña con máximo 3 intentos. Tienes una lista de intentos ya dados (o puedes simularlos con un contador). El programa debe:</p>
+    <ul>
+      <li>Probar cada intento contra la contraseña correcta <code>"secreta123"</code>.</li>
+      <li>Si un intento es correcto, imprimir "Acceso concedido" y detenerse.</li>
+      <li>Si se agotan los 3 intentos sin éxito, imprimir "Cuenta bloqueada".</li>
+    </ul>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span> correcta = <span class="str">"secreta123"</span>;
+<span class="cls">String</span>[] intentos = {<span class="str">"12345"</span>, <span class="str">"password"</span>, <span class="str">"secreta123"</span>};
+<span class="kw">boolean</span> acceso = <span class="kw">false</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; intentos.length; i++) {
+    <span class="kw">if</span> (intentos[i].<span class="mth">equals</span>(correcta)) {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Acceso concedido en intento "</span> + (i + <span class="num">1</span>));
+        acceso = <span class="kw">true</span>;
+        <span class="kw">break</span>;
+    }
+}
+
+<span class="kw">if</span> (!acceso) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Cuenta bloqueada"</span>);
+}</pre>
+      </div>
+      <p class="mb-0">Aquí se combinan varios patrones: <code>for</code> con condición <code>&lt; length</code>, <code>if</code> con <code>.equals</code>, bandera <code>acceso</code>, y <code>break</code> cuando se encuentra. Después del ciclo, se consulta la bandera para saber qué mensaje mostrar. Es un ejemplo realista y combina varias piezas de los bloques anteriores. Si te resulta complejo, es la señal de que estás en el punto correcto del manual: ya no son ejercicios de una sola pieza, son de varias.</p>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="anidados-4">
+    <h2>Un <code>for</code> dentro de otro (el momento más difícil del manual)</h2>
+
+    <p>Llegamos al punto que anuncié al inicio del bloque. Este es el momento más difícil de todo el manual, y quiero que llegues preparado. No es imposible, pero sí requiere que te tomes el tiempo de simular con papel. Lo prometido es: cuando lo entiendas, se te va a quedar para siempre, y casi todo lo demás te va a parecer fácil después.</p>
+
+    <h3>Antes de Java (situación cotidiana)</h3>
+
+    <p>Piensa en una tabla de multiplicar. Si quieres imprimir la tabla del 1 al 5, tienes que recorrer dos cosas: el número de la tabla (1, 2, 3, 4, 5) y los multiplicadores (1, 2, ..., 10). Son dos dimensiones.</p>
+
+    <p>O piensa en filas y columnas de una hoja de cálculo. Para recorrer toda la hoja, tienes que recorrer cada fila, y para cada fila, recorrer cada columna. Son dos ciclos: uno para filas, y otro para columnas, anidados.</p>
+
+    <p>Cuando tienes <strong>dos dimensiones</strong> o <strong>dos recorridos que dependen uno del otro</strong>, necesitas dos ciclos. Y como uno va dentro del otro, se llama <em>ciclos anidados</em>.</p>
+
+    <h3>La idea en español</h3>
+
+    <p>Un <code>for</code> dentro de otro significa: <em>"para cada vuelta del ciclo externo, ejecuta TODAS las vueltas del ciclo interno"</em>. El ciclo interno se reinicia completo cada vez que el externo avanza una posición.</p>
+
+    <p>Esa es la frase que tienes que recordar: <strong>el ciclo interno se reinicia completo por cada vuelta del externo</strong>. Si el externo da 3 vueltas y el interno da 4, el cuerpo del interno se ejecuta 3 × 4 = 12 veces.</p>
+
+    <h3>La nueva pieza</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">3</span>; i++) {
+    <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">1</span>; j &lt;= <span class="num">4</span>; j++) {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"i="</span> + i + <span class="str">", j="</span> + j);
+    }
+}</pre>
+    </div>
+
+    <p>Este programa imprime 12 líneas. Vamos a verlo paso a paso en la siguiente subsección, porque este es exactamente el tipo de cosa que no se entiende "de un vistazo".</p>
+
+    <p>Antes de la simulación, dos consejos importantes:</p>
+
+    <ul>
+      <li><strong>Usa nombres de variable distintos</strong>: <code>i</code> para el ciclo externo, <code>j</code> para el interno. Es la convención en casi todo el código Java, y ayuda a no confundirse. Cuando hay tres niveles, se usa <code>k</code>.</li>
+      <li><strong>Respeta la indentación</strong>. El <code>for</code> interno va indentado un nivel más que el externo. El cuerpo del interno, un nivel más. Esto no es un adorno: es la única forma en que puedes ver de un vistazo dónde empieza y dónde termina cada ciclo.</li>
+    </ul>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="simulacion-anidados">
+    <h2>Simulación paso a paso del <code>for</code> anidado</h2>
+
+    <p>Esta es la sección más importante del bloque. Si la entiendes bien, el resto de los ciclos anidados se vuelve fácil. Si la saltas, vas a quedar con la sensación de que "los ciclos anidados son magia" toda la vida. Tómate el tiempo.</p>
+
+    <h3>El programa</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">3</span>; i++) {
+    <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">1</span>; j &lt;= <span class="num">4</span>; j++) {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"i="</span> + i + <span class="str">", j="</span> + j);
+    }
+}</pre>
+    </div>
+
+    <h3>Paso a paso</h3>
+
+    <div class="simulacion">
+      <table class="table table-bordered">
+        <thead>
+          <tr><th>#</th><th>Qué hace Java</th><th><code>i</code></th><th><code>j</code></th><th>Salida</th></tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="5" style="background:#eef; font-weight:bold;">Vuelta externa 1 (i = 1)</td></tr>
+          <tr><td>1</td><td>Externo: init <code>i = 1</code>, condición <code>1 &lt;= 3</code> → true</td><td>1</td><td>—</td><td>—</td></tr>
+          <tr><td>2</td><td>Interno: init <code>j = 1</code>, condición <code>1 &lt;= 4</code> → true</td><td>1</td><td>1</td><td>—</td></tr>
+          <tr><td>3</td><td>Interno: cuerpo <code>println("i=1, j=1")</code></td><td>1</td><td>1</td><td><code>i=1, j=1</code></td></tr>
+          <tr><td>4</td><td>Interno: incremento <code>j++</code></td><td>1</td><td>2</td><td>—</td></tr>
+          <tr><td>5</td><td>Interno: <code>2 &lt;= 4</code> → true, cuerpo</td><td>1</td><td>2</td><td><code>i=1, j=2</code></td></tr>
+          <tr><td>6</td><td>Interno: <code>j++</code>, después cuerpo</td><td>1</td><td>3</td><td><code>i=1, j=3</code></td></tr>
+          <tr><td>7</td><td>Interno: <code>j++</code>, después cuerpo</td><td>1</td><td>4</td><td><code>i=1, j=4</code></td></tr>
+          <tr><td>8</td><td>Interno: <code>j++</code> → 5. <code>5 &lt;= 4</code> → false. Sale del interno.</td><td>1</td><td>5</td><td>—</td></tr>
+          <tr><td>9</td><td>Externo: incremento <code>i++</code></td><td>2</td><td>—</td><td>—</td></tr>
+
+          <tr><td colspan="5" style="background:#eef; font-weight:bold;">Vuelta externa 2 (i = 2)</td></tr>
+          <tr><td>10</td><td>Externo: <code>2 &lt;= 3</code> → true</td><td>2</td><td>—</td><td>—</td></tr>
+          <tr><td>11</td><td>Interno: <strong>reinicia</strong> <code>j = 1</code>, condición true</td><td>2</td><td>1</td><td>—</td></tr>
+          <tr><td>12</td><td>Interno: cuerpo</td><td>2</td><td>1</td><td><code>i=2, j=1</code></td></tr>
+          <tr><td>13</td><td>Interno: sigue con j=2, j=3, j=4</td><td>2</td><td>2,3,4</td><td><code>i=2, j=2</code> / <code>i=2, j=3</code> / <code>i=2, j=4</code></td></tr>
+          <tr><td>14</td><td>Interno: <code>j++</code> → 5. Sale del interno.</td><td>2</td><td>5</td><td>—</td></tr>
+          <tr><td>15</td><td>Externo: <code>i++</code> → 3</td><td>3</td><td>—</td><td>—</td></tr>
+
+          <tr><td colspan="5" style="background:#eef; font-weight:bold;">Vuelta externa 3 (i = 3)</td></tr>
+          <tr><td>16</td><td>Externo: <code>3 &lt;= 3</code> → true</td><td>3</td><td>—</td><td>—</td></tr>
+          <tr><td>17</td><td>Interno: <strong>reinicia</strong> <code>j = 1</code> de nuevo</td><td>3</td><td>1</td><td>—</td></tr>
+          <tr><td>18</td><td>Interno: cuerpos con j = 1, 2, 3, 4</td><td>3</td><td>1..4</td><td><code>i=3, j=1</code> / ... / <code>i=3, j=4</code></td></tr>
+          <tr><td>19</td><td>Interno: <code>j++</code> → 5. Sale del interno.</td><td>3</td><td>5</td><td>—</td></tr>
+          <tr><td>20</td><td>Externo: <code>i++</code> → 4. <code>4 &lt;= 3</code> → false. Sale del externo.</td><td>4</td><td>—</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Salida completa:</p>
+    <div class="flujo">i=1, j=1
+i=1, j=2
+i=1, j=3
+i=1, j=4
+i=2, j=1
+i=2, j=2
+i=2, j=3
+i=2, j=4
+i=3, j=1
+i=3, j=2
+i=3, j=3
+i=3, j=4</div>
+
+    <p>Observa con atención varios detalles que son la clave de todo:</p>
+
+    <ul>
+      <li><strong>El ciclo interno se ejecuta completo tres veces.</strong> Una por cada vuelta del ciclo externo. Cuando <code>i = 1</code>, el interno recorre <code>j = 1, 2, 3, 4</code>. Cuando <code>i = 2</code>, <em>el interno vuelve a empezar desde j = 1</em>. Y así.</li>
+      <li><strong>El <code>j</code> se reinicia.</strong> Esto es lo que más confunde al principio: la inicialización <code>int j = 1</code> del ciclo interno se ejecuta <em>cada vez</em> que arranca el ciclo interno. No es una sola vez, como parecería al leer el código. Se ejecuta tantas veces como vueltas dé el ciclo externo.</li>
+      <li><strong>El número total de ejecuciones del cuerpo interno es 3 × 4 = 12.</strong> Es el producto de las vueltas del externo por las del interno. Este producto es la clave para calcular cuántas veces se ejecuta el cuerpo: <em>vueltas_externas × vueltas_internas</em>.</li>
+      <li><strong>El ciclo externo avanza despacio.</strong> Avanza una sola vez por cada bloque completo del interno. En todo el programa, el <code>i++</code> solo se ejecuta 3 veces, mientras que el <code>j++</code> se ejecuta 12 veces.</li>
+    </ul>
+
+    <div class="caja caja-detente">
+      <h5>Detente un momento y piensa</h5>
+      <p class="mb-0">Antes de seguir, predice qué imprimiría el mismo código si cambiaras el rango del ciclo externo a <code>i &lt;= 2</code>. ¿Cuántas líneas imprimiría? ¿Qué valores tendrían <code>i</code> y <code>j</code>? Después predice qué pasaría si cambiaras el rango del interno a <code>j &lt;= 2</code>, dejando el externo en 3. Estos dos ejercicios mentales te van a fijar el concepto: el externo multiplica la cantidad de bloques, y el interno multiplica la cantidad dentro de cada bloque. Todo lo demás es simulación.</p>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver las respuestas</summary>
+      <p class="mt-2 mb-2"><strong>Con <code>i &lt;= 2</code>:</strong> imprime 2 × 4 = 8 líneas. Los pares son <code>i=1</code> con <code>j=1..4</code>, e <code>i=2</code> con <code>j=1..4</code>.</p>
+      <p class="mb-0"><strong>Con <code>j &lt;= 2</code> (y externo sigue en <code>i &lt;= 3</code>):</strong> imprime 3 × 2 = 6 líneas. Los pares son <code>i=1,2,3</code> y para cada uno, <code>j=1,2</code>.</p>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejemplos-anidados">
+    <h2>Ejemplos progresivos con ciclos anidados</h2>
+
+    <h3>Ejemplo 1 — Tabla de multiplicar</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Tabla del 3 (1 al 5)</span>
+<span class="kw">int</span> tabla = <span class="num">3</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">5</span>; i++) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(tabla + <span class="str">" x "</span> + i + <span class="str">" = "</span> + (tabla * i));
+}</pre>
+    </div>
+    <p>Este todavía no es anidado. Solo un <code>for</code>. El anidamiento viene cuando quieres hacer las tablas del 1 al 5, por ejemplo:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Tablas del 1 al 5, cada una del 1 al 5</span>
+<span class="kw">for</span> (<span class="kw">int</span> tabla = <span class="num">1</span>; tabla &lt;= <span class="num">5</span>; tabla++) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"--- Tabla del "</span> + tabla + <span class="str">" ---"</span>);
+
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">5</span>; i++) {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(tabla + <span class="str">" x "</span> + i + <span class="str">" = "</span> + (tabla * i));
+    }
+}</pre>
+    </div>
+    <p>Imprime 25 líneas de multiplicaciones, más 5 cabeceras. Fíjate: por cada tabla (ciclo externo), se imprime la cabecera, y después se recorren los multiplicadores 1 al 5 (ciclo interno). El ciclo interno se reinicia cada vez que el externo avanza. Si el externo va por la tabla 3, el interno recorre 1, 2, 3, 4, 5. Después el externo avanza a la tabla 4, y el interno vuelve a empezar en 1.</p>
+
+    <h3>Ejemplo 2 — Cuadrado de asteriscos</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> lado = <span class="num">4</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> fila = <span class="num">1</span>; fila &lt;= lado; fila++) {
+    <span class="kw">for</span> (<span class="kw">int</span> col = <span class="num">1</span>; col &lt;= lado; col++) {
+        <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"* "</span>);
+    }
+    <span class="cls">System</span>.out.<span class="mth">println</span>();   <span class="cmt">// salto de línea al final de cada fila</span>
+}</pre>
+    </div>
+    <p>Imprime un cuadrado de 4×4 asteriscos:</p>
+    <div class="flujo">* * * *
+* * * *
+* * * *
+* * * *</div>
+    <p>Este es un ejemplo muy visual y muy útil para entender ciclos anidados. Fíjate en dos cosas nuevas:</p>
+    <ul>
+      <li>Usamos <code>System.out.print</code> (sin "ln") para que los asteriscos se impriman en la misma línea. Solo al final de cada fila, usamos <code>println()</code> (vacío) para hacer un salto de línea.</li>
+      <li>El ciclo externo controla las filas, y el interno controla las columnas. Cada vez que el externo avanza a una nueva fila, el interno recorre todas las columnas de esa fila.</li>
+    </ul>
+
+    <h3>Ejemplo 3 — Triángulo de asteriscos</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> altura = <span class="num">5</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> fila = <span class="num">1</span>; fila &lt;= altura; fila++) {
+    <span class="kw">for</span> (<span class="kw">int</span> col = <span class="num">1</span>; col &lt;= fila; col++) {
+        <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"* "</span>);
+    }
+    <span class="cls">System</span>.out.<span class="mth">println</span>();
+}</pre>
+    </div>
+    <p>Imprime:</p>
+    <div class="flujo">*
+* *
+* * *
+* * * *
+* * * * *</div>
+    <p>La única diferencia con el cuadrado es que la condición del ciclo interno es <code>col &lt;= fila</code> en lugar de <code>col &lt;= lado</code>. Es decir, la cantidad de columnas <strong>depende del valor de la fila actual</strong>. Cuando <code>fila = 1</code>, se imprimen 1 asterisco. Cuando <code>fila = 3</code>, 3 asteriscos. Este es un patrón muy poderoso: <em>el ciclo interno puede depender del valor del ciclo externo</em>, y eso te permite construir formas variables.</p>
+
+    <h3>Ejemplo 4 — Combinaciones (pares de valores)</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Todas las combinaciones de dados: 2 dados, cada uno del 1 al 6</span>
+<span class="kw">for</span> (<span class="kw">int</span> d1 = <span class="num">1</span>; d1 &lt;= <span class="num">6</span>; d1++) {
+    <span class="kw">for</span> (<span class="kw">int</span> d2 = <span class="num">1</span>; d2 &lt;= <span class="num">6</span>; d2++) {
+        <span class="kw">if</span> (d1 + d2 == <span class="num">7</span>) {
+            <span class="cls">System</span>.out.<span class="mth">println</span>(d1 + <span class="str">" + "</span> + d2 + <span class="str">" = 7"</span>);
+        }
+    }
+}</pre>
+    </div>
+    <p>Imprime las combinaciones de dos dados que suman 7:</p>
+    <div class="flujo">1 + 6 = 7
+2 + 5 = 7
+3 + 4 = 7
+4 + 3 = 7
+5 + 2 = 7
+6 + 1 = 7</div>
+    <p>Este es un caso donde el ciclo interno vuelve a depender del externo (para recorrer todas las combinaciones), y además hay una decisión adentro (<code>if</code>) que filtra solo las que cumplen la condición. Es la combinación más compleja que has visto hasta ahora, y ahora ya entiendes por qué funciona: por cada valor del primer dado, se recorren todos los valores del segundo, y para cada par, se verifica si suman 7.</p>
+
+    <h3>Ejemplo 5 — Buscar en dos dimensiones</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Buscar el número 5 en una matriz 3x4 (simulada con arreglos, que verás después)</span>
+<span class="kw">int</span>[][] matriz = {
+    {<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>},
+    {<span class="num">6</span>, <span class="num">7</span>, <span class="num">5</span>, <span class="num">8</span>},
+    {<span class="num">9</span>, <span class="num">10</span>, <span class="num">11</span>, <span class="num">12</span>}
+};
+
+<span class="kw">boolean</span> encontrado = <span class="kw">false</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> fila = <span class="num">0</span>; fila &lt; <span class="num">3</span>; fila++) {
+    <span class="kw">for</span> (<span class="kw">int</span> col = <span class="num">0</span>; col &lt; <span class="num">4</span>; col++) {
+        <span class="kw">if</span> (matriz[fila][col] == <span class="num">5</span>) {
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Encontrado en fila "</span> + fila + <span class="str">", columna "</span> + col);
+            encontrado = <span class="kw">true</span>;
+            <span class="kw">break</span>;   <span class="cmt">// sale del ciclo interno</span>
+        }
+    }
+    <span class="kw">if</span> (encontrado) {
+        <span class="kw">break</span>;   <span class="cmt">// sale del ciclo externo</span>
+    }
+}</pre>
+    </div>
+    <p>Aquí aparece una técnica muy útil: <strong>break en dos niveles</strong>. El primer <code>break</code> sale del ciclo interno (las columnas), pero el ciclo externo sigue. Para salir también del externo, ponemos un segundo <code>if + break</code> afuera del interno. Esto es más claro que las etiquetas (que viste en la sección opcional), y es el patrón que vas a ver más seguido en código real.</p>
+
+    <p>Los arreglos bidimensionales (la <code>int[][]</code>) los vas a ver en el Bloque 6. Por ahora lo importante es la estructura: dos ciclos anidados que recorren filas y columnas, y un <code>if</code> adentro que verifica cada celda.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="errores-anidados">
+    <h2>Errores comunes con ciclos anidados</h2>
+
+    <h3>1. Usar la misma variable en ambos ciclos</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// MAL: el ciclo interno sobrescribe i, y el externo se comporta raro</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">3</span>; i++) {
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">4</span>; i++) {   <span class="cmt">// ← no compila: i ya existe</span>
+        ...
+    }
+}</pre>
+    </div>
+
+    <p>Java no permite declarar dos veces la misma variable en ámbitos anidados, así que este error lo detecta el compilador y no ejecuta nada. Pero en otros lenguajes sí se permite y causa comportamientos muy raros. La solución: usa nombres distintos. La convención es <code>i</code> para el externo, <code>j</code> para el interno, y <code>k</code> si hay un tercer nivel.</p>
+
+    <h3>2. Confundir cuál es el ciclo externo y cuál el interno</h3>
+
+    <p>Si tu cuadrado de asteriscos sale como una línea horizontal en lugar de un cuadrado, probablemente tienes el orden de los ciclos invertido. El ciclo externo controla las <em>filas</em>, el interno las <em>columnas</em>. Si los inviertes, el resultado también se invierte.</p>
+
+    <h3>3. No reiniciar bien las variables del ciclo interno</h3>
+
+    <p>Esto casi no pasa en Java, porque la inicialización <code>int j = 1</code> está <em>dentro</em> de la declaración del <code>for</code>, así que se reinicia automáticamente en cada vuelta del externo. Pero si declaras <code>j</code> afuera y lo inicializas dentro del ciclo externo de manera incorrecta, puedes tener un bug sutil. Regla: <strong>inicializa las variables de cada ciclo dentro de su propio <code>for</code></strong>. Así te ahorras ese problema.</p>
+
+    <h3>4. Complejidad explosiva</h3>
+
+    <p>Los ciclos anidados multiplican el número de ejecuciones. Un <code>for</code> de 1000 elementos es rápido. Un <code>for</code> anidado sobre 1000 × 1000 elementos ejecuta el cuerpo 1.000.000 de veces, y ya puede sentirse lento. Si anidas tres ciclos de 1000, son 1.000.000.000 de vueltas, y el programa se queda colgado minutos u horas.</p>
+
+    <p>Esta es una primera noción de <strong>complejidad</strong>, que no vamos a profundizar aquí pero conviene saber que existe. Cuando escribas ciclos anidados, pregúntate si realmente necesitas recorrer todos los pares. Muchas veces hay formas más eficientes de resolver el problema, y las vas a ir aprendiendo con la práctica.</p>
+
+    <h3>5. Código que funciona pero es imposible de leer</h3>
+
+    <p>Este no es un error de sintaxis, es un error de estilo. Si al leer tu propio código de ciclos anidados te pierdes, es que algo está mal. Cosas que ayudan:</p>
+
+    <ul>
+      <li>Nombres de variables descriptivos: <code>fila</code> y <code>col</code> se entienden mejor que <code>i</code> y <code>j</code>, cuando el contexto lo permite.</li>
+      <li>Indentación consistente. Cada nivel de anidamiento, un nivel de indentación.</li>
+      <li>Comentarios cortos explicando qué hace cada ciclo (<code>// recorre cada fila</code>).</li>
+      <li>Si tienes más de tres niveles de anidamiento, probablemente hay una forma mejor de escribirlo.</li>
+    </ul>
+
+    <div class="caja caja-protocolo">
+      <h5>Si los ciclos anidados te tienen atorado</h5>
+      <p class="mb-0">Este es el momento exacto para el que sirve el protocolo: <em>aísla una pieza, verifícala sola, después vuelve al conjunto</em>. Concretamente: escribe solo el ciclo externo, con un <code>println</code> que muestre el valor de <code>i</code>. Corre el programa. Después agrega el ciclo interno, pero con un <code>println</code> que muestre también el valor de <code>j</code>. Corre de nuevo. Ya tienes el esqueleto funcionando. Ahora reemplaza los <code>println</code> por la lógica real. Construir en pasos pequeños es la mejor estrategia para los ciclos anidados, sin excepción.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejercicios-anidados">
+    <h2>Ejercicios de ciclos anidados</h2>
+
+    <h3><span class="nivel nivel-reconocer">Reconocer</span></h3>
+    <p>¿Cuántas veces se ejecuta el <code>println</code> de este programa? ¿Qué imprime?</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; <span class="num">2</span>; i++) {
+    <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">0</span>; j &lt; <span class="num">3</span>; j++) {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(i + <span class="str">","</span> + j);
+    }
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-2">Se ejecuta 2 × 3 = 6 veces. Imprime:</p>
+      <div class="flujo">0,0
+0,1
+0,2
+1,0
+1,1
+1,2</div>
+      <p class="mb-0">Fíjate en cómo se reinicia <code>j</code> cada vez que <code>i</code> avanza: cuando <code>i = 0</code>, <code>j</code> va de 0 a 2. Cuando <code>i = 1</code>, <code>j</code> vuelve a empezar en 0. Este es el patrón fundamental de los ciclos anidados.</p>
+    </details>
+
+    <h3><span class="nivel nivel-completar">Completar</span></h3>
+    <p>Completa el ciclo interno para que se imprima un triángulo rectángulo de 5 filas, con tantos asteriscos como el número de fila.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> fila = <span class="num">1</span>; fila &lt;= <span class="num">5</span>; fila++) {
+    <span class="kw">for</span> (<span class="kw">int</span> col = <span class="num">1</span>; ______; col++) {
+        <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"* "</span>);
+    }
+    <span class="cls">System</span>.out.<span class="mth">println</span>();
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-0"><code>col &lt;= fila</code>. Así, para la fila 1 se imprime 1 asterisco, para la fila 2, 2 asteriscos, y así. La clave es que la condición del ciclo interno <em>depende del valor del ciclo externo</em>.</p>
+    </details>
+
+    <h3><span class="nivel nivel-modificar">Modificar</span></h3>
+    <p>Este programa quiere imprimir todos los pares <code>(i, j)</code> donde <code>i</code> va del 1 al 3 y <code>j</code> va del 1 al 3, pero solo cuando son distintos. Está roto: imprime algunos pares repetidos. Encuentra y corrige el error.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">3</span>; i++) {
+    <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">1</span>; j &lt;= <span class="num">3</span>; j++) {
+        <span class="kw">if</span> (i != j) {
+            <span class="cls">System</span>.out.<span class="mth">println</span>(i + <span class="str">","</span> + j);
+        } <span class="kw">else</span> {
+            <span class="cls">System</span>.out.<span class="mth">println</span>(i + <span class="str">","</span> + j);   <span class="cmt">// ← esto no debería estar</span>
+        }
+    }
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-2">El <code>else</code> está imprimiendo también los pares iguales. Como la idea es imprimir <em>solo</em> cuando son distintos, basta con quitar el <code>else</code> completo:</p>
+      <div class="bloque-codigo">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">3</span>; i++) {
+    <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">1</span>; j &lt;= <span class="num">3</span>; j++) {
+        <span class="kw">if</span> (i != j) {
+            <span class="cls">System</span>.out.<span class="mth">println</span>(i + <span class="str">","</span> + j);
+        }
+    }
+}</pre>
+      </div>
+      <p class="mb-0">Imprime: <code>1,2</code>, <code>1,3</code>, <code>2,1</code>, <code>2,3</code>, <code>3,1</code>, <code>3,2</code>. La redundancia del <code>else</code> era lo único que sobraba.</p>
+    </details>
+
+    <h3><span class="nivel nivel-construir">Construir</span></h3>
+    <p>Escribe un programa que imprima un cuadrado de asteriscos de tamaño 6×6.</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> lado = <span class="num">6</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> fila = <span class="num">1</span>; fila &lt;= lado; fila++) {
+    <span class="kw">for</span> (<span class="kw">int</span> col = <span class="num">1</span>; col &lt;= lado; col++) {
+        <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"* "</span>);
+    }
+    <span class="cls">System</span>.out.<span class="mth">println</span>();
+}</pre>
+      </div>
+      <p class="mb-0">Fíjate en el uso de <code>print</code> (sin "ln") dentro del ciclo interno, y <code>println</code> (vacío) al final de cada fila. El <code>print</code> deja el cursor en la misma línea para que los asteriscos se acumulen horizontalmente; el <code>println</code> del final hace el salto a la siguiente fila. Esta distinción es clave en todos los programas que imprimen formas.</p>
+    </details>
+
+    <h3><span class="nivel nivel-combinar">Combinar</span></h3>
+    <p>Escribe un programa que imprima las tablas de multiplicar del 1 al 5, con un encabezado para cada tabla, mostrando los productos del 1 al 5.</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> tabla = <span class="num">1</span>; tabla &lt;= <span class="num">5</span>; tabla++) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Tabla del "</span> + tabla + <span class="str">":"</span>);
+
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">5</span>; i++) {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"  "</span> + tabla + <span class="str">" x "</span> + i + <span class="str">" = "</span> + (tabla * i));
+    }
+
+    <span class="cls">System</span>.out.<span class="mth">println</span>();   <span class="cmt">// línea en blanco entre tablas</span>
+}</pre>
+      </div>
+      <p class="mb-0">Fíjate en los dos detalles de formato: la indentación con dos espacios antes del producto (<code>"  "</code>), y la línea en blanco al final de cada tabla. La presentación importa: un programa útil no solo calcula bien, también muestra la información de forma legible. Este tipo de cuidado es lo que separa a un programa que "funciona" de uno que "sirve".</p>
+    </details>
+
+    <h3><span class="nivel nivel-crear">Crear</span></h3>
+    <p>Escribe un programa que imprima una pirámide de asteriscos de 5 filas:</p>
+    <div class="flujo">    *
+   ***
+  *****
+ *******
+*********</div>
+    <p>Pista: vas a necesitar dos ciclos internos además del externo. Uno para imprimir espacios a la izquierda (que van <em>disminuyendo</em> conforme avanza la fila), y otro para imprimir asteriscos (que van <em>aumentando</em>).</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> altura = <span class="num">5</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> fila = <span class="num">1</span>; fila &lt;= altura; fila++) {
+    <span class="cmt">// espacios: altura - fila (5-1=4, 5-2=3, 5-3=2, ...)</span>
+    <span class="kw">for</span> (<span class="kw">int</span> espacio = <span class="num">1</span>; espacio &lt;= altura - fila; espacio++) {
+        <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">" "</span>);
+    }
+
+    <span class="cmt">// asteriscos: 2*fila - 1 (1, 3, 5, 7, 9)</span>
+    <span class="kw">for</span> (<span class="kw">int</span> ast = <span class="num">1</span>; ast &lt;= <span class="num">2</span> * fila - <span class="num">1</span>; ast++) {
+        <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"*"</span>);
+    }
+
+    <span class="cls">System</span>.out.<span class="mth">println</span>();
+}</pre>
+      </div>
+      <p class="mb-2">Este ejercicio combina tres ciclos en total: uno externo (filas) y dos internos (espacios y asteriscos). La lógica es:</p>
+      <ul class="mb-0">
+        <li>En la fila 1: 4 espacios + 1 asterisco.</li>
+        <li>En la fila 2: 3 espacios + 3 asteriscos.</li>
+        <li>En la fila 3: 2 espacios + 5 asteriscos.</li>
+        <li>En la fila 4: 1 espacio + 7 asteriscos.</li>
+        <li>En la fila 5: 0 espacios + 9 asteriscos.</li>
+      </ul>
+      <p class="mb-0 mt-2">Si te cuesta, no te preocupes. Es un ejercicio avanzado, y volver a él después de haber practicado más ciclos anidados lo va a hacer mucho más fácil. El propósito es que veas cómo se combinan varios ciclos para construir algo, no que salga perfecto la primera vez.</p>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="mezclar-4">
+    <h2>Mezclar todo lo aprendido</h2>
+
+    <p>Llegaste al final del bloque con cuatro estructuras en tu arsenal: <code>if/else</code>, <code>switch</code>, <code>while/do while</code>, y <code>for</code>. Más <code>break</code> y <code>continue</code>. Esto es mucho. Ahora la habilidad que importa no es aprender estructuras nuevas, sino <strong>saber elegir cuál usar en cada situación</strong>.</p>
+
+    <p>Vamos a ver algunos patrones que combinan todo, para que veas cómo se arma un programa completo con las piezas que tienes.</p>
+
+    <h3>Patrón 1 — Recorrido con decisión</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Recorrer los números del 1 al 100 y clasificarlos</span>
+<span class="kw">int</span> multiplos3 = <span class="num">0</span>;
+<span class="kw">int</span> multiplos5 = <span class="num">0</span>;
+<span class="kw">int</span> ambos = <span class="num">0</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">100</span>; i++) {
+    <span class="kw">if</span> (i % <span class="num">3</span> == <span class="num">0</span> &amp;&amp; i % <span class="num">5</span> == <span class="num">0</span>) {
+        ambos++;
+    } <span class="kw">else if</span> (i % <span class="num">3</span> == <span class="num">0</span>) {
+        multiplos3++;
+    } <span class="kw">else if</span> (i % <span class="num">5</span> == <span class="num">0</span>) {
+        multiplos5++;
+    }
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Solo múltiplos de 3: "</span> + multiplos3);
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Solo múltiplos de 5: "</span> + multiplos5);
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Múltiplos de ambos: "</span> + ambos);</pre>
+    </div>
+
+    <p>Un <code>for</code> que recorre, y dentro un <code>else if</code> que clasifica. Este es el patrón más común en análisis de datos. Vas a verlo mil veces.</p>
+
+    <h3>Patrón 2 — Búsqueda con bandera</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] numeros = {<span class="num">12</span>, <span class="num">7</span>, <span class="num">45</span>, <span class="num">3</span>, <span class="num">89</span>, <span class="num">21</span>};
+<span class="kw">int</span> buscar = <span class="num">45</span>;
+<span class="kw">boolean</span> encontrado = <span class="kw">false</span>;
+<span class="kw">int</span> posicion = <span class="num">-1</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; numeros.length; i++) {
+    <span class="kw">if</span> (numeros[i] == buscar) {
+        encontrado = <span class="kw">true</span>;
+        posicion = i;
+        <span class="kw">break</span>;
+    }
+}
+
+<span class="kw">if</span> (encontrado) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(buscar + <span class="str">" está en la posición "</span> + posicion);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"No encontrado"</span>);
+}</pre>
+    </div>
+
+    <p>Ya lo viste antes. Es el patrón de búsqueda con bandera: <code>for</code> que recorre, <code>if</code> que verifica, <code>break</code> al encontrar, y consulta de la bandera al final.</p>
+
+    <h3>Patrón 3 — Validación con repetición</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Pedir un número válido hasta que cumpla, con máximo de intentos</span>
+<span class="kw">int</span> maxIntentos = <span class="num">5</span>;
+<span class="kw">boolean</span> valido = <span class="kw">false</span>;
+<span class="kw">int</span> intento = <span class="num">0</span>;
+
+<span class="kw">while</span> (intento &lt; maxIntentos &amp;&amp; !valido) {
+    intento++;
+
+    <span class="cmt">// simulado: leer numero del usuario</span>
+    <span class="kw">int</span> numero = <span class="num">150</span>;   <span class="cmt">// cambiar para probar distintos casos</span>
+
+    <span class="kw">if</span> (numero &gt;= <span class="num">1</span> &amp;&amp; numero &lt;= <span class="num">100</span>) {
+        valido = <span class="kw">true</span>;
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Número aceptado: "</span> + numero);
+    } <span class="kw">else</span> {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Número fuera de rango, intenta de nuevo"</span>);
+    }
+}
+
+<span class="kw">if</span> (!valido) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Máximo de intentos alcanzado"</span>);
+}</pre>
+    </div>
+
+    <p>Este patrón combina varias cosas: <code>while</code> con dos condiciones, contador de intentos, bandera de validez, y decisión dentro del ciclo. Es la estructura base de cualquier sistema de login o de validación de entrada. Cuando llegues al capítulo de Scanner (Bloque 5), vas a usar este patrón con la lectura real del usuario.</p>
+
+    <h3>Patrón 4 — Menú con opciones</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> opcion = <span class="num">0</span>;
+
+<span class="kw">do</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"1) Opción A  2) Opción B  3) Salir"</span>);
+
+    <span class="cmt">// simulado: opcion = leer del usuario</span>
+    opcion = <span class="num">2</span>;
+
+    <span class="kw">switch</span> (opcion) {
+        <span class="kw">case</span> <span class="num">1</span>: <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Opción A"</span>); <span class="kw">break</span>;
+        <span class="kw">case</span> <span class="num">2</span>: <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Opción B"</span>); <span class="kw">break</span>;
+        <span class="kw">case</span> <span class="num">3</span>: <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Adiós"</span>); <span class="kw">break</span>;
+        <span class="kw">default</span>: <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Opción no válida"</span>);
+    }
+} <span class="kw">while</span> (opcion != <span class="num">3</span>);</pre>
+    </div>
+
+    <p>El patrón de menú: <code>do while</code> exterior con <code>switch</code> dentro. El menú se muestra al menos una vez, y se repite hasta que el usuario elija salir.</p>
+
+    <p>Estos cuatro patrones (recorrido con decisión, búsqueda con bandera, validación con repetición, menú) cubren la mayoría de lo que vas a escribir durante mucho tiempo. Cuando enfrentes un problema nuevo, pregúntate cuál de estos cuatro patrones se parece más al problema que tienes. Casi siempre uno de ellos te da el esqueleto de la solución.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="reto-final-4">
+    <h2>Reto del Bloque 4</h2>
+
+    <p>Este reto combina todo el bloque: <code>for</code>, <code>while</code>, <code>break</code>, <code>continue</code>, con lo que ya traías de bloques anteriores.</p>
+
+    <p><strong>Reto: análisis de números</strong></p>
+
+    <p>Escribe un programa que analice los números del 1 al 100 y genere un reporte con la siguiente información:</p>
+
+    <ol>
+      <li>Cuántos números son primos.</li>
+      <li>Cuántos son perfectos (un número perfecto es igual a la suma de sus divisores propios, excluyéndose a sí mismo; el 6 = 1+2+3, el 28 = 1+2+4+7+14 son los primeros).</li>
+      <li>Cuántos son capicúa (se leen igual al derecho y al revés; por ejemplo, 11, 22, 121...).</li>
+      <li>Cuántos números son pares, cuántos impares.</li>
+      <li>La suma de todos los números divisibles por 7.</li>
+    </ol>
+
+    <p>Para lograrlo vas a necesitar:</p>
+
+    <ul>
+      <li>Un <code>for</code> que recorra del 1 al 100.</li>
+      <li>Dentro, varios <code>if</code> y anidamientos para clasificar cada número.</li>
+      <li>Ciclos internos para verificar si un número es primo, perfecto o capicúa.</li>
+      <li>Contadores y acumuladores para llevar la cuenta.</li>
+      <li>Posiblemente <code>break</code> para optimizar las verificaciones.</li>
+    </ul>
+
+    <p>Antes de escribir código, <strong>haz el análisis en español</strong>. Divide el problema en subproblemas. Pregúntate: ¿cómo verifico si un número es primo? ¿Cómo verifico si es perfecto? ¿Cómo verifico si es capicúa? Escribe cada verificación como un ciclo separado (o como una función, si ya sabes cómo hacerlo, aunque no es necesario para este reto). Después intégralas todas en un solo recorrido del 1 al 100.</p>
+
+    <details class="solucion">
+      <summary>Ver una posible solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> primos = <span class="num">0</span>;
+<span class="kw">int</span> perfectos = <span class="num">0</span>;
+<span class="kw">int</span> capicuas = <span class="num">0</span>;
+<span class="kw">int</span> pares = <span class="num">0</span>;
+<span class="kw">int</span> impares = <span class="num">0</span>;
+<span class="kw">int</span> sumaDiv7 = <span class="num">0</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> n = <span class="num">1</span>; n &lt;= <span class="num">100</span>; n++) {
+
+    <span class="cmt">// Pares e impares</span>
+    <span class="kw">if</span> (n % <span class="num">2</span> == <span class="num">0</span>) pares++;
+    <span class="kw">else</span> impares++;
+
+    <span class="cmt">// Múltiplos de 7</span>
+    <span class="kw">if</span> (n % <span class="num">7</span> == <span class="num">0</span>) sumaDiv7 += n;
+
+    <span class="cmt">// Primo</span>
+    <span class="kw">if</span> (n &gt; <span class="num">1</span>) {
+        <span class="kw">boolean</span> esPrimo = <span class="kw">true</span>;
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">2</span>; i &lt; n; i++) {
+            <span class="kw">if</span> (n % i == <span class="num">0</span>) {
+                esPrimo = <span class="kw">false</span>;
+                <span class="kw">break</span>;
+            }
+        }
+        <span class="kw">if</span> (esPrimo) primos++;
+    }
+
+    <span class="cmt">// Perfecto</span>
+    <span class="kw">int</span> sumaDivisores = <span class="num">0</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt; n; i++) {
+        <span class="kw">if</span> (n % i == <span class="num">0</span>) sumaDivisores += i;
+    }
+    <span class="kw">if</span> (sumaDivisores == n &amp;&amp; n &gt; <span class="num">1</span>) perfectos++;
+
+    <span class="cmt">// Capicúa</span>
+    <span class="kw">int</span> invertido = <span class="num">0</span>;
+    <span class="kw">int</span> temp = n;
+    <span class="kw">while</span> (temp &gt; <span class="num">0</span>) {
+        invertido = invertido * <span class="num">10</span> + (temp % <span class="num">10</span>);
+        temp = temp / <span class="num">10</span>;
+    }
+    <span class="kw">if</span> (invertido == n) capicuas++;
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Primos: "</span> + primos);
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Perfectos: "</span> + perfectos);
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Capicúas: "</span> + capicuas);
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Pares: "</span> + pares);
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Impares: "</span> + impares);
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Suma de múltiplos de 7: "</span> + sumaDiv7);</pre>
+      </div>
+      <p class="mb-0">Fíjate en que el programa está dividido en <em>secciones</em>, cada una con su comentario y su lógica. Esto es clave cuando un programa crece: dividir por bloques temáticos, con comentarios, hace el código mucho más legible. También fíjate en el uso de <code>break</code> en el ciclo que verifica si un número es primo: en cuanto encuentra un divisor, ya sabe que no es primo, y sale. Sin <code>break</code> funcionaría igual, pero sería más lento. Optimizar con <code>break</code> cuando ya se sabe la respuesta es un patrón común.</p>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="resumen-4">
+    <h2>Lo que llevas construido</h2>
+
+    <p>Al terminar este bloque, tienes estas piezas nuevas:</p>
+
+    <ul>
+      <li><strong><code>for</code></strong> — la estructura de repetición más usada, ideal cuando sabes cuántas vueltas va a dar el ciclo.</li>
+      <li><strong>La equivalencia <code>for</code> ↔ <code>while</code></strong> — la clave para no asustarte con la sintaxis del <code>for</code>.</li>
+      <li><strong><code>break</code></strong> — salir de un ciclo antes de tiempo.</li>
+      <li><strong><code>continue</code></strong> — saltar una vuelta específica sin salir del ciclo.</li>
+      <li><strong>Ciclos anidados</strong> — dos (o más) ciclos, uno dentro de otro, para recorrer dos dimensiones.</li>
+      <li><strong>Cuatro patrones comunes</strong> — recorrido con decisión, búsqueda con bandera, validación con repetición, menú con opciones.</li>
+    </ul>
+
+    <p>Y estas son las piezas que ya tenías de bloques anteriores y que ahora usas con más soltura:</p>
+
+    <ul>
+      <li>Variables, tipos, operadores, booleanos (Bloque 1).</li>
+      <li><code>if</code>, <code>else</code>, <code>else if</code>, operadores lógicos, anidados (Bloque 2).</li>
+      <li><code>switch</code>, <code>while</code>, <code>do while</code>, contadores y acumuladores, bucles infinitos (Bloque 3).</li>
+    </ul>
+
+    <p>Si miras hacia atrás, desde el inicio del manual, has recorrido un trecho enorme. Empezaste sin saber qué era una variable. Ahora escribes ciclos anidados con decisiones y control fino, y reconoces patrones que se repiten en problemas distintos. Eso es lo que hacen los programadores con experiencia: no es que sepan más sintaxis que tú, es que reconocen más patrones. Y tú ya estás reconociendo varios.</p>
+
+    <p>El siguiente bloque es <strong>Scanner como capítulo propio</strong>. Hasta ahora todos los programas han usado datos "escritos en el código" (simulados). En el Bloque 5 vas a hacer que tus programas <em>pregunten</em> al usuario por los datos, lo cual abre un mundo distinto de posibilidades. Después, en el Bloque 6, vienen los arreglos, que es la última pieza del manual.</p>
+
+    <div class="caja caja-idea">
+      <p class="mb-0">Antes de seguir al Bloque 5, asegúrate de resolver al menos un ejercicio de cada nivel en <code>for</code>, en <code>break</code>/<code>continue</code>, y en ciclos anidados. Los ciclos anidados, en particular, conviene practicarlos varias veces hasta que se sientan naturales. Avanzar sin practicar suficiente deja huecos que después cuestan más.</p>
+    </div>
+  </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.querySelectorAll('.bloque-codigo').forEach(function (bloque) {
+    var btn = bloque.querySelector('.btn-copiar');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var pre = bloque.querySelector('pre');
+      var texto = pre.innerText;
+      navigator.clipboard.writeText(texto).then(function () {
+        var original = btn.textContent;
+        btn.textContent = '¡Copiado!';
+        setTimeout(function () { btn.textContent = original; }, 1200);
+      });
+    });
+  });
+
+  var html = document.documentElement;
+  var btnTema = document.getElementById('btnTema');
+  var temaGuardado = localStorage.getItem('temaManual') || 'light';
+  aplicarTema(temaGuardado);
+
+  btnTema.addEventListener('click', function () {
+    var actual = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+    aplicarTema(actual);
+    localStorage.setItem('temaManual', actual);
+  });
+
+  function aplicarTema(tema) {
+    html.setAttribute('data-bs-theme', tema);
+    btnTema.innerHTML = tema === 'dark'
+      ? '<i class="bi bi-sun"></i>'
+      : '<i class="bi bi-moon-stars"></i>';
+  }
+
+  var sidebar = document.getElementById('sidebar');
+  var btnMenu = document.getElementById('btnMenu');
+  var btnCerrarMenu = document.getElementById('btnCerrarMenu');
+
+  function cerrarMenu() {
+    sidebar.classList.remove('abierto');
+    document.body.classList.remove('menu-abierto');
+    btnMenu.setAttribute('aria-expanded', 'false');
+  }
+
+  btnMenu.addEventListener('click', function () {
+    var abierto = sidebar.classList.toggle('abierto');
+    document.body.classList.toggle('menu-abierto', abierto);
+    btnMenu.setAttribute('aria-expanded', String(abierto));
+  });
+  btnCerrarMenu.addEventListener('click', cerrarMenu);
+  sidebar.querySelectorAll('a').forEach(function (enlace) {
+    enlace.addEventListener('click', cerrarMenu);
+  });
+
+  var enlaces = document.querySelectorAll('.sidebar .nav-link');
+  var secciones = [];
+  enlaces.forEach(function (a) {
+    var id = a.getAttribute('href');
+    if (id && id.startsWith('#')) {
+      var el = document.querySelector(id);
+      if (el) secciones.push({ el: el, link: a });
+    }
+  });
+
+  function actualizarActivo() {
+    var y = window.scrollY + 120;
+    var actual = null;
+    secciones.forEach(function (s) {
+      if (s.el.offsetTop <= y) actual = s;
+    });
+    enlaces.forEach(function (a) { a.classList.remove('active'); });
+    if (actual) actual.link.classList.add('active');
+  }
+  window.addEventListener('scroll', actualizarActivo);
+  window.addEventListener('load', actualizarActivo);
+</script>
+<script src="../../../public/java-manual.js"></script>
+</body>
+</html>

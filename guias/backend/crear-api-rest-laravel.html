@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía API RESTful - Laravel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #e0e0e0;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #1e1e1e;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            text-align: center;
+            border-bottom: 3px solid #764ba2;
+        }
+
+        h1 {
+            color: #ffffff;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        h3 {
+            color: #64b5f6;
+            font-size: 1.5em;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        h4 {
+            color: #81c784;
+            font-size: 1.2em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        p, li {
+            color: #e0e0e0;
+            margin-bottom: 10px;
+        }
+
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        strong {
+            color: #ffab40;
+        }
+
+        code {
+            background: #2d2d2d;
+            color: #4fc3f7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+            font-size: 0.95em;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .badge.get {
+            background: #4caf50;
+        }
+
+        .badge.post {
+            background: #2196f3;
+        }
+
+        .badge.put {
+            background: #ff9800;
+        }
+
+        .badge.delete {
+            background: #f44336;
+        }
+
+        .note {
+            background: #263238;
+            border-left: 4px solid #64b5f6;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .warning {
+            background: #3e2723;
+            border-left: 4px solid #ff9800;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .success {
+            background: #1b5e20;
+            border-left: 4px solid #4caf50;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        hr {
+            border: none;
+            border-top: 2px solid #424242;
+            margin: 40px 0;
+        }
+
+        .toc {
+            background: #263238;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .toc h3 {
+            margin-top: 0;
+            color: #81c784;
+        }
+
+        .toc ul {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .toc li {
+            margin-bottom: 8px;
+        }
+
+        .toc a {
+            color: #64b5f6;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .toc a:hover {
+            color: #90caf9;
+            text-decoration: underline;
+        }
+
+        footer {
+            background: #263238;
+            padding: 20px;
+            text-align: center;
+            color: #9e9e9e;
+            border-top: 2px solid #424242;
+        }
+    </style>
+    <link rel="stylesheet" href="../../public/guide.css">
+</head>
+<body class="guide-page">
+    <nav class="guide-site-header" aria-label="Navegación de la guía">
+        <a class="guide-brand" href="../../index.html"><span class="guide-brand-mark" aria-hidden="true">&lt;/&gt;</span> Recursos de Sistemas</a>
+        <a class="guide-back-link" href="../../index.html">← Volver a recursos</a>
+    </nav>
+    <div class="container guide-document">
+        <header>
+            <h1>📚 Guía Completa: API RESTful de Libros con Laravel</h1>
+            <p style="color: #e0e0e0; margin-top: 10px;">Aprende a crear una API profesional paso a paso</p>
+        </header>
+
+        <div class="content">
+            <div class="toc">
+                <h3>📋 Índice de Contenidos</h3>
+                <ul>
+                    <li><a href="#paso-0">0. Crear el proyecto Laravel</a></li>
+                    <li><a href="#paso-1">1. Diferencia entre routes/web.php y routes/api.php</a></li>
+                    <li><a href="#paso-2">2. Crear el Modelo Libro</a></li>
+                    <li><a href="#paso-3">3. Crear el Controlador API</a></li>
+                    <li><a href="#paso-4">4. Definir rutas en routes/api.php</a></li>
+                    <li><a href="#paso-5">5. Implementar métodos en el controlador</a></li>
+                    <li><a href="#paso-6">6. Códigos HTTP explicados</a></li>
+                    <li><a href="#paso-7">7. Métodos Eloquent explicados</a></li>
+                    <li><a href="#paso-8">8. ¿Qué es un API RESTful?</a></li>
+                    <li><a href="#paso-9">9. Probar cada ruta</a></li>
+                </ul>
+            </div>
+
+            <section id="paso-0">
+                <h2>0. Crear el proyecto Laravel (Si es nuevo)</h2>
+
+                <h3>Paso 0.1: Crear proyecto con Composer</h3>
+                <pre><code class="language-bash">composer create-project laravel/laravel nombre-proyecto</code></pre>
+                <ul>
+                    <li><strong>Para qué:</strong> Crea un nuevo proyecto Laravel desde cero</li>
+                    <li><strong><code>nombre-proyecto</code>:</strong> Cambia esto por el nombre de tu proyecto</li>
+                    <li><strong>Ejemplo:</strong> <code>composer create-project laravel/laravel api1</code></li>
+                </ul>
+
+                <h3>Paso 0.2: Entrar al directorio del proyecto</h3>
+                <pre><code class="language-bash">cd nombre-proyecto</code></pre>
+
+                <h3>Paso 0.3: Configurar base de datos</h3>
+                <p>Abrir el archivo <code>.env</code> y configurar conexión a base de datos:</p>
+                <pre><code class="language-env">DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=nombre_de_tu_base_de_datos
+DB_USERNAME=tu_usuario
+DB_PASSWORD=tu_contraseña</code></pre>
+
+                <h3>Paso 0.4: Crear la migración de libros</h3>
+                <pre><code class="language-bash">php artisan make:migration create_libros_table</code></pre>
+                <p>Abrir <code>database/migrations/XXXX_XX_XX_XXXXXX_create_libros_table.php</code> y definir los campos:</p>
+                <pre><code class="language-php">public function up(): void
+{
+    Schema::create('libros', function (Blueprint $table) {
+        $table->id();
+        $table->string('titulo');
+        $table->string('autor');
+        $table->string('genero')->nullable();
+        $table->integer('anio_publicacion')->nullable();
+        $table->timestamps();
+    });
+}</code></pre>
+
+                <h3>Paso 0.5: Ejecutar las migraciones</h3>
+                <pre><code class="language-bash">php artisan migrate</code></pre>
+                <ul>
+                    <li><strong>Para qué:</strong> Crea las tablas en la base de datos</li>
+                </ul>
+            </section>
+
+            <hr>
+
+            <section id="paso-1">
+                <h2>1. Diferencia entre <code>routes/web.php</code> y <code>routes/api.php</code></h2>
+
+                <h3><code>routes/web.php</code></h3>
+                <ul>
+                    <li><strong>Para qué:</strong> Rutas para páginas web (HTML)</li>
+                    <li><strong>Usa:</strong> Sesiones, cookies, CSRF protection</li>
+                    <li><strong>Retorna:</strong> Vistas (Blade templates)</li>
+                    <li><strong>Ejemplo:</strong> Rutas para tu sitio web tradicional</li>
+                    <li><strong>URL:</strong> <code>http://localhost:8000/ruta</code></li>
+                </ul>
+
+                <h3><code>routes/api.php</code></h3>
+                <ul>
+                    <li><strong>Para qué:</strong> Rutas para APIs (JSON)</li>
+                    <li><strong>Usa:</strong> Sin sesiones, sin cookies, sin CSRF</li>
+                    <li><strong>Retorna:</strong> JSON (datos)</li>
+                    <li><strong>Ejemplo:</strong> Endpoints para aplicaciones móviles, frontend separado (React, Vue, Angular)</li>
+                    <li><strong>URL:</strong> <code>http://localhost:8000/api/ruta</code> (prefijo <code>/api</code> automático)</li>
+                </ul>
+
+                <h3>Crear soporte para API en Laravel 11</h3>
+                <div class="warning">
+                    <p><strong>⚠️ Importante:</strong> Laravel 11 ya NO incluye <code>routes/api.php</code> por defecto. Debes instalarlo:</p>
+                </div>
+                <pre><code class="language-bash">php artisan install:api</code></pre>
+                <ul>
+                    <li><strong>Para qué:</strong> Crea el archivo <code>routes/api.php</code> y configura todo automáticamente</li>
+                    <li><strong>Qué hace:</strong>
+                        <ul>
+                            <li>Crea <code>routes/api.php</code></li>
+                            <li>Agrega el prefijo <code>/api</code> a todas las rutas de API</li>
+                            <li>Configura middleware para APIs</li>
+                            <li>Instala Laravel Sanctum (autenticación de APIs)</li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+
+            <hr>
+
+            <section id="paso-2">
+                <h2>2. Crear el Modelo Libro</h2>
+                <pre><code class="language-bash">php artisan make:model Libro</code></pre>
+                <p>Abrir <code>app/Models/Libro.php</code> y definir <code>$fillable</code> con los campos que se pueden llenar masivamente:</p>
+                <pre><code class="language-php">&lt;?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Libro extends Model
+{
+    // Campos que se pueden llenar masivamente
+    protected $fillable = [
+        'titulo',
+        'autor',
+        'genero',
+        'anio_publicacion'
+    ];
+}</code></pre>
+                <ul>
+                    <li><strong>Para qué:</strong> Permite usar <code>Libro::create()</code> sin errores de asignación masiva</li>
+                </ul>
+            </section>
+
+            <hr>
+
+            <section id="paso-3">
+                <h2>3. Crear el Controlador API</h2>
+                <pre><code class="language-bash">php artisan make:controller Api/LibroController</code></pre>
+                <ul>
+                    <li><strong>Para qué:</strong> Crea el controlador en <code>app/Http/Controllers/Api/LibroController.php</code></li>
+                    <li><strong><code>Api/</code>:</strong> Crea una carpeta <code>Api</code> para organizar los controladores de la API</li>
+                </ul>
+            </section>
+
+            <hr>
+
+            <section id="paso-4">
+                <h2>4. Definir rutas en <code>routes/api.php</code></h2>
+
+                <div class="warning">
+                    <p><strong>⚠️ IMPORTANTE:</strong> Agregar el <code>use</code> del controlador al inicio del archivo:</p>
+                </div>
+                <pre><code class="language-php">&lt;?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\LibroController;</code></pre>
+
+                <p>Luego agregar las rutas:</p>
+
+                <h3><span class="badge get">GET</span> Ruta 1 - Listar todos los libros</h3>
+                <pre><code class="language-php">Route::get('/libros', [LibroController::class, 'index']);</code></pre>
+                <ul>
+                    <li><strong>URL:</strong> <code>GET /api/libros</code></li>
+                    <li><strong>Para qué:</strong> Obtener listado completo de libros</li>
+                </ul>
+
+                <h3><span class="badge post">POST</span> Ruta 2 - Crear un libro</h3>
+                <pre><code class="language-php">Route::post('/libros', [LibroController::class, 'store']);</code></pre>
+                <ul>
+                    <li><strong>URL:</strong> <code>POST /api/libros</code></li>
+                    <li><strong>Para qué:</strong> Crear un nuevo libro en la base de datos</li>
+                </ul>
+
+                <h3><span class="badge get">GET</span> Ruta 3 - Mostrar un libro específico</h3>
+                <pre><code class="language-php">Route::get('/libros/{id}', [LibroController::class, 'show']);</code></pre>
+                <ul>
+                    <li><strong>URL:</strong> <code>GET /api/libros/1</code></li>
+                    <li><strong>Para qué:</strong> Obtener detalles de un libro específico</li>
+                </ul>
+
+                <h3><span class="badge put">PUT</span> Ruta 4 - Actualizar un libro</h3>
+                <pre><code class="language-php">Route::put('/libros/{id}', [LibroController::class, 'update']);</code></pre>
+                <ul>
+                    <li><strong>URL:</strong> <code>PUT /api/libros/1</code></li>
+                    <li><strong>Para qué:</strong> Modificar datos de un libro existente</li>
+                </ul>
+
+                <h3><span class="badge delete">DELETE</span> Ruta 5 - Eliminar un libro</h3>
+                <pre><code class="language-php">Route::delete('/libros/{id}', [LibroController::class, 'destroy']);</code></pre>
+                <ul>
+                    <li><strong>URL:</strong> <code>DELETE /api/libros/1</code></li>
+                    <li><strong>Para qué:</strong> Eliminar un libro de la base de datos</li>
+                </ul>
+
+                <div class="note">
+                    <p><strong>📝 Nota:</strong> Todas las URLs tienen el prefijo <code>/api</code> porque están en <code>routes/api.php</code></p>
+                </div>
+            </section>
+
+            <hr>
+
+            <section id="paso-5">
+                <h2>5. Implementar métodos en el controlador</h2>
+
+                <p><strong>Archivo completo:</strong> <code>app/Http/Controllers/Api/LibroController.php</code></p>
+                <pre><code class="language-php">&lt;?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\Libro;
+use Illuminate\Http\Request;
+
+class LibroController extends Controller
+{
+    // Aquí van todos los métodos
+}</code></pre>
+
+                <h3>Método <code>index()</code> - Listar todos</h3>
+                <pre><code class="language-php">/**
+ * Obtiene todos los libros de la base de datos
+ * 
+ * Para qué: Mostrar listado completo de libros
+ * 
+ * @return \Illuminate\Http\JsonResponse
+ * 
+ * Libro::all() → Trae todos los registros de la tabla libros
+ * response()->json() → Convierte los datos a formato JSON
+ * 200 → Código de estado HTTP que significa "OK - Todo bien, solicitud exitosa"
+ *       Se usa cuando la operación de consulta fue exitosa
+ */
+public function index()
+{
+    $libros = Libro::all(); // Obtiene todos los libros
+    return response()->json($libros, 200); // Retorna JSON con código 200 (OK)
+}</code></pre>
+
+                <h3>Método <code>store()</code> - Crear nuevo</h3>
+                <pre><code class="language-php">/**
+ * Crea un nuevo libro en la base de datos
+ * 
+ * Para qué: Guardar un libro nuevo cuando el usuario envía datos
+ * 
+ * @param \Illuminate\Http\Request $request
+ * @return \Illuminate\Http\JsonResponse
+ * 
+ * $request->validate() → Valida que los datos cumplan las reglas
+ * 'required' → Campo obligatorio, debe venir en la petición
+ * 'string' → Debe ser texto
+ * 'integer' → Debe ser número entero
+ * 'nullable' → Campo opcional, puede venir vacío
+ * 'max:255' → Máximo 255 caracteres
+ * Libro::create() → Inserta el nuevo registro en la base de datos
+ * 201 → Código de estado HTTP que significa "Created - Recurso creado con éxito"
+ *       Se usa cuando se crea algo nuevo en la base de datos
+ */
+public function store(Request $request)
+{
+    // Valida los datos recibidos (según tu migración)
+    $validated = $request->validate([
+        'titulo' => 'required|string|max:255',      // Título obligatorio
+        'autor' => 'required|string|max:255',       // Autor obligatorio
+        'genero' => 'nullable|string|max:255',      // Género opcional
+        'anio_publicacion' => 'nullable|integer',   // Año opcional, debe ser número
+    ]);
+    
+    // Crea el libro en la base de datos
+    $libro = Libro::create($validated);
+    
+    // Retorna el libro creado con código 201 (Created)
+    return response()->json($libro, 201);
+}</code></pre>
+
+                <h3>Método <code>show()</code> - Mostrar uno</h3>
+                <pre><code class="language-php">/**
+ * Muestra un libro específico por su ID
+ * 
+ * Para qué: Ver los detalles completos de un libro en particular
+ * 
+ * @param int $id
+ * @return \Illuminate\Http\JsonResponse
+ * 
+ * findOrFail($id) → "Encuentra o falla"
+ *   - Busca el registro por ID
+ *   - Si lo encuentra: lo retorna
+ *   - Si NO existe: lanza automáticamente error 404
+ * 200 → Código de estado HTTP que significa "OK - Todo bien"
+ *       Se usa cuando encontramos y retornamos el recurso correctamente
+ */
+public function show($id)
+{
+    // Busca el libro por ID, si no existe retorna error 404 automáticamente
+    $libro = Libro::findOrFail($id);
+    
+    // Retorna el libro encontrado con código 200 (OK)
+    return response()->json($libro, 200);
+}</code></pre>
+
+                <h3>Método <code>update()</code> - Actualizar</h3>
+                <pre><code class="language-php">/**
+ * Actualiza un libro existente
+ * 
+ * Para qué: Modificar los datos de un libro que ya existe
+ * 
+ * @param \Illuminate\Http\Request $request
+ * @param int $id
+ * @return \Illuminate\Http\JsonResponse
+ * 
+ * findOrFail($id) → Busca el libro, si no existe retorna 404
+ * $libro->update() → Actualiza los campos en la base de datos
+ * Validaciones sin 'required' → Los campos son opcionales al actualizar
+ *   (puedes actualizar solo el título sin enviar el autor, por ejemplo)
+ * 200 → Código de estado HTTP que significa "OK - Actualización exitosa"
+ *       Se usa cuando modificamos un recurso correctamente
+ */
+public function update(Request $request, $id)
+{
+    // Busca el libro, si no existe retorna 404
+    $libro = Libro::findOrFail($id);
+    
+    // Valida los datos (todos opcionales porque puedes actualizar solo algunos campos)
+    $validated = $request->validate([
+        'titulo' => 'string|max:255',           // Título opcional
+        'autor' => 'string|max:255',            // Autor opcional
+        'genero' => 'nullable|string|max:255',  // Género opcional
+        'anio_publicacion' => 'nullable|integer', // Año opcional
+    ]);
+    
+    // Actualiza el libro con los nuevos datos
+    $libro->update($validated);
+    
+    // Retorna el libro actualizado con código 200 (OK)
+    return response()->json($libro, 200);
+}</code></pre>
+
+                <h3>Método <code>destroy()</code> - Eliminar</h3>
+                <pre><code class="language-php">/**
+ * Elimina un libro de la base de datos
+ * 
+ * Para qué: Borrar permanentemente un libro
+ * 
+ * @param int $id
+ * @return \Illuminate\Http\JsonResponse
+ * 
+ * findOrFail($id) → Busca el libro, si no existe retorna 404
+ * $libro->delete() → Elimina el registro de la base de datos
+ * 204 → Código de estado HTTP que significa "No Content - Sin contenido"
+ *       Se usa cuando eliminamos algo exitosamente
+ *       No hay contenido que retornar porque el recurso ya no existe
+ */
+public function destroy($id)
+{
+    // Busca el libro, si no existe retorna 404
+    $libro = Libro::findOrFail($id);
+    
+    // Elimina el libro de la base de datos
+    $libro->delete();
+    
+    // Retorna respuesta vacía con código 204 (No Content)
+    return response()->json(null, 204);
+}</code></pre>
+            </section>
+
+            <hr>
+
+            <section id="paso-6">
+                <h2>6. Códigos HTTP explicados - Para qué sirve cada uno</h2>
+
+                <h3>200 (OK)</h3>
+                <ul>
+                    <li><strong>Para qué:</strong> Decir "todo salió bien"</li>
+                    <li><strong>Cuándo:</strong> Al consultar o actualizar datos exitosamente</li>
+                    <li><strong>Ejemplo:</strong> GET libros, GET libro/1, PUT libro/1</li>
+                </ul>
+
+                <h3>201 (Created)</h3>
+                <ul>
+                    <li><strong>Para qué:</strong> Decir "se creó algo nuevo correctamente"</li>
+                    <li><strong>Cuándo:</strong> Al crear un nuevo registro en la base de datos</li>
+                    <li><strong>Ejemplo:</strong> POST libros (crear libro nuevo)</li>
+                </ul>
+
+                <h3>204 (No Content)</h3>
+                <ul>
+                    <li><strong>Para qué:</strong> Decir "se eliminó correctamente, no hay nada que mostrar"</li>
+                    <li><strong>Cuándo:</strong> Al eliminar un registro</li>
+                    <li><strong>Ejemplo:</strong> DELETE libro/1</li>
+                </ul>
+
+                <h3>404 (Not Found)</h3>
+                <ul>
+                    <li><strong>Para qué:</strong> Decir "no encontré lo que buscas"</li>
+                    <li><strong>Cuándo:</strong> Cuando buscas un libro que no existe</li>
+                    <li><strong>Ejemplo:</strong> GET libro/999 (si no existe ese ID)</li>
+                    <li><strong>Nota:</strong> Lo genera <code>findOrFail()</code> automáticamente</li>
+                </ul>
+
+                <h3>422 (Unprocessable Entity)</h3>
+                <ul>
+                    <li><strong>Para qué:</strong> Decir "los datos que enviaste están mal"</li>
+                    <li><strong>Cuándo:</strong> Cuando falla la validación</li>
+                    <li><strong>Ejemplo:</strong> POST sin título o con año en texto</li>
+                    <li><strong>Nota:</strong> Lo genera <code>validate()</code> automáticamente</li>
+                </ul>
+            </section>
+
+            <hr>
+
+            <section id="paso-7">
+                <h2>7. Métodos Eloquent explicados - Para qué sirve cada uno</h2>
+
+                <h3><code>Libro::all()</code></h3>
+                <ul>
+                    <li><strong>Para qué:</strong> Traer todos los libros de la tabla</li>
+                </ul>
+
+                <h3><code>Libro::create($data)</code></h3>
+                <ul>
+                    <li><strong>Para qué:</strong> Crear un nuevo libro en la tabla</li>
+                </ul>
+
+                <h3><code>Libro::find($id)</code></h3>
+                <ul>
+                    <li><strong>Para qué:</strong> Buscar un libro por ID</li>
+                    <li><strong>Si no existe:</strong> Retorna <code>null</code></li>
+                </ul>
+
+                <h3><code>Libro::findOrFail($id)</code></h3>
+                <ul>
+                    <li><strong>Para qué:</strong> Buscar un libro por ID</li>
+                    <li><strong>Si no existe:</strong> Lanza error 404 automáticamente</li>
+                </ul>
+
+                <h3><code>$libro->update($data)</code></h3>
+                <ul>
+                    <li><strong>Para qué:</strong> Actualizar los datos del libro</li>
+                </ul>
+
+                <h3><code>$libro->delete()</code></h3>
+                <ul>
+                    <li><strong>Para qué:</strong> Eliminar el libro de la tabla</li>
+                </ul>
+            </section>
+
+            <hr>
+
+            <section id="paso-8">
+                <h2>8. ¿Qué es un API RESTful?</h2>
+
+                <p>Esto es un <strong>API RESTful</strong> (también llamado REST API).</p>
+
+                <p><strong>REST</strong> y <strong>RESTful</strong> son lo mismo:</p>
+                <ul>
+                    <li><strong>REST</strong> = Representational State Transfer (el concepto/arquitectura)</li>
+                    <li><strong>RESTful</strong> = Un API que sigue los principios REST</li>
+                </ul>
+
+                <h3>¿Por qué tu API de libros es RESTful?</h3>
+
+                <p>Cumple con los principios REST:</p>
+
+                <ol>
+                    <li><strong>Usa verbos HTTP correctamente:</strong>
+                        <ul>
+                            <li><code>GET</code> → Para leer/consultar</li>
+                            <li><code>POST</code> → Para crear</li>
+                            <li><code>PUT</code> → Para actualizar</li>
+                            <li><code>DELETE</code> → Para eliminar</li>
+                        </ul>
+                    </li>
+                    <li><strong>Usa recursos (sustantivos en plural):</strong>
+                        <ul>
+                            <li><code>/api/libros</code> (no <code>/api/obtenerLibros</code> o <code>/api/getBooks</code>)</li>
+                            <li>Los recursos se identifican por URL</li>
+                        </ul>
+                    </li>
+                    <li><strong>Sin estado (Stateless):</strong>
+                        <ul>
+                            <li>Cada petición es independiente</li>
+                            <li>No guarda información de sesión entre peticiones</li>
+                        </ul>
+                    </li>
+                    <li><strong>Retorna códigos HTTP estándar:</strong>
+                        <ul>
+                            <li>200, 201, 204, 404, 422</li>
+                        </ul>
+                    </li>
+                    <li><strong>Usa JSON para intercambiar datos:</strong>
+                        <ul>
+                            <li>Formato estándar para APIs modernas</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <div class="success">
+                    <h4>✅ Resumen:</h4>
+                    <ul>
+                        <li><strong>REST</strong> = Los principios/reglas</li>
+                        <li><strong>RESTful</strong> = Un API que sigue esas reglas</li>
+                        <li>Tu API de libros es <strong>RESTful</strong> porque sigue los principios REST</li>
+                    </ul>
+                    <p>Algunas personas dicen "API REST" y otras "API RESTful", pero significan exactamente lo mismo. ✓</p>
+                </div>
+            </section>
+
+            <hr>
+
+            <section id="paso-9">
+                <h2>9. Probar cada ruta</h2>
+
+                <p>Para probar la API puedes usar:</p>
+                <ul>
+                    <li><strong>Postman</strong> (aplicación de escritorio)</li>
+                    <li><strong>Thunder Client</strong> (extensión de VS Code)</li>
+                    <li><strong>Insomnia</strong> (aplicación de escritorio)</li>
+                    <li><strong>curl</strong> (desde la terminal)</li>
+                </ul>
+
+                <h3>Iniciar servidor de desarrollo</h3>
+                <pre><code class="language-bash">php artisan serve</code></pre>
+                <ul>
+                    <li><strong>URL base:</strong> <code>http://localhost:8000</code></li>
+                </ul>
+
+                <h3>Ejemplos de peticiones:</h3>
+
+                <h4><span class="badge get">GET</span> 1. Ver todos los libros</h4>
+                <pre><code class="language-bash">curl http://localhost:8000/api/libros</code></pre>
+
+                <h4><span class="badge post">POST</span> 2. Crear un libro</h4>
+                <pre><code class="language-bash">curl -X POST http://localhost:8000/api/libros \
+  -H "Content-Type: application/json" \
+  -d '{"titulo":"Don Quijote","autor":"Miguel de Cervantes","genero":"Novela","anio_publicacion":1605}'</code></pre>
+
+                <h4><span class="badge get">GET</span> 3. Ver un libro específico</h4>
+                <pre><code class="language-bash">curl http://localhost:8000/api/libros/1</code></pre>
+
+                <h4><span class="badge put">PUT</span> 4. Actualizar un libro</h4>
+                <pre><code class="language-bash">curl -X PUT http://localhost:8000/api/libros/1 \
+  -H "Content-Type: application/json" \
+  -d '{"titulo":"Don Quijote de la Mancha"}'</code></pre>
+
+                <h4><span class="badge delete">DELETE</span> 5. Eliminar un libro</h4>
+                <pre><code class="language-bash">curl -X DELETE http://localhost:8000/api/libros/1</code></pre>
+
+                <h3>Resumen de rutas:</h3>
+                <div class="note">
+                    <ul>
+                        <li><span class="badge get">GET</span> <code>/api/libros</code> → Ver todos</li>
+                        <li><span class="badge post">POST</span> <code>/api/libros</code> → Crear uno nuevo</li>
+                        <li><span class="badge get">GET</span> <code>/api/libros/1</code> → Ver uno específico</li>
+                        <li><span class="badge put">PUT</span> <code>/api/libros/1</code> → Actualizar</li>
+                        <li><span class="badge delete">DELETE</span> <code>/api/libros/1</code> → Eliminar</li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+
+        <footer>
+            <p>📚 Guía API RESTful de Libros con Laravel | 2025</p>
+            <p>Creado con ❤️ para aprender desarrollo de APIs</p>
+        </footer>
+    </div>
+
+    <script>
+        // Inicializar highlight.js para resaltado de sintaxis
+        hljs.highlightAll();
+    </script>
+</body>
+</html>

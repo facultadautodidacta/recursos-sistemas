@@ -1,0 +1,2459 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual de Java — Bloque 3: switch, while, do while</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+  :root {
+    --acento: #f89820;
+    --acento-2: #5382a1;
+    --code-bg: #1e1e2e;
+    --code-fg: #cdd6f4;
+  }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.7;
+    scroll-behavior: smooth;
+  }
+  .sidebar {
+    position: fixed; top: 0; left: 0;
+    width: 280px; height: 100vh;
+    overflow-y: auto; padding: 1rem;
+    background: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+    z-index: 1030;
+  }
+  [data-bs-theme="dark"] .sidebar { background: #16181d; border-right-color: #2a2d34; }
+  .sidebar h6 {
+    text-transform: uppercase; font-size: .75rem;
+    letter-spacing: .05em; color: #6c757d; margin-top: 1.25rem;
+  }
+  .sidebar .nav-link {
+    padding: .35rem .6rem; border-radius: .35rem;
+    font-size: .92rem; color: inherit;
+  }
+  .sidebar .nav-link:hover { background: rgba(248,152,32,.12); }
+  .sidebar .nav-link.active { background: var(--acento); color: #fff !important; font-weight: 600; }
+  .contenido { margin-left: 280px; padding: 2.5rem 3rem 6rem; max-width: 900px; }
+  .btn-menu, .btn-cerrar-menu { display: none; }
+  @media (max-width: 991px) {
+    .btn-menu {
+      display: inline-flex; position: fixed; top: 1rem; left: 1rem;
+      z-index: 1040; align-items: center; gap: .4rem;
+    }
+    .sidebar {
+      position: fixed; top: 0; left: 0; width: min(88vw, 320px); height: 100vh;
+      transform: translateX(-100%); transition: transform .2s ease;
+      box-shadow: 0 0 1.5rem rgba(0, 0, 0, .2);
+    }
+    .sidebar.abierto { transform: translateX(0); }
+    .btn-cerrar-menu { display: inline-flex; float: right; margin-top: -.25rem; }
+    body.menu-abierto { overflow: hidden; }
+    .contenido { margin-left: 0; padding: 1.5rem; }
+  }
+  h1, h2, h3 { font-weight: 700; }
+  h2 { margin-top: 3.5rem; padding-bottom: .5rem; border-bottom: 3px solid var(--acento); }
+  h3 { margin-top: 2.2rem; color: var(--acento-2); }
+  [data-bs-theme="dark"] h3 { color: #8ab4d6; }
+
+  .bloque-codigo {
+    position: relative; margin: 1.25rem 0;
+    border-radius: .5rem; overflow: hidden;
+    background: var(--code-bg);
+  }
+  .bloque-codigo pre {
+    margin: 0; padding: 1rem 1rem .9rem;
+    color: var(--code-fg); font-size: .9rem; line-height: 1.55;
+    overflow-x: auto;
+    font-family: "JetBrains Mono", Consolas, Menlo, monospace;
+  }
+  .bloque-codigo .btn-copiar {
+    position: absolute; top: .5rem; right: .5rem;
+    background: rgba(255,255,255,.08); color: #cdd6f4;
+    border: 1px solid rgba(255,255,255,.15);
+    font-size: .75rem; padding: .2rem .55rem;
+    border-radius: .3rem; opacity: 0; transition: opacity .15s;
+  }
+  .bloque-codigo:hover .btn-copiar { opacity: 1; }
+  .bloque-codigo .btn-copiar:hover { background: rgba(248,152,32,.3); }
+  .kw  { color: #cba6f7; }
+  .str { color: #a6e3a1; }
+  .num { color: #fab387; }
+  .cmt { color: #6c7086; font-style: italic; }
+  .cls { color: #f9e2af; }
+  .mth { color: #89b4fa; }
+
+  .caja { border-radius: .5rem; padding: 1rem 1.15rem; margin: 1.25rem 0; border-left: 5px solid; }
+  .caja-detente   { background: #fff8e6; border-color: #f0ad4e; }
+  .caja-error     { background: #fdecec; border-color: #dc3545; }
+  .caja-protocolo { background: #eef5ff; border-color: #4a7cff; }
+  .caja-idea      { background: #eefaf1; border-color: #28a745; }
+  .caja-anticipa  { background: #f3e8ff; border-color: #a855f7; }
+  [data-bs-theme="dark"] .caja-detente   { background: #2e2612; }
+  [data-bs-theme="dark"] .caja-error     { background: #2e1618; }
+  [data-bs-theme="dark"] .caja-protocolo { background: #14202e; }
+  [data-bs-theme="dark"] .caja-idea      { background: #12291b; }
+  [data-bs-theme="dark"] .caja-anticipa  { background: #231531; }
+  .caja h5 { margin-top: 0; font-size: 1rem; font-weight: 700; }
+  .caja p:last-child, .caja ul:last-child, .caja ol:last-child { margin-bottom: 0; }
+
+  .nivel {
+    display: inline-block; padding: .15rem .55rem;
+    border-radius: 999px; font-size: .72rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .03em; margin-right: .4rem;
+  }
+  .nivel-reconocer { background:#dbeafe; color:#1e40af; }
+  .nivel-completar { background:#dcfce7; color:#166534; }
+  .nivel-modificar { background:#fef3c7; color:#92400e; }
+  .nivel-construir { background:#fae8ff; color:#86198f; }
+  .nivel-combinar  { background:#ffe4e6; color:#9f1239; }
+  .nivel-crear     { background:#e0e7ff; color:#3730a3; }
+
+  .simulacion table { font-size: .9rem; }
+  .simulacion th { background: #f1f3f5; }
+  [data-bs-theme="dark"] .simulacion th { background: #23262e; }
+
+  details.solucion {
+    margin: .75rem 0; border: 1px solid #dee2e6;
+    border-radius: .4rem; padding: .6rem .9rem; background: #fbfbfb;
+  }
+  [data-bs-theme="dark"] details.solucion { background: #16181d; border-color: #2a2d34; }
+  details.solucion summary { cursor: pointer; font-weight: 600; color: #495057; }
+  [data-bs-theme="dark"] details.solucion summary { color: #adb5bd; }
+
+  .btn-tema { position: fixed; top: 1rem; right: 1rem; z-index: 1040; }
+
+  .portada {
+    background: linear-gradient(135deg, var(--acento) 0%, var(--acento-2) 100%);
+    color: #fff; padding: 3rem 2rem; border-radius: 1rem; margin-bottom: 2rem;
+  }
+  .portada h1 { font-size: 2.2rem; }
+
+  .flujo {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: .5rem;
+    padding: 1rem 1.25rem;
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: .85rem;
+    line-height: 1.5;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  [data-bs-theme="dark"] .flujo { background: #16181d; border-color: #2a2d34; }
+</style>
+    <link rel="stylesheet" href="../../../public/java-manual.css">
+</head>
+<body class="java-manual">
+
+<button class="btn btn-outline-secondary btn-sm btn-tema" id="btnTema" title="Cambiar tema">
+  <i class="bi bi-moon-stars"></i>
+</button>
+
+<button class="btn btn-primary btn-sm btn-menu" id="btnMenu" type="button"
+        aria-controls="sidebar" aria-expanded="false">
+  <i class="bi bi-list"></i>
+  <span>Menú</span>
+</button>
+
+<nav class="sidebar" id="sidebar" aria-label="Navegación del bloque 3">
+  <div class="px-2 pb-2 border-bottom">
+    <button class="btn btn-outline-secondary btn-sm btn-cerrar-menu" id="btnCerrarMenu"
+            type="button" aria-label="Cerrar menú">
+      <i class="bi bi-x-lg"></i>
+    </button>
+    <strong style="color:var(--acento)">Manual Java</strong><br>
+    <small class="text-secondary">Bloque 3 · Repetición</small>
+  </div>
+  <a class="nav-link mt-2" href="index.html">
+    <i class="bi bi-house-door me-1"></i> Volver al índice
+  </a>
+
+  <h6>Antes de empezar</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#bienvenida-3">Bienvenida al Bloque 3</a></li>
+    <li><a class="nav-link" href="#anticipo-ciclos">Vas a combinar decisiones y repetición</a></li>
+  </ul>
+
+  <h6>Elegir entre muchos</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#switch">El <code>switch</code></a></li>
+    <li><a class="nav-link" href="#simulacion-switch">Simulación: cómo se recorre</a></li>
+    <li><a class="nav-link" href="#break-switch"><code>break</code> en <code>switch</code></a></li>
+    <li><a class="nav-link" href="#switch-vs-else-if">¿<code>switch</code> o <code>else if</code>?</a></li>
+    <li><a class="nav-link" href="#ejemplos-switch">Ejemplos progresivos</a></li>
+    <li><a class="nav-link" href="#errores-switch">Errores comunes</a></li>
+    <li><a class="nav-link" href="#ejercicios-switch">Ejercicios de <code>switch</code></a></li>
+  </ul>
+
+  <h6>Repetir mientras</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#while">El <code>while</code></a></li>
+    <li><a class="nav-link" href="#simulacion-while">Simulación: cómo se ejecuta</a></li>
+    <li><a class="nav-link" href="#contador">Contadores y acumuladores</a></li>
+    <li><a class="nav-link" href="#bucles-infinitos">Bucles infinitos</a></li>
+    <li><a class="nav-link" href="#ejemplos-while">Ejemplos progresivos</a></li>
+    <li><a class="nav-link" href="#errores-while">Errores comunes</a></li>
+    <li><a class="nav-link" href="#ejercicios-while">Ejercicios de <code>while</code></a></li>
+  </ul>
+
+  <h6>Repetir al menos una vez</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#do-while">El <code>do while</code></a></li>
+    <li><a class="nav-link" href="#while-vs-do-while"><code>while</code> vs <code>do while</code></a></li>
+    <li><a class="nav-link" href="#simulacion-do-while">Simulación</a></li>
+    <li><a class="nav-link" href="#ejemplos-do-while">Ejemplos progresivos</a></li>
+    <li><a class="nav-link" href="#errores-do-while">Errores comunes</a></li>
+    <li><a class="nav-link" href="#ejercicios-do-while">Ejercicios de <code>do while</code></a></li>
+  </ul>
+
+  <h6>Combinar ciclos y decisiones</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#combinar-3">Ciclos con <code>if</code> adentro</a></li>
+    <li><a class="nav-link" href="#ejemplos-combinar">Ejemplos progresivos</a></li>
+    <li><a class="nav-link" href="#ejercicios-combinar">Ejercicios</a></li>
+  </ul>
+
+  <h6>Cierre del bloque</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#reto-final-3">Reto del Bloque 3</a></li>
+    <li><a class="nav-link" href="#resumen-3">Lo que llevas construido</a></li>
+  </ul>
+</nav>
+
+<main class="contenido">
+
+  <div class="portada">
+    <h1>Repetición en Java</h1>
+    <p class="mb-0 fs-5">Bloque 3 — <code>switch</code>, <code>while</code>, <code>do while</code></p>
+    <p class="mb-0"><small>Hasta ahora tu programa decidía. Aquí empieza a repetir.</small></p>
+  </div>
+
+  <!-- ============================================================ -->
+  <section id="bienvenida-3">
+    <h2>Bienvenida al Bloque 3</h2>
+
+    <p>En el Bloque 2 aprendiste a hacer que tu programa tomara decisiones. Un <code>if</code> ejecuta algo si se cumple una condición. Un <code>else if</code> elige entre varios caminos. Con eso ya puedes escribir programas que responden a distintas situaciones, no siempre lo mismo.</p>
+
+    <p>Pero hay algo que todavía no puedes hacer: <strong>repetir</strong>. Si quisieras mostrar los números del 1 al 100, hasta ahora tendrías que escribir cien <code>println</code>. Si quisieras preguntarle al usuario si quiere seguir, tendrías que repetir la misma pregunta una y otra vez a mano. Si quisieras sumar los primeros N números, no habría forma de hacerlo sin saber N de antemano.</p>
+
+    <p>Este bloque cambia eso. Vas a aprender tres piezas nuevas:</p>
+
+    <ul>
+      <li><strong><code>switch</code></strong> — una forma alternativa y a veces más clara de elegir entre muchas opciones cuando todas comparan el mismo dato contra un valor exacto.</li>
+      <li><strong><code>while</code></strong> — repetir algo <em>mientras</em> se cumpla una condición, evaluándola antes de cada vuelta.</li>
+      <li><strong><code>do while</code></strong> — repetir algo <em>al menos una vez</em>, y después seguir mientras se cumpla la condición.</li>
+    </ul>
+
+    <p>Los ciclos (<code>while</code> y <code>do while</code>) son probablemente la pieza que más va a cambiar tu forma de escribir programas. Con ellos, una sola línea de código puede hacer que algo se repita mil veces. Y con ellos llega, por primera vez en el manual, la sensación de que un programa <em>trabaja solo</em>. Es una de las cosas más satisfactorias de programar.</p>
+
+    <p>Pero también es donde muchas personas se atoran, porque aparece una nueva dificultad: <strong>hay que imaginar el paso del tiempo</strong>. Un <code>if</code> lo ves y ya sabes qué pasa. Un <code>while</code> tenés que imaginarlo ejecutándose varias veces, y eso cuesta al principio. Es normal. Vamos a ir despacio.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="anticipo-ciclos">
+    <h2>Vas a combinar decisiones y repetición (léelo antes de que pase)</h2>
+
+    <p>En el Bloque 2 te anticipé un bajón específico: el de combinar variables con decisiones. En este bloque viene uno más grande, y quiero que llegues preparado.</p>
+
+    <p>El momento más difícil del manual no es <code>while</code> solo. Tampoco es <code>if</code> solo. Es cuando empiezas a <strong>meter decisiones dentro de ciclos</strong>: un <code>if</code> adentro de un <code>while</code>, o un <code>while</code> adentro de un <code>if</code>. Ahí las dos piezas que ya sabías por separado se tienen que reorganizar para funcionar juntas, y el cerebro tiene que empezar a <em>simular un proceso que se repite</em>, no solo un camino que se recorre una vez.</p>
+
+    <p>Cuando llegues a esa parte del bloque, es probable que sientas una de estas cosas:</p>
+
+    <ul>
+      <li>"No entiendo cuándo se ejecuta esto y cuándo no".</li>
+      <li>"Sé lo que hace cada pieza sola, pero juntas me pierdo".</li>
+      <li>"Pensé que ya sabía <code>if</code>, pero ahora no sé si entendí bien".</li>
+    </ul>
+
+    <p>Ninguna de esas sensaciones significa que hayas retrocedido. Significan que tu mente está tratando de sostener al mismo tiempo la idea de <em>decisión</em> y la idea de <em>repetición</em>, y eso no es algo que el cerebro haga naturalmente: hay que construirlo. A nadie le sale de fábrica.</p>
+
+    <div class="caja caja-anticipa">
+      <h5>Anticipa esto antes de que pase</h5>
+      <p class="mb-0">Cuando sientas que "se te olvidó <code>if</code>" al meter un <code>if</code> dentro de un <code>while</code>, no se te olvidó. Lo estás poniendo a trabajar en un contexto más complejo. Dale tiempo. Haz simulaciones a mano, escribe las vueltas en papel, marca los valores de las variables en cada paso. En dos o tres días, se va a sentir claro. Esa es la señal de que aprendiste algo que antes no sabías.</p>
+    </div>
+
+    <p>Este manual vuelve a hablar de esto en el cierre del bloque, cuando ya hayas pasado por la experiencia. Aquí lo lees <strong>antes</strong>, para que cuando aparezca lo reconozcas en lugar de pensar que estás fallando.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="switch">
+    <h2>El <code>switch</code>: elegir entre muchas opciones</h2>
+
+    <h3>Antes de Java (situación cotidiana)</h3>
+
+    <p>Piensa en un menú de restaurante con opciones numeradas. El mesero dice "opción 1, 2 o 3". Si el cliente dice "1", se sirve sopa. Si dice "2", se sirve ensalada. Si dice "3", se sirve pasta. Si dice cualquier otra cosa, se avisa que la opción no existe.</p>
+
+    <p>Cada opción es un caso específico del mismo dato (el número del menú). El cliente no dice "quiero algo entre el 1 y el 3", dice un número exacto. Y el mesero reacciona a ese número exacto. No evalúa rangos, ni condiciones compuestas: mira el número y actúa.</p>
+
+    <p>Esa estructura —un dato contra varios valores exactos— es exactamente la que resuelve el <code>switch</code>.</p>
+
+    <h3>La idea en español</h3>
+
+    <p>Un <code>switch</code> significa: <em>"según el valor de esto, haz una de estas varias cosas específicas"</em>. Se parece a una cadena de <code>else if</code>, pero solo se usa cuando cada caso compara <strong>el mismo dato</strong> contra un <strong>valor exacto</strong>. No sirve para rangos. No sirve para condiciones compuestas. Si tu condición es "<code>nota &gt;= 7 &amp;&amp; nota &lt;= 9</code>", el <code>switch</code> no es la pieza correcta: ahí va <code>if / else if</code>. Si tu condición es "el día es el 3", el <code>switch</code> sí.</p>
+
+    <h3>La nueva pieza</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">switch</span> (variable) {
+    <span class="kw">case</span> valor1:
+        <span class="cmt">// hacer algo</span>
+        <span class="kw">break</span>;
+    <span class="kw">case</span> valor2:
+        <span class="cmt">// hacer otra cosa</span>
+        <span class="kw">break</span>;
+    <span class="kw">default</span>:
+        <span class="cmt">// hacer algo si no coincide con ningún caso</span>
+}</pre>
+    </div>
+
+    <p>Un ejemplo concreto con el número del día:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> dia = <span class="num">3</span>;
+
+<span class="kw">switch</span> (dia) {
+    <span class="kw">case</span> <span class="num">1</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Lunes"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">2</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Martes"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">3</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Miércoles"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">default</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Día no válido"</span>);
+}</pre>
+    </div>
+
+    <p>Lee eso en español: "según el valor de <code>dia</code>: si es 1, muestra Lunes; si es 2, Martes; si es 3, Miércoles; en cualquier otro caso, muestra Día no válido". Con <code>dia = 3</code>, imprime "Miércoles".</p>
+
+    <h3>Anatomía de un <code>switch</code></h3>
+
+    <ul>
+      <li><strong><code>switch (variable)</code></strong> — la variable o expresión cuyo valor se va a comparar. En Java moderno puede ser <code>int</code>, <code>char</code>, <code>String</code>, o tipos <code>enum</code>. No puede ser <code>double</code> ni <code>boolean</code>.</li>
+      <li><strong><code>case valor:</code></strong> — cada caso. Compara el valor de arriba con este valor exacto. Si coincide, empieza a ejecutar desde aquí.</li>
+      <li><strong><code>break;</code></strong> — <em>termina el switch</em>. Sin esto, Java sigue ejecutando los siguientes casos también ("fall through"), que casi nunca es lo que quieres. Volvemos a esto en un momento.</li>
+      <li><strong><code>default:</code></strong> — el caso por defecto. Se ejecuta si ningún otro coincidió. Es opcional, pero casi siempre conviene tenerlo.</li>
+    </ul>
+
+    <h3>El detalle que sorprende: <code>switch</code> en Java compara con <code>==</code>, no con <code>.equals()</code></h3>
+
+    <p>Cuando uses un <code>switch</code> sobre un <code>String</code>, Java internamente usa <code>.equals()</code>, no <code>==</code>. Es decir, compara contenido, no referencia. Esto es distinto a lo que pasa cuando tú escribes <code>str1 == str2</code> a mano. Puedes confiar en que <code>switch (nombre) { case "Ana": ... }</code> va a funcionar bien con strings, porque Java lo maneja correctamente por dentro.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="simulacion-switch">
+    <h2>Simulación: cómo se recorre un <code>switch</code></h2>
+
+    <p>Vamos a ver paso a paso qué hace Java al ejecutar el ejemplo del día con distintos valores. Lo importante aquí es entender que Java <strong>compara el valor contra cada caso en orden</strong>, hasta encontrar uno que coincida.</p>
+
+    <h3>El programa</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> dia = <span class="num">3</span>;
+
+<span class="kw">switch</span> (dia) {
+    <span class="kw">case</span> <span class="num">1</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Lunes"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">2</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Martes"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">3</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Miércoles"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">default</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Día no válido"</span>);
+}</pre>
+    </div>
+
+    <h3>Caso 1: <code>dia = 3</code></h3>
+
+    <div class="simulacion">
+      <table class="table table-bordered">
+        <thead><tr><th>Paso</th><th>Qué hace Java</th><th>Resultado</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Compara <code>dia</code> (3) con <code>case 1</code></td><td>no coincide</td></tr>
+          <tr><td>2</td><td>Compara <code>dia</code> con <code>case 2</code></td><td>no coincide</td></tr>
+          <tr><td>3</td><td>Compara <code>dia</code> con <code>case 3</code></td><td><strong>coincide</strong>, entra aquí</td></tr>
+          <tr><td>4</td><td>Ejecuta el <code>println</code>: "Miércoles"</td><td>salida: <code>Miércoles</code></td></tr>
+          <tr><td>5</td><td>Encuentra el <code>break</code></td><td>sale del <code>switch</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Caso 2: <code>dia = 7</code></h3>
+
+    <div class="simulacion">
+      <table class="table table-bordered">
+        <thead><tr><th>Paso</th><th>Qué hace Java</th><th>Resultado</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Compara <code>dia</code> con <code>case 1</code></td><td>no coincide</td></tr>
+          <tr><td>2</td><td>Compara <code>dia</code> con <code>case 2</code></td><td>no coincide</td></tr>
+          <tr><td>3</td><td>Compara <code>dia</code> con <code>case 3</code></td><td>no coincide</td></tr>
+          <tr><td>4</td><td>Ningún <code>case</code> coincidió</td><td>entra en <code>default</code></td></tr>
+          <tr><td>5</td><td>Ejecuta <code>println</code>: "Día no válido"</td><td>salida: <code>Día no válido</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="caja caja-detente">
+      <h5>Detente un momento y piensa</h5>
+      <p class="mb-0">Antes de seguir, simula con <code>dia = 1</code>. ¿Cuántas comparaciones hace Java antes de entrar al caso? ¿Sale por <code>break</code> o cae al <code>default</code>? Y con <code>dia = 0</code>: ¿cuál <code>case</code> coincide? Predice, después verifica mentalmente. Esa es la práctica que hace la diferencia.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="break-switch">
+    <h2>El <code>break</code> en <code>switch</code> (y qué pasa si lo olvidas)</h2>
+
+    <p>Este es el error número uno con <code>switch</code>, y merece su propia sección. Cuando un <code>case</code> coincide, Java empieza a ejecutar desde ahí y <strong>sigue ejecutando todo lo que venga después</strong>, hasta encontrar un <code>break</code> o hasta el final del <code>switch</code>. A esto se le llama <em>fall through</em>.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> dia = <span class="num">2</span>;
+
+<span class="kw">switch</span> (dia) {
+    <span class="kw">case</span> <span class="num">1</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Lunes"</span>);
+    <span class="kw">case</span> <span class="num">2</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Martes"</span>);
+    <span class="kw">case</span> <span class="num">3</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Miércoles"</span>);
+    <span class="kw">default</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Día no válido"</span>);
+}</pre>
+    </div>
+
+    <p>Con <code>dia = 2</code> y sin ningún <code>break</code>, la salida es:</p>
+
+    <div class="flujo">Martes
+Miércoles
+Día no válido</div>
+
+    <p>Java entra en el <code>case 2</code>, ejecuta "Martes", y como no hay <code>break</code>, <em>sigue</em> con el <code>case 3</code> y con el <code>default</code>. No los compara: los ejecuta directamente, porque ya entró al <code>switch</code> y solo va a salir cuando encuentre un <code>break</code> o llegue al final.</p>
+
+    <p>Esto confunde mucho al principio, pero tiene una razón de ser: <strong>a veces quieres que varios <code>case</code> compartan el mismo bloque de código</strong>. Por ejemplo:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">switch</span> (dia) {
+    <span class="kw">case</span> <span class="num">1</span>:
+    <span class="kw">case</span> <span class="num">2</span>:
+    <span class="kw">case</span> <span class="num">3</span>:
+    <span class="kw">case</span> <span class="num">4</span>:
+    <span class="kw">case</span> <span class="num">5</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Día laborable"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">6</span>:
+    <span class="kw">case</span> <span class="num">7</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Fin de semana"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">default</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Día no válido"</span>);
+}</pre>
+    </div>
+
+    <p>Aquí los <code>case 1, 2, 3, 4, 5</code> están "vacíos" (sin código propio) y caen al mismo bloque, que imprime "Día laborable". Si <code>dia</code> vale 1, 2, 3, 4 o 5, todos imprimen lo mismo. Esto se llama <em>fall through intencional</em>, y es una de las razones por las que <code>switch</code> existe: agrupa casos sin repetir el código.</p>
+
+    <p>Lo que <strong>no</strong> quieres es fall through accidental. Regla práctica: <strong>pon un <code>break</code> al final de cada caso, salvo cuando estés agrupando deliberadamente</strong>. Si no estás seguro, pon el <code>break</code>. Si el código se comporta raro, sospecha de un <code>break</code> olvidado.</p>
+
+    <div class="caja caja-error">
+      <h5>Si un <code>switch</code> imprime más de lo que esperabas</h5>
+      <p class="mb-0">Es casi siempre esto. Revisa cada caso y pregúntate: "¿este caso debería seguir ejecutándose si entra?". Si la respuesta es no, ponle <code>break</code>. Es el mismo tipo de bloqueo que un <code>;</code> olvidado después de un <code>if</code>: el código compila, pero hace algo distinto a lo que querías.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="switch-vs-else-if">
+    <h2>¿<code>switch</code> o <code>else if</code>?</h2>
+
+    <p>Los dos pueden expresar la misma idea muchas veces, pero no son intercambiables en todos los casos. La regla es simple:</p>
+
+    <ul>
+      <li><strong><code>switch</code></strong>: cuando comparas <em>el mismo dato</em> contra <em>varios valores exactos</em>. Por ejemplo, un <code>int dia</code> contra <code>1, 2, 3, 4, 5, 6, 7</code>. Un <code>String</code> contra <code>"rojo", "verde", "azul"</code>.</li>
+      <li><strong><code>else if</code></strong>: cuando las condiciones son <em>rangos</em>, <em>combinaciones lógicas</em>, o comparan <em>cosas distintas</em>. Por ejemplo, <code>nota &gt;= 9</code>, <code>nota &gt;= 7 &amp;&amp; nota &lt; 9</code>, <code>edad &gt;= 18 &amp;&amp; tieneIdentificacion</code>.</li>
+    </ul>
+
+    <p>Veamos la misma lógica escrita de dos formas para notar la diferencia:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Con else if (funciona, pero es más largo)</span>
+<span class="kw">if</span> (dia == <span class="num">1</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Lunes"</span>);
+} <span class="kw">else if</span> (dia == <span class="num">2</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Martes"</span>);
+} <span class="kw">else if</span> (dia == <span class="num">3</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Miércoles"</span>);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Día no válido"</span>);
+}
+
+<span class="cmt">// Con switch (más claro cuando hay muchos casos)</span>
+<span class="kw">switch</span> (dia) {
+    <span class="kw">case</span> <span class="num">1</span>: <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Lunes"</span>); <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">2</span>: <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Martes"</span>); <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">3</span>: <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Miércoles"</span>); <span class="kw">break</span>;
+    <span class="kw">default</span>: <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Día no válido"</span>);
+}</pre>
+    </div>
+
+    <p>Los dos hacen lo mismo. Pero cuando tienes cinco, ocho, quince casos que comparan el mismo dato contra valores exactos, el <code>switch</code> se lee mucho mejor: se ve de un vistazo cuántos casos hay y qué hace cada uno. El <code>else if</code> se vuelve una torre de líneas que cuesta seguir.</p>
+
+    <p>Ninguno de los dos es "el correcto". Son herramientas distintas para problemas ligeramente distintos. Cuando dudes, pregúntate: <em>¿estoy comparando el mismo dato contra valores exactos?</em> Si sí, <code>switch</code>. Si no, <code>else if</code>.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejemplos-switch">
+    <h2>Ejemplos progresivos con <code>switch</code></h2>
+
+    <h3>Ejemplo 1 — Muy simple: vocal o consonante</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">char</span> letra = <span class="str">'a'</span>;
+
+<span class="kw">switch</span> (letra) {
+    <span class="kw">case</span> <span class="str">'a'</span>:
+    <span class="kw">case</span> <span class="str">'e'</span>:
+    <span class="kw">case</span> <span class="str">'i'</span>:
+    <span class="kw">case</span> <span class="str">'o'</span>:
+    <span class="kw">case</span> <span class="str">'u'</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Es vocal"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">default</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Es consonante o símbolo"</span>);
+}</pre>
+    </div>
+    <p>Fíjate en que los primeros cuatro <code>case</code> no tienen código propio: caen al bloque que dice "Es vocal". Esto es <em>fall through intencional</em>, y es una de las formas más elegantes que tiene <code>switch</code>.</p>
+
+    <h3>Ejemplo 2 — Días de la semana, con agrupación</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> dia = <span class="num">6</span>;
+
+<span class="kw">switch</span> (dia) {
+    <span class="kw">case</span> <span class="num">1</span>:
+    <span class="kw">case</span> <span class="num">2</span>:
+    <span class="kw">case</span> <span class="num">3</span>:
+    <span class="kw">case</span> <span class="num">4</span>:
+    <span class="kw">case</span> <span class="num">5</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Día laborable"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">6</span>:
+    <span class="kw">case</span> <span class="num">7</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Fin de semana"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">default</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Día no válido"</span>);
+}</pre>
+    </div>
+    <p>Con <code>dia = 6</code>, imprime "Fin de semana". Con <code>dia = 3</code>, "Día laborable". Con <code>dia = 10</code>, "Día no válido". Ahora sí, cada grupo de casos tiene un <code>break</code> al final, así que no hay fall through accidental.</p>
+
+    <h3>Ejemplo 3 — <code>switch</code> sobre un <code>String</code></h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span> color = <span class="str">"amarillo"</span>;
+
+<span class="kw">switch</span> (color) {
+    <span class="kw">case</span> <span class="str">"rojo"</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Alto"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">"amarillo"</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Precaución"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">"verde"</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Siga"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">default</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Color no reconocido"</span>);
+}</pre>
+    </div>
+    <p>Con <code>switch</code> sobre <code>String</code>, cada <code>case</code> lleva el texto entre comillas dobles. Java compara por contenido, así que funciona bien. Y algo importante: en Java, los textos son <em>sensibles a mayúsculas</em>. "Rojo" no coincide con <code>case "rojo"</code>. Si quisieras ignorar mayúsculas, tendrías que normalizar el texto antes (con <code>toLowerCase()</code>, por ejemplo).</p>
+
+    <h3>Ejemplo 4 — Calculadora simple</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">double</span> a = <span class="num">10</span>;
+<span class="kw">double</span> b = <span class="num">3</span>;
+<span class="kw">char</span> operacion = <span class="str">'/'</span>;
+<span class="kw">double</span> resultado;
+
+<span class="kw">switch</span> (operacion) {
+    <span class="kw">case</span> <span class="str">'+'</span>:
+        resultado = a + b;
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Suma: "</span> + resultado);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'-'</span>:
+        resultado = a - b;
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Resta: "</span> + resultado);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'*'</span>:
+        resultado = a * b;
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Multiplicación: "</span> + resultado);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'/'</span>:
+        <span class="kw">if</span> (b != <span class="num">0</span>) {
+            resultado = a / b;
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"División: "</span> + resultado);
+        } <span class="kw">else</span> {
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Error: división entre cero"</span>);
+        }
+        <span class="kw">break</span>;
+    <span class="kw">default</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Operación no válida"</span>);
+}</pre>
+    </div>
+    <p>Este ejemplo combina <code>switch</code> con <code>if</code> dentro del caso de la división. Es muy común: cada caso del <code>switch</code> puede tener lógica propia, incluso decisiones. Aquí, el caso <code>'/'</code> verifica que <code>b</code> no sea cero antes de dividir. Si fuera cero, muestra un error. Estás usando las piezas de bloques anteriores junto con la nueva.</p>
+
+    <h3>Ejemplo 5 — Menú de opciones con varios niveles</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> opcion = <span class="num">2</span>;
+
+<span class="kw">switch</span> (opcion) {
+    <span class="kw">case</span> <span class="num">1</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Consulta de saldo"</span>);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Tu saldo es: $1500"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">2</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Retiro de efectivo"</span>);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Selecciona el monto deseado"</span>);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"1) $100  2) $500  3) $1000"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">3</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Depósito"</span>);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Ingresa el monto a depositar"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">4</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Saliendo del sistema..."</span>);
+        <span class="kw">break</span>;
+    <span class="kw">default</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Opción no válida"</span>);
+}</pre>
+    </div>
+    <p>Este es el tipo de programa donde <code>switch</code> brilla: un menú de opciones numeradas. Con <code>else if</code> también funcionaría, pero con <code>switch</code> se ve de inmediato cuántas opciones hay y qué hace cada una. Fíjate además en que cada caso puede tener varias instrucciones, no solo una.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="errores-switch">
+    <h2>Errores comunes con <code>switch</code></h2>
+
+    <h3>1. Olvidar <code>break</code> y caer en <em>fall through</em> accidental</h3>
+    <p>Ya lo cubrimos arriba, pero es tan frecuente que conviene repetirlo: si un <code>switch</code> imprime más de lo que esperabas, casi siempre es esto. Pon <code>break</code> al final de cada caso que no agrupe deliberadamente con el siguiente.</p>
+
+    <h3>2. Usar <code>switch</code> con rangos</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// ESTO NO ES POSIBLE:</span>
+<span class="kw">switch</span> (edad) {
+    <span class="kw">case</span> edad &gt;= <span class="num">18</span>:   <span class="cmt">// ← error de sintaxis</span>
+        ...
+}
+
+<span class="cmt">// Los case solo pueden comparar valores exactos:</span>
+<span class="kw">case</span> <span class="num">18</span>:   <span class="cmt">// ✓ esto sí</span>
+<span class="kw">case</span> <span class="num">19</span>:   <span class="cmt">// ✓ esto también</span></pre>
+    </div>
+
+    <p>Si tu caso es "mayor o igual a 18", <code>switch</code> no es la herramienta. Usa <code>if</code>. El <code>switch</code> es solo para valores exactos.</p>
+
+    <h3>3. Usar <code>double</code> o <code>boolean</code> en <code>switch</code></h3>
+
+    <p>Java no permite <code>switch</code> sobre <code>double</code> ni <code>boolean</code>. Solo sobre tipos "discretos": <code>int</code>, <code>char</code>, <code>String</code>, <code>enum</code>. Si tienes un <code>double</code> o un <code>boolean</code> y quieres ramificar, usa <code>if / else if</code>.</p>
+
+    <h3>4. Olvidar los dos puntos después del <code>case</code></h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">case</span> <span class="num">1</span>    <span class="cmt">// ← falta el ":"</span>
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Lunes"</span>);
+    <span class="kw">break</span>;</pre>
+    </div>
+
+    <p>Cada <code>case</code> y el <code>default</code> llevan dos puntos al final. Si te falta, Java te da error de sintaxis y no compila. Es una de esas cosas que uno olvida por costumbre de no ponerlos en otro sitio.</p>
+
+    <h3>5. Asumir que <code>default</code> es obligatorio</h3>
+
+    <p>Técnicamente puedes omitir el <code>default</code>. El programa compila y corre. Pero entonces, si el valor no coincide con ningún caso, el <code>switch</code> simplemente se salta y sigue con la siguiente instrucción. Eso es válido a veces, pero muchas veces esconde un bug: te olvidaste de manejar un caso que sí debería tener una respuesta. Como regla general, <strong>pon siempre un <code>default</code></strong>, aunque sea con un mensaje de "no reconocido". Te obliga a pensar si tu lógica cubre todo.</p>
+
+    <h3>6. Confundir <code>switch</code> con <code>if</code> anidados</h3>
+
+    <p>El <code>switch</code> no reemplaza al <code>if</code>. Son herramientas distintas. Si te encuentras escribiendo un <code>switch</code> con <code>case</code> que hacen cosas muy distintas y con condiciones internas, probablemente estás forzando la pieza donde no corresponde. Vuelve al análisis en español: ¿estás eligiendo entre varios valores exactos del mismo dato? Si sí, <code>switch</code>. Si estás tomando decisiones encadenadas, <code>if / else if</code>.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejercicios-switch">
+    <h2>Ejercicios de <code>switch</code></h2>
+
+    <h3><span class="nivel nivel-reconocer">Reconocer</span></h3>
+    <p>¿Qué imprime este programa con <code>x = 2</code>?</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> x = <span class="num">2</span>;
+
+<span class="kw">switch</span> (x) {
+    <span class="kw">case</span> <span class="num">1</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"uno"</span>);
+    <span class="kw">case</span> <span class="num">2</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"dos"</span>);
+    <span class="kw">case</span> <span class="num">3</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"tres"</span>);
+    <span class="kw">default</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"otro"</span>);
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-0">Imprime <code>dos</code>, <code>tres</code> y <code>otro</code>, cada uno en su propia línea. Esto es <em>fall through</em>: una vez que entra en <code>case 2</code>, sigue ejecutando hacia abajo porque no hay <code>break</code>. Es exactamente el error que acabamos de estudiar.</p>
+    </details>
+
+    <h3><span class="nivel nivel-completar">Completar</span></h3>
+    <p>Completa el <code>switch</code> para que, dado <code>opcion</code>, muestre el nombre de la operación correspondiente: 1 → sumar, 2 → restar, 3 → multiplicar, cualquier otro → "opción no válida".</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> opcion = <span class="num">2</span>;
+
+<span class="kw">switch</span> (opcion) {
+    <span class="cmt">// tu código aquí</span>
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">switch</span> (opcion) {
+    <span class="kw">case</span> <span class="num">1</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Sumar"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">2</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Restar"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">3</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Multiplicar"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">default</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Opción no válida"</span>);
+}</pre>
+      </div>
+      <p class="mb-0">Cada caso tiene <code>break</code> al final. El <code>default</code> cubre lo que no coincide con ninguno. Nota: los <code>break</code> aquí no tienen punto y coma al final del bloque en todas las versiones de Java, pero es común escribirlo <code>break;</code> con punto y coma. Los dos son válidos según la versión.</p>
+    </details>
+
+    <h3><span class="nivel nivel-modificar">Modificar</span></h3>
+    <p>Este programa debería mostrar "Verano" si el mes es junio, julio o agosto, pero no funciona bien. Encuentra y corrige el error.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> mes = <span class="num">7</span>;
+
+<span class="kw">switch</span> (mes) {
+    <span class="kw">case</span> <span class="num">6</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Verano"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">7</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Verano"</span>);
+    <span class="kw">case</span> <span class="num">8</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Verano"</span>);
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-2">Hay dos problemas: repetir el mismo mensaje en tres <code>case</code> es innecesario, y falta un <code>break</code> después del <code>case 7</code> (lo cual, en este caso, no rompe el programa porque imprimiría tres veces "Verano" con <code>mes = 7</code>, pero confunde). Una forma más limpia:</p>
+      <div class="bloque-codigo">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">switch</span> (mes) {
+    <span class="kw">case</span> <span class="num">6</span>:
+    <span class="kw">case</span> <span class="num">7</span>:
+    <span class="kw">case</span> <span class="num">8</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Verano"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">default</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Otra estación"</span>);
+}</pre>
+      </div>
+      <p class="mb-0">Aquí los tres <code>case</code> están vacíos y caen al mismo bloque. Es un ejemplo de <em>fall through intencional</em>: tres casos distintos, mismo comportamiento.</p>
+    </details>
+
+    <h3><span class="nivel nivel-construir">Construir</span></h3>
+    <p>Escribe un programa que, dada una variable <code>char categoria</code> con valor <code>'A'</code>, <code>'B'</code> o <code>'C'</code>, muestre el sueldo correspondiente:</p>
+    <ul>
+      <li><code>'A'</code> → 2500</li>
+      <li><code>'B'</code> → 1800</li>
+      <li><code>'C'</code> → 1200</li>
+      <li>Cualquier otro → "Categoría no válida"</li>
+    </ul>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">char</span> categoria = <span class="str">'B'</span>;
+
+<span class="kw">switch</span> (categoria) {
+    <span class="kw">case</span> <span class="str">'A'</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Sueldo: 2500"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'B'</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Sueldo: 1800"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'C'</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Sueldo: 1200"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">default</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Categoría no válida"</span>);
+}</pre>
+      </div>
+      <p class="mb-0">Con <code>char</code>, los valores de cada <code>case</code> van entre comillas simples (<code>'A'</code>), no dobles. Las comillas dobles son para <code>String</code>. Este es un detalle que a veces se confunde cuando se alterna entre tipos.</p>
+    </details>
+
+    <h3><span class="nivel nivel-combinar">Combinar</span></h3>
+    <p>Escribe un programa que simule una calculadora simple. Tienes tres variables: <code>double a</code>, <code>double b</code>, <code>char operacion</code>. Según el valor de <code>operacion</code> (<code>'+'</code>, <code>'-'</code>, <code>'*'</code>, <code>'/'</code>), muestra el resultado. Si la operación es <code>'/'</code> y <code>b</code> es 0, muestra un error. Si la operación no es ninguna de las cuatro, muestra "Operación no válida".</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">double</span> a = <span class="num">20.0</span>;
+<span class="kw">double</span> b = <span class="num">4.0</span>;
+<span class="kw">char</span> operacion = <span class="str">'/'</span>;
+
+<span class="kw">switch</span> (operacion) {
+    <span class="kw">case</span> <span class="str">'+'</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Resultado: "</span> + (a + b));
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'-'</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Resultado: "</span> + (a - b));
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'*'</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Resultado: "</span> + (a * b));
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="str">'/'</span>:
+        <span class="kw">if</span> (b == <span class="num">0</span>) {
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Error: no se puede dividir entre cero"</span>);
+        } <span class="kw">else</span> {
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Resultado: "</span> + (a / b));
+        }
+        <span class="kw">break</span>;
+    <span class="kw">default</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Operación no válida"</span>);
+}</pre>
+      </div>
+      <p class="mb-0">Cada caso tiene una sola instrucción, salvo el de la división, que tiene un <code>if</code> adentro. Este es el primer ejemplo del bloque donde combinas <code>switch</code> con <code>if</code> anidado. No es una combinación complicada, pero es la primera señal de que las piezas empiezan a usarse juntas.</p>
+    </details>
+
+    <h3><span class="nivel nivel-crear">Crear</span></h3>
+    <p>Escribe un programa que, dado un mes (1 a 12), muestre la estación del año correspondiente (en el hemisferio norte):</p>
+    <ul>
+      <li>diciembre, enero, febrero → Invierno</li>
+      <li>marzo, abril, mayo → Primavera</li>
+      <li>junio, julio, agosto → Verano</li>
+      <li>septiembre, octubre, noviembre → Otoño</li>
+      <li>cualquier otro → "Mes no válido"</li>
+    </ul>
+    <p>Usa <code>switch</code> aprovechando el <em>fall through</em> intencional para agrupar los meses de cada estación.</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> mes = <span class="num">4</span>;
+
+<span class="kw">switch</span> (mes) {
+    <span class="kw">case</span> <span class="num">12</span>:
+    <span class="kw">case</span> <span class="num">1</span>:
+    <span class="kw">case</span> <span class="num">2</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Invierno"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">3</span>:
+    <span class="kw">case</span> <span class="num">4</span>:
+    <span class="kw">case</span> <span class="num">5</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Primavera"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">6</span>:
+    <span class="kw">case</span> <span class="num">7</span>:
+    <span class="kw">case</span> <span class="num">8</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Verano"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="num">9</span>:
+    <span class="kw">case</span> <span class="num">10</span>:
+    <span class="kw">case</span> <span class="num">11</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Otoño"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">default</span>:
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Mes no válido"</span>);
+}</pre>
+      </div>
+      <p class="mb-0">Con <code>mes = 4</code>, imprime "Primavera". Los tres primeros <code>case</code> del bloque de invierno están vacíos: solo el último tiene el código y el <code>break</code>. Si <code>mes</code> fuera 1, Java entraría en <code>case 1</code>, no haría nada, y caería al <code>case 2</code>, tampoco nada, y llegaría al bloque con código. Es exactamente el <em>fall through intencional</em>.</p>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="while">
+    <h2>El <code>while</code>: repetir mientras se cumpla algo</h2>
+
+    <h3>Antes de Java (situación cotidiana)</h3>
+
+    <p>Piensa en un lavaplatos automático. Le pones los trastes, presionas "start", y el aparato hace algo parecido a esto: mientras haya agua en el depósito, sigue lavando. Cuando ya no hay agua, se detiene. No lava una cantidad fija de veces: lava <em>mientras</em> se cumpla una condición. Si hay mucha agua, lava más tiempo. Si hay poca, lava menos. La cantidad de vueltas no la decides tú de antemano: la decide la condición.</p>
+
+    <p>O piensa en un ascensor: mientras la puerta esté abierta, sigue sonando una alarma. Cuando la puerta se cierra, la alarma se detiene. Otra vez: repetición que depende de una condición, no de un número fijo.</p>
+
+    <p>Esta es exactamente la estructura del <code>while</code>: repetir algo <strong>mientras</strong> se cumpla una condición, y detenerse cuando deje de cumplirse.</p>
+
+    <h3>La idea en español</h3>
+
+    <p>Un <code>while</code> significa: <em>"mientras esta condición sea verdadera, repite esto"</em>. La condición se evalúa <strong>antes</strong> de cada vuelta. Si es verdadera, se ejecuta el cuerpo. Si es falsa, el cuerpo no se ejecuta (ni siquiera una vez) y se sale del ciclo.</p>
+
+    <p>Tres cosas importantes para tener claras desde el principio:</p>
+
+    <ul>
+      <li><strong>La condición se evalúa antes de cada vuelta</strong>, no después. Esto significa que si la condición ya es falsa al llegar, el cuerpo del <code>while</code> no se ejecuta ni una vez.</li>
+      <li><strong>El cuerpo tiene que cambiar algo</strong>, o la condición nunca va a dejar de ser verdadera. Este es el error más común: olvidar cambiar la variable que controla el ciclo, y quedarse con un ciclo infinito.</li>
+      <li><strong>La variable de control</strong> (la que aparece en la condición) generalmente se declara <em>antes</em> del <code>while</code> y se modifica <em>dentro</em> del ciclo. Ese patrón lo vas a ver una y otra vez.</li>
+    </ul>
+
+    <h3>La nueva pieza</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">while</span> (condición) {
+    <span class="cmt">// esto se repite mientras la condición sea true</span>
+}</pre>
+    </div>
+
+    <p>Un ejemplo concreto: contar del 1 al 5.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">1</span>;
+
+<span class="kw">while</span> (i &lt;= <span class="num">5</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+    i = i + <span class="num">1</span>;
+}</pre>
+    </div>
+
+    <p>Antes de mirar la simulación de la siguiente sección, trata de adivinar qué hace. La variable <code>i</code> empieza en 1. La condición <code>i &lt;= 5</code> se evalúa. Mientras se cumpla, se imprime <code>i</code> y se aumenta en 1. Cuando <code>i</code> llegue a 6, la condición <code>6 &lt;= 5</code> es falsa y el ciclo termina.</p>
+
+    <h3>El diagrama del flujo</h3>
+
+    <div class="flujo">              ┌─────────────────────────┐
+              │   evaluar la condición   │
+              │        (i <= 5)         │
+              └───────────┬─────────────┘
+                          │
+                 ┌────────┴────────┐
+                 │                 │
+            true │                 │ false
+                 ▼                 ▼
+        ┌────────────────┐   ┌────────────────┐
+        │ ejecutar el    │   │ salir del      │
+        │ cuerpo del     │   │ ciclo y        │
+        │ while          │   │ seguir         │
+        │                │   │                │
+        │  ────────      │   └────────────────┘
+        │  │i = i+1│     │
+        │  ────────      │
+        └────────┬───────┘
+                 │
+                 │  (vuelve a evaluar la condición)
+                 │
+                 └──────► (regresa al inicio)</div>
+
+    <p>La flecha que vuelve al inicio es lo que hace que el <code>while</code> sea un ciclo. No es una línea recta: es un camino que se recorre varias veces hasta que la condición deja de cumplirse.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="simulacion-while">
+    <h2>Simulación: cómo se ejecuta un <code>while</code> paso a paso</h2>
+
+    <p>Este es el momento más importante de la sección. Un <code>while</code> solo se entiende <strong>simulándolo</strong>. Vamos a ejecutar el ejemplo del contador marcando, en cada paso, el valor de <code>i</code> y la decisión que toma Java.</p>
+
+    <h3>El programa</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">1</span>;
+
+<span class="kw">while</span> (i &lt;= <span class="num">5</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+    i = i + <span class="num">1</span>;
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Fin"</span>);</pre>
+    </div>
+
+    <h3>Paso a paso</h3>
+
+    <div class="simulacion">
+      <table class="table table-bordered">
+        <thead>
+          <tr><th>#</th><th>Qué hace Java</th><th><code>i</code> al final del paso</th><th>Salida</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td><code>int i = 1;</code></td><td><code>i = 1</code></td><td>—</td></tr>
+          <tr><td>2</td><td>Evalúa <code>1 &lt;= 5</code> → <code>true</code>. Entra al cuerpo.</td><td><code>i = 1</code></td><td>—</td></tr>
+          <tr><td>3</td><td>Ejecuta <code>println(i)</code></td><td><code>i = 1</code></td><td><code>1</code></td></tr>
+          <tr><td>4</td><td>Ejecuta <code>i = i + 1</code></td><td><code>i = 2</code></td><td>—</td></tr>
+          <tr><td>5</td><td>Vuelve a evaluar: <code>2 &lt;= 5</code> → <code>true</code></td><td><code>i = 2</code></td><td>—</td></tr>
+          <tr><td>6</td><td><code>println(i)</code></td><td><code>i = 2</code></td><td><code>2</code></td></tr>
+          <tr><td>7</td><td><code>i = i + 1</code></td><td><code>i = 3</code></td><td>—</td></tr>
+          <tr><td>8</td><td>Evalúa <code>3 &lt;= 5</code> → <code>true</code></td><td><code>i = 3</code></td><td>—</td></tr>
+          <tr><td>9</td><td><code>println(i)</code></td><td><code>i = 3</code></td><td><code>3</code></td></tr>
+          <tr><td>10</td><td><code>i = i + 1</code></td><td><code>i = 4</code></td><td>—</td></tr>
+          <tr><td>11</td><td>Evalúa <code>4 &lt;= 5</code> → <code>true</code></td><td><code>i = 4</code></td><td>—</td></tr>
+          <tr><td>12</td><td><code>println(i)</code></td><td><code>i = 4</code></td><td><code>4</code></td></tr>
+          <tr><td>13</td><td><code>i = i + 1</code></td><td><code>i = 5</code></td><td>—</td></tr>
+          <tr><td>14</td><td>Evalúa <code>5 &lt;= 5</code> → <code>true</code></td><td><code>i = 5</code></td><td>—</td></tr>
+          <tr><td>15</td><td><code>println(i)</code></td><td><code>i = 5</code></td><td><code>5</code></td></tr>
+          <tr><td>16</td><td><code>i = i + 1</code></td><td><code>i = 6</code></td><td>—</td></tr>
+          <tr><td>17</td><td>Evalúa <code>6 &lt;= 5</code> → <code>false</code></td><td><code>i = 6</code></td><td>—</td></tr>
+          <tr><td>18</td><td>Sale del <code>while</code>. Sigue con la siguiente línea.</td><td><code>i = 6</code></td><td>—</td></tr>
+          <tr><td>19</td><td><code>println("Fin")</code></td><td><code>i = 6</code></td><td><code>Fin</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Salida completa:</p>
+    <div class="flujo">1
+2
+3
+4
+5
+Fin</div>
+
+    <p>Fíjate en varias cosas:</p>
+
+    <ul>
+      <li><strong>La condición se evalúa más veces que el cuerpo.</strong> Se evalúa 6 veces (una por cada intento de entrada) y el cuerpo se ejecuta 5 veces. La sexta evaluación es la que da <code>false</code> y termina el ciclo. Este detalle sorprende a mucha gente la primera vez.</li>
+      <li><strong>El valor final de <code>i</code> es 6, no 5</strong>. Aunque el último número impreso fue 5. Porque después de imprimir 5, el ciclo ejecutó <code>i = i + 1</code> y dejó <code>i</code> en 6. La condición falló y el ciclo terminó, pero <code>i</code> ya había cambiado.</li>
+      <li><strong>La secuencia de ejecución no es lineal.</strong> Java no ejecuta las líneas 1, 2, 3, 4 y sigue. Ejecuta 1, luego 2, después 3 y 4, y <em>vuelve</em> a 2, después 3 y 4 de nuevo, y así. Este "volver a 2" es lo que hace que un ciclo sea un ciclo, y es lo que confunde al principio.</li>
+    </ul>
+
+    <div class="caja caja-detente">
+      <h5>Detente un momento y piensa</h5>
+      <p class="mb-0">Antes de seguir, cambia la condición a <code>i &lt; 5</code> (en vez de <code>i &lt;= 5</code>) y simula el programa. ¿Qué números imprime? ¿Cuál es el valor final de <code>i</code>? Predícelo en papel, después vuelve y compara. Y después prueba con <code>i &gt; 5</code>: ¿qué pasa si la condición es falsa desde el principio?</p>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver respuestas a los dos cambios</summary>
+      <p class="mt-2 mb-2">Con <code>i &lt; 5</code>: imprime 1, 2, 3, 4. No imprime el 5. El valor final de <code>i</code> es 5. La condición falla cuando <code>i</code> llega a 5, porque <code>5 &lt; 5</code> es falso.</p>
+      <p class="mb-0">Con <code>i &gt; 5</code>: la condición es falsa desde el principio (<code>1 &gt; 5</code> es falso). El cuerpo del <code>while</code> <strong>no se ejecuta ni una sola vez</strong>. El programa salta directamente a <code>println("Fin")</code>. Este es un caso muy importante: <strong>un <code>while</code> puede no ejecutarse nunca</strong>, y hay que tenerlo en cuenta al razonar sobre un programa.</p>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="contador">
+    <h2>Contadores y acumuladores (los dos patrones que vas a usar siempre)</h2>
+
+    <p>Antes de ver más ejemplos, quiero presentarte dos patrones que vas a usar una y otra vez con ciclos. Tienen nombre y todo.</p>
+
+    <h3>Contador</h3>
+
+    <p>Un <strong>contador</strong> es una variable que empieza en algún valor (usualmente 0) y se incrementa dentro del ciclo. Sirve para contar cuántas veces pasó algo.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">0</span>;
+<span class="kw">int</span> contador = <span class="num">0</span>;
+
+<span class="kw">while</span> (i &lt; <span class="num">10</span>) {
+    contador = contador + <span class="num">1</span>;
+    i = i + <span class="num">1</span>;
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Iteraciones: "</span> + contador);</pre>
+    </div>
+
+    <p>Este programa imprime "Iteraciones: 10". El contador empezó en 0 y se incrementó una vez por cada vuelta. Fíjate en que hay <strong>dos variables</strong> aquí: <code>i</code> controla el ciclo, y <code>contador</code> registra cuántas vueltas se dieron. A veces son la misma variable (si solo necesitas contar), pero a menudo son distintas.</p>
+
+    <h3>Acumulador</h3>
+
+    <p>Un <strong>acumulador</strong> es una variable que empieza en un valor neutral (0 para sumas, 1 para productos) y va acumulando resultados dentro del ciclo. Sirve para sumar, multiplicar, o combinar los valores que aparecen en cada vuelta.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">1</span>;
+<span class="kw">int</span> suma = <span class="num">0</span>;
+
+<span class="kw">while</span> (i &lt;= <span class="num">5</span>) {
+    suma = suma + i;
+    i = i + <span class="num">1</span>;
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Suma total: "</span> + suma);</pre>
+    </div>
+
+    <p>Aquí <code>suma</code> acumula 1+2+3+4+5 = 15. Cada vuelta, <code>suma</code> se actualiza con el valor actual de <code>i</code>. El resultado final es 15. Estos dos patrones —contador y acumulador— son probablemente el 80% de lo que vas a hacer con ciclos durante mucho tiempo.</p>
+
+    <div class="caja caja-idea">
+      <p class="mb-0"><strong>Regla del pulgar</strong>: antes de escribir un ciclo, pregúntate si necesitas <em>contar</em> algo (contador) o <em>acumular</em> algo (acumulador). Casi siempre la respuesta a qué variable extra necesitas está ahí. Y no olvides declararla <em>antes</em> del ciclo con el valor inicial correcto: 0 para contar o sumar, 1 para multiplicar.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="bucles-infinitos">
+    <h2>Bucles infinitos (el error más frustrante)</h2>
+
+    <p>El error más común con <code>while</code>, y también el más frustrante al principio, es el <strong>bucle infinito</strong>: un ciclo cuya condición nunca deja de ser verdadera, así que el programa se queda trabado ejecutando el mismo bloque para siempre. VSCode se queda "colgado", el programa no termina, y muchas veces tienes que detenerlo a la fuerza.</p>
+
+    <p>Veamos el ejemplo más clásico:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">1</span>;
+
+<span class="kw">while</span> (i &lt;= <span class="num">5</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+}</pre>
+    </div>
+
+    <p>Este programa imprime <code>1</code> infinitas veces. Porque la variable <code>i</code> nunca cambia: empieza en 1, siempre vale 1, y <code>1 &lt;= 5</code> siempre es verdadero. La condición no se va a hacer falsa sola: alguien tiene que cambiarla. Si el cuerpo no modifica <code>i</code> (o cualquier cosa de la que dependa la condición), el ciclo nunca termina.</p>
+
+    <p>Esta es la primera regla de todo ciclo: <strong>algo tiene que cambiar dentro del cuerpo, y ese algo tiene que afectar la condición</strong>. Si no hay cambio, hay bucle infinito.</p>
+
+    <h3>Por qué esto confunde tanto (y por qué no es solo "un error tonto")</h3>
+
+    <p>Un bucle infinito confunde más de lo que parece, por una razón concreta: <strong>tú escribiste lo que querías, y el programa no te dice nada</strong>. No hay un mensaje de error. No hay una línea roja en VSCode. Solo hay un programa que se queda ejecutando y no responde. Es una de las primeras veces en que sientes que la computadora "no coopera", y eso desespera.</p>
+
+    <p>Aquí conviene aplicar el protocolo que viste en el Bloque 1. Antes de asumir "no entiendo ciclos", detente y pregúntate: <em>¿qué variable aparece en la condición? ¿qué la cambia dentro del ciclo?</em> Casi siempre, la respuesta a esas dos preguntas te muestra el problema en segundos.</p>
+
+    <div class="caja caja-protocolo">
+      <h5>Cuando tu programa se queda trabado</h5>
+      <ol class="mb-0">
+        <li>Detén el programa (en VSCode: el botón rojo de stop, o el atajo que uses).</li>
+        <li>Lee la condición del <code>while</code>. ¿Qué variable decide si se sigue ejecutando?</li>
+        <li>Busca en el cuerpo del ciclo: ¿esa variable se modifica en algún lado? Si no, ese es el problema.</li>
+        <li>Si sí se modifica, ¿se modifica <em>de forma que la condición eventualmente sea falsa</em>? Por ejemplo, si la condición es <code>i &lt;= 5</code> y dentro haces <code>i = i - 1</code>, va a seguir siendo verdadera para siempre. El cambio tiene que ir en la dirección correcta.</li>
+      </ol>
+    </div>
+
+    <h3>Cómo evitarlos desde que escribes</h3>
+
+    <p>Un hábito que vale la pena cultivar: cada vez que escribas un <code>while</code>, antes de ejecutarlo, hazte estas tres preguntas:</p>
+
+    <ol>
+      <li><strong>¿Qué condición controla el ciclo?</strong> Escríbela en papel.</li>
+      <li><strong>¿Qué hace que esa condición se vuelva falsa?</strong> Deberías poder señalar una línea dentro del cuerpo que cambia algo.</li>
+      <li><strong>¿Cuántas vueltas esperas que dé?</strong> Si puedes estimarlo, mucho mejor. Te va a permitir comparar con la realidad.</li>
+    </ol>
+
+    <p>Si puedes contestar las tres, el ciclo va a funcionar. Si te falta la respuesta a la segunda, hay bucle infinito esperándote.</p>
+
+    <p>Otro truco, útil durante el desarrollo: poner un <code>println</code> con la variable de control dentro del ciclo. Así, si el programa se queda trabado, ves qué está pasando. Pero ojo: si el ciclo imprime mucho, la consola se llena de texto y no ayuda. Ponlo solo al principio, y quítalo cuando el ciclo funcione.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">1</span>;
+
+<span class="kw">while</span> (i &lt;= <span class="num">5</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Iteración i="</span> + i);   <span class="cmt">// depuración</span>
+    <span class="cmt">// ... resto del cuerpo ...</span>
+    i = i + <span class="num">1</span>;
+}</pre>
+    </div>
+
+    <p>Cuando el programa funcione, borra la línea de depuración. Ese truco lo vas a usar toda tu vida programando. Es simple, pero es una de las técnicas más efectivas que existen.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejemplos-while">
+    <h2>Ejemplos progresivos con <code>while</code></h2>
+
+    <h3>Ejemplo 1 — Contar hacia atrás</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">10</span>;
+
+<span class="kw">while</span> (i &gt;= <span class="num">1</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+    i = i - <span class="num">1</span>;
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"¡Despegue!"</span>);</pre>
+    </div>
+    <p>Cuenta 10, 9, 8, ..., 1, y luego imprime "¡Despegue!". Fíjate en que aquí <code>i</code> decrece, no crece. La condición también cambió de dirección (<code>i &gt;= 1</code> en vez de <code>i &lt;= 5</code>). El patrón es el mismo, solo cambió el sentido.</p>
+
+    <h3>Ejemplo 2 — Sumar números hasta un límite</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">1</span>;
+<span class="kw">int</span> suma = <span class="num">0</span>;
+
+<span class="kw">while</span> (i &lt;= <span class="num">100</span>) {
+    suma = suma + i;
+    i = i + <span class="num">1</span>;
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Suma de 1 a 100: "</span> + suma);</pre>
+    </div>
+    <p>Imprime 5050. Nota cómo se combinan un contador (<code>i</code>) y un acumulador (<code>suma</code>). Ambos se declaran <em>antes</em> del <code>while</code>, ambos se actualizan <em>dentro</em>. Este es el patrón más común con ciclos, y conviene que lo reconozcas de un vistazo.</p>
+
+    <h3>Ejemplo 3 — Encontrar el primer múltiplo</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> n = <span class="num">13</span>;
+<span class="kw">int</span> i = <span class="num">1</span>;
+
+<span class="kw">while</span> (n * i % <span class="num">7</span> != <span class="num">0</span>) {
+    i = i + <span class="num">1</span>;
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"El primer múltiplo de 13 que es divisible por 7: "</span> + (n * i));</pre>
+    </div>
+    <p>Con <code>n = 13</code> y multiplicando por <code>i</code> sucesivamente, el ciclo busca el primer <code>i</code> tal que <code>13 * i</code> sea divisible por 7. Cuando lo encuentre, sale del ciclo. Este ejemplo no tiene un contador claro (no sabemos cuántas vueltas va a dar), pero funciona porque <code>i</code> crece y eventualmente se cumple. Fíjate en la condición negada: seguimos mientras NO sea divisible. Cuando lo sea, la condición es falsa y salimos.</p>
+
+    <h3>Ejemplo 4 — Contar los dígitos de un número</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> n = <span class="num">12345</span>;
+<span class="kw">int</span> contador = <span class="num">0</span>;
+
+<span class="kw">while</span> (n &gt; <span class="num">0</span>) {
+    n = n / <span class="num">10</span>;
+    contador = contador + <span class="num">1</span>;
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Cantidad de dígitos: "</span> + contador);</pre>
+    </div>
+    <p>Con <code>n = 12345</code>, imprime 5. La idea es ir dividiendo <code>n</code> entre 10 (con división entera, que descarta decimales) para "quitarle" el último dígito. Después de 5 divisiones, <code>n</code> queda en 0 y el ciclo termina. Ojo con este tipo de programas: modifican <code>n</code> dentro del ciclo, así que si necesitas <code>n</code> original después, tienes que guardarlo en otra variable antes.</p>
+
+    <h3>Ejemplo 5 — Simular una condición de fin externa</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> temperatura = <span class="num">95</span>;
+
+<span class="kw">while</span> (temperatura &gt; <span class="num">40</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Temperatura actual: "</span> + temperatura);
+    temperatura = temperatura - <span class="num">10</span>;
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Temperatura estable: "</span> + temperatura);</pre>
+    </div>
+    <p>Este ejemplo simula un enfriamiento: mientras la temperatura sea mayor a 40, se sigue "enfriando" (reduciendo de 10 en 10). Fíjate en que la condición del ciclo <em>tiene una interpretación del mundo real</em>: "mientras aún esté demasiado caliente". Ese tipo de lectura en español es la que te va a ayudar a diseñar ciclos en tus propios programas.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="errores-while">
+    <h2>Errores comunes con <code>while</code></h2>
+
+    <h3>1. Olvidar cambiar la variable del ciclo (bucle infinito)</h3>
+    <p>Ya lo cubrimos en detalle. Es <strong>el</strong> error. Si tu programa se queda colgado, sospecha de esto primero.</p>
+
+    <h3>2. Cambiar la variable en dirección contraria</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">1</span>;
+
+<span class="kw">while</span> (i &lt;= <span class="num">5</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+    i = i - <span class="num">1</span>;   <span class="cmt">// ← ¡está decreciendo!</span>
+}</pre>
+    </div>
+
+    <p>Si <code>i</code> empieza en 1 y decrece, la condición <code>i &lt;= 5</code> va a ser verdadera siempre (incluso para <code>i = -100</code>, que sigue siendo menor o igual a 5). Bucle infinito por otra vía. La dirección del cambio tiene que coincidir con la dirección que la condición necesita para volverse falsa.</p>
+
+    <h3>3. Condición mal escrita (que nunca se vuelve falsa)</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">1</span>;
+
+<span class="kw">while</span> (i != <span class="num">10</span>) {   <span class="cmt">// si i salta por encima de 10, nunca se detiene</span>
+    i = i + <span class="num">2</span>;
+}</pre>
+    </div>
+
+    <p>Si <code>i</code> empieza en 1 y se incrementa de 2 en 2, va a pasar por 1, 3, 5, 7, 9, 11, 13... y nunca va a valer exactamente 10. La condición <code>i != 10</code> siempre es verdadera. Como regla general, <strong>prefiere <code>&lt;</code> o <code>&lt;=</code> sobre <code>!=</code></strong> en las condiciones de un ciclo, porque así es imposible "saltarse" el valor de salida.</p>
+
+    <h3>4. Usar <code>while</code> cuando un contador sería más claro</h3>
+
+    <p>Si vas a repetir algo una cantidad exacta de veces, el <code>while</code> funciona, pero muchas veces vas a preferir un <code>for</code> (que verás en el Bloque 4). El <code>for</code> empaqueta en una sola línea las tres cosas que siempre necesitas: la inicialización, la condición, y el incremento. Para ciclos con un número fijo de vueltas, el <code>for</code> es más legible. El <code>while</code> brilla cuando el número de vueltas <em>no</em> se sabe de antemano.</p>
+
+    <h3>5. Modificar la variable en varios lugares del cuerpo</h3>
+
+    <p>Un error sutil: cambiar <code>i</code> en dos lugares distintos dentro del mismo cuerpo del <code>while</code>. El código compila y corre, pero es muy difícil de razonar y de depurar. Como regla, <strong>modifica la variable de control en un solo lugar</strong>, preferiblemente al final del cuerpo. Así, cuando leas el ciclo, sabes exactamente dónde ocurre el cambio.</p>
+
+    <h3>6. Olvidarse de las llaves</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">1</span>;
+
+<span class="kw">while</span> (i &lt;= <span class="num">5</span>)
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+    i = i + <span class="num">1</span>;   <span class="cmt">// ← ¡este NO está dentro del while!</span></pre>
+    </div>
+
+    <p>Sin llaves, solo la primera instrucción después del <code>while</code> está dentro del ciclo. La segunda (<code>i = i + 1</code>) se ejecuta <em>después</em> del ciclo, que nunca termina porque <code>i</code> no cambia dentro. Bucle infinito por falta de llaves. Es exactamente el mismo tipo de error que con los <code>if</code>, y la solución es la misma: <strong>pon siempre las llaves</strong>. Es una regla simple que te ahorra horas de frustración.</p>
+
+    <div class="caja caja-error">
+      <h5>Si tu programa se queda colgado y no sabes por qué</h5>
+      <p class="mb-0">Aplica el protocolo. Detén el programa, identifica la variable del ciclo, y busca dónde (y si) se modifica. En el 95% de los casos el problema es una de las seis cosas que acabas de leer. Aísla esa pieza —como dice el protocolo del Bloque 1— y verifícala sola.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejercicios-while">
+    <h2>Ejercicios de <code>while</code></h2>
+
+    <h3><span class="nivel nivel-reconocer">Reconocer</span></h3>
+    <p>¿Cuántas veces se ejecuta el cuerpo de este <code>while</code>? ¿Qué imprime?</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> x = <span class="num">0</span>;
+
+<span class="kw">while</span> (x &lt; <span class="num">3</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"x = "</span> + x);
+    x = x + <span class="num">1</span>;
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-2">Se ejecuta 3 veces. Imprime:</p>
+      <div class="flujo">x = 0
+x = 1
+x = 2</div>
+      <p class="mb-0">Cuando <code>x</code> llega a 3, la condición <code>3 &lt; 3</code> es falsa y el ciclo termina. Fíjate que no se imprime "x = 3" porque el cuerpo no llega a ejecutarse con ese valor.</p>
+    </details>
+
+    <h3><span class="nivel nivel-completar">Completar</span></h3>
+    <p>Completa el código para que imprima los números del 1 al 10.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">1</span>;
+
+<span class="kw">while</span> (_______________) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+    i = i + <span class="num">1</span>;
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-0"><code>i &lt;= 10</code>. También podría ser <code>i &lt; 11</code>. Las dos dan el mismo resultado, pero <code>i &lt;= 10</code> se lee mejor porque dice directamente "mientras sea menor o igual a 10".</p>
+    </details>
+
+    <h3><span class="nivel nivel-modificar">Modificar</span></h3>
+    <p>Este programa debería imprimir los números pares del 2 al 10, pero está roto. Encuentra y corrige el error.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">2</span>;
+
+<span class="kw">while</span> (i &lt;= <span class="num">10</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+    i = i + <span class="num">1</span>;
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-2">El incremento es de 1, así que imprime todos los números del 2 al 10, no solo los pares. Hay que incrementar de 2 en 2:</p>
+      <div class="bloque-codigo">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">2</span>;
+
+<span class="kw">while</span> (i &lt;= <span class="num">10</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+    i = i + <span class="num">2</span>;
+}</pre>
+      </div>
+      <p class="mb-0">Este es un error que compila bien y corre, pero hace algo distinto a lo que querías. Es un error de lógica, no de sintaxis. Los errores de lógica solo se detectan comparando lo que el programa imprime con lo que tú esperabas. Por eso siempre hay que ejecutar y revisar la salida.</p>
+    </details>
+
+    <h3><span class="nivel nivel-construir">Construir</span></h3>
+    <p>Escribe un programa que calcule el factorial de un número <code>n</code>. Por ejemplo, si <code>n = 5</code>, el resultado es 1×2×3×4×5 = 120.</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> n = <span class="num">5</span>;
+<span class="kw">int</span> i = <span class="num">1</span>;
+<span class="kw">int</span> factorial = <span class="num">1</span>;
+
+<span class="kw">while</span> (i &lt;= n) {
+    factorial = factorial * i;
+    i = i + <span class="num">1</span>;
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Factorial de "</span> + n + <span class="str">" es: "</span> + factorial);</pre>
+      </div>
+      <p class="mb-0">Dos cosas importantes: <code>factorial</code> empieza en <strong>1</strong>, no en 0, porque si empezara en 0 la multiplicación daría 0 siempre. Eso es un acumulador para productos: valor inicial 1. Y no lo declares <code>int</code> si el número puede ser grande: los factoriales crecen rapidísimo. Con <code>n = 13</code> ya se desborda un <code>int</code>. Para valores grandes, usarías <code>long</code>. Ese detalle lo verás en otro bloque, pero conviene que sepas que existe.</p>
+    </details>
+
+    <h3><span class="nivel nivel-combinar">Combinar</span></h3>
+    <p>Escribe un programa que lea un número y determine cuántas cifras tiene. Asume que el número siempre es positivo.</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> numero = <span class="num">987654</span>;
+<span class="kw">int</span> original = numero;
+<span class="kw">int</span> cifras = <span class="num">0</span>;
+
+<span class="kw">if</span> (numero == <span class="num">0</span>) {
+    cifras = <span class="num">1</span>;
+} <span class="kw">else</span> {
+    <span class="kw">while</span> (numero &gt; <span class="num">0</span>) {
+        numero = numero / <span class="num">10</span>;
+        cifras = cifras + <span class="num">1</span>;
+    }
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"El número "</span> + original + <span class="str">" tiene "</span> + cifras + <span class="str">" cifras"</span>);</pre>
+      </div>
+      <p class="mb-0">Este es el primer ejercicio del bloque que combina <code>if</code> y <code>while</code> juntos. Fíjate en la estructura: si el número es 0, no entraría nunca al <code>while</code> (porque <code>0 &gt; 0</code> es falso), así que lo manejamos como caso especial. Si es cualquier otro número, el <code>while</code> se encarga. Y ojo: guardé el valor original en <code>original</code> antes del ciclo, porque el ciclo modifica <code>numero</code> y después ya no lo tendríamos.</p>
+    </details>
+
+    <h3><span class="nivel nivel-crear">Crear</span></h3>
+    <p>Escribe un programa que calcule cuántos números de la secuencia de Fibonacci son menores a un límite dado. La secuencia empieza con 0, 1, 1, 2, 3, 5, 8, 13, 21... y cada número es la suma de los dos anteriores.</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> limite = <span class="num">100</span>;
+<span class="kw">int</span> a = <span class="num">0</span>;
+<span class="kw">int</span> b = <span class="num">1</span>;
+<span class="kw">int</span> contador = <span class="num">0</span>;
+
+<span class="kw">while</span> (a &lt; limite) {
+    contador = contador + <span class="num">1</span>;
+    <span class="kw">int</span> siguiente = a + b;
+    a = b;
+    b = siguiente;
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Cantidad de Fibonacci menores a "</span> + limite + <span class="str">": "</span> + contador);</pre>
+      </div>
+      <p class="mb-0">Este ejercicio es más complejo, y es normal que cueste un poco al principio. La idea es que <code>a</code> y <code>b</code> van avanzando en la secuencia, y guardamos el siguiente valor en una variable temporal antes de moverlas. Cuando <code>a</code> llegue al límite, el ciclo termina. Si te cuesta, ejecútalo paso a paso en papel para los primeros valores: <code>a=0, b=1</code> → <code>siguiente=1, a=1, b=1</code> → <code>siguiente=2, a=1, b=2</code> → <code>siguiente=3, a=2, b=3</code>... Con un límite de 100, el contador termina en 12.</p>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="do-while">
+    <h2>El <code>do while</code>: repetir al menos una vez</h2>
+
+    <h3>Antes de Java (situación cotidiana)</h3>
+
+    <p>Piensa en una máquina expendedora. La persona mete monedas, la máquina verifica si alcanza. Si no alcanza, pide más. Y así hasta que el saldo alcance. Pero hay algo particular en esta máquina: <strong>siempre pide monedas al menos una vez</strong>. No hay un caso en el que no pida nada. La primera interacción está garantizada; las siguientes dependen de la condición.</p>
+
+    <p>Ese es el patrón del <code>do while</code>: hay algo que <strong>siempre se ejecuta al menos una vez</strong>, y después se repite mientras se cumpla una condición. A diferencia del <code>while</code>, donde el cuerpo puede no ejecutarse nunca si la condición es falsa desde el principio, en el <code>do while</code> el cuerpo se ejecuta una vez sin preguntar, y <em>después</em> se evalúa la condición.</p>
+
+    <h3>La idea en español</h3>
+
+    <p>Un <code>do while</code> significa: <em>"haz esto, y después repítelo mientras se cumpla esta condición"</em>. La diferencia clave con <code>while</code> es dónde se evalúa la condición:</p>
+
+    <ul>
+      <li><code>while</code>: primero pregunta, después (si aplica) hace.</li>
+      <li><code>do while</code>: primero hace, después pregunta si repetir.</li>
+    </ul>
+
+    <h3>La nueva pieza</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">do</span> {
+    <span class="cmt">// esto se ejecuta AL MENOS UNA VEZ</span>
+} <span class="kw">while</span> (condición);</pre>
+    </div>
+
+    <p>Nota algo importante en la sintaxis: hay un punto y coma al final del <code>while (condición);</code>. A diferencia del <code>while</code> normal, el del <code>do while</code> lleva <code>;</code>. Es la única parte del lenguaje en la que se te va a olvidar ponerlo, y Java te va a dar error de sintaxis hasta que lo agregues. Es un buen recordatorio.</p>
+
+    <p>Un ejemplo concreto:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">1</span>;
+
+<span class="kw">do</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+    i = i + <span class="num">1</span>;
+} <span class="kw">while</span> (i &lt;= <span class="num">5</span>);</pre>
+    </div>
+
+    <p>Este programa imprime 1, 2, 3, 4, 5. Igual que el <code>while</code> que viste antes. La diferencia se nota cuando la condición inicial es falsa.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Con while: no imprime nada</span>
+<span class="kw">int</span> j = <span class="num">10</span>;
+<span class="kw">while</span> (j &lt; <span class="num">5</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(j);
+    j = j + <span class="num">1</span>;
+}
+
+<span class="cmt">// Con do while: imprime el 10 UNA VEZ</span>
+<span class="kw">int</span> k = <span class="num">10</span>;
+<span class="kw">do</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(k);
+    k = k + <span class="num">1</span>;
+} <span class="kw">while</span> (k &lt; <span class="num">5</span>);</pre>
+    </div>
+
+    <p>En el primer caso, la condición <code>10 &lt; 5</code> es falsa desde el principio, así que el <code>while</code> no ejecuta el cuerpo nunca. En el segundo caso, el <code>do while</code> ejecuta el cuerpo una vez (imprime 10), y después evalúa <code>11 &lt; 5</code>, que es falsa, así que no repite. Pero esa primera impresión ya ocurrió.</p>
+
+    <p>Esta es la diferencia central: <strong>si necesitas que algo ocurra al menos una vez sin importar la condición, usa <code>do while</code></strong>.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="while-vs-do-while">
+    <h2><code>while</code> vs <code>do while</code>: ¿cuándo usar cada uno?</h2>
+
+    <p>La diferencia técnica ya la tienes clara: <code>while</code> evalúa antes, <code>do while</code> evalúa después. Ahora la pregunta práctica: ¿cuándo elegir uno u otro?</p>
+
+    <h3>Usa <code>while</code> cuando…</h3>
+
+    <ul>
+      <li>Puede que el cuerpo <em>no se ejecute nunca</em>. Por ejemplo, "mientras el archivo tenga líneas pendientes, léelas". Si el archivo está vacío, no hay nada que leer, y eso es correcto.</li>
+      <li>La condición es fácil de evaluar <em>antes</em> de entrar.</li>
+      <li>No tienes una razón específica para garantizar una primera ejecución.</li>
+    </ul>
+
+    <h3>Usa <code>do while</code> cuando…</h3>
+
+    <ul>
+      <li>El cuerpo debe ejecutarse <strong>al menos una vez</strong>. Por ejemplo: pedirle un dato al usuario, verificar si es válido, y si no, pedirlo de nuevo. La primera vez siempre se pide.</li>
+      <li>La condición para repetir solo tiene sentido <em>después</em> de haber hecho algo. Por ejemplo: "vuelve a preguntar mientras la respuesta sea inválida".</li>
+      <li>Quieres que la lógica del ciclo se lea como "haz algo, y sigue haciéndolo hasta que se cumpla X".</li>
+    </ul>
+
+    <h3>Un ejemplo donde <code>do while</code> es claramente mejor</h3>
+
+    <p>Imagina que quieres pedir un número entre 1 y 10 al usuario. El patrón natural es:</p>
+
+    <div class="flujo">1. Pedir el número.
+2. Si no está entre 1 y 10, pedirlo otra vez.
+3. Repetir hasta que esté bien.</div>
+
+    <p>Con <code>do while</code>, esto se escribe directo:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Aquí leemos de Scanner, pero imagina que "numero" ya tiene un valor inicial</span>
+<span class="kw">int</span> numero;
+
+<span class="kw">do</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Ingresa un número entre 1 y 10: "</span>);
+    numero = <span class="num">5</span>;   <span class="cmt">// simulado: en la práctica sería leer con Scanner</span>
+} <span class="kw">while</span> (numero &lt; <span class="num">1</span> || numero &gt; <span class="num">10</span>);
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Número aceptado: "</span> + numero);</pre>
+    </div>
+
+    <p>Con <code>while</code> tendrías que inicializar <code>numero</code> con un valor "trampa" (como -1) solo para forzar a que entre la primera vez, y eso es feo. Con <code>do while</code> queda natural: haz la pregunta, y repite mientras la respuesta sea mala.</p>
+
+    <div class="caja caja-idea">
+      <p class="mb-0"><strong>Regla del pulgar</strong>: si te encuentras inicializando una variable con un valor "artificial" solo para que un <code>while</code> entre la primera vez, probablemente quieres un <code>do while</code>. Si el ciclo puede legítimamente no ejecutarse nunca, quieres un <code>while</code>. La diferencia es <em>si la primera ejecución está garantizada o no</em>.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="simulacion-do-while">
+    <h2>Simulación de un <code>do while</code></h2>
+
+    <p>Vamos a simular el ejemplo de pedir un número entre 1 y 10, asumiendo que las primeras respuestas del "usuario" son 15, 20, y finalmente 7.</p>
+
+    <h3>El programa</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> numero;
+
+<span class="kw">do</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Ingresa un número entre 1 y 10: "</span>);
+    <span class="cmt">// simulado: numero = leer del usuario</span>
+} <span class="kw">while</span> (numero &lt; <span class="num">1</span> || numero &gt; <span class="num">10</span>);</pre>
+    </div>
+
+    <h3>Simulación asumiendo respuestas: 15, 20, 7</h3>
+
+    <div class="simulacion">
+      <table class="table table-bordered">
+        <thead>
+          <tr><th>#</th><th>Qué hace Java</th><th><code>numero</code></th><th>Salida</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>Entra al cuerpo sin evaluar nada (do)</td><td>—</td><td><code>Ingresa un número entre 1 y 10:</code></td></tr>
+          <tr><td>2</td><td>Simula que el usuario responde 15</td><td><code>15</code></td><td>—</td></tr>
+          <tr><td>3</td><td>Evalúa la condición: <code>15 &lt; 1 || 15 &gt; 10</code> → <code>true</code></td><td><code>15</code></td><td>—</td></tr>
+          <tr><td>4</td><td>Repite: vuelve al cuerpo (do)</td><td><code>15</code></td><td><code>Ingresa un número entre 1 y 10:</code></td></tr>
+          <tr><td>5</td><td>Simula que responde 20</td><td><code>20</code></td><td>—</td></tr>
+          <tr><td>6</td><td>Evalúa: <code>20 &lt; 1 || 20 &gt; 10</code> → <code>true</code></td><td><code>20</code></td><td>—</td></tr>
+          <tr><td>7</td><td>Repite: vuelve al cuerpo</td><td><code>20</code></td><td><code>Ingresa un número entre 1 y 10:</code></td></tr>
+          <tr><td>8</td><td>Simula que responde 7</td><td><code>7</code></td><td>—</td></tr>
+          <tr><td>9</td><td>Evalúa: <code>7 &lt; 1 || 7 &gt; 10</code> → <code>false</code></td><td><code>7</code></td><td>—</td></tr>
+          <tr><td>10</td><td>Sale del ciclo. Continúa con la siguiente instrucción.</td><td><code>7</code></td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Fíjate en dos cosas. Primero: el cuerpo se ejecuta <strong>tres veces</strong>, y la condición se evalúa <strong>tres veces también</strong> (una después de cada ejecución). Segundo: el cuerpo se ejecutó una vez <em>antes</em> de que se evaluara cualquier condición. Eso es exactamente lo que distingue al <code>do while</code>: garantiza al menos una ejecución.</p>
+
+    <p>Si hubiera sido un <code>while</code>, la primera evaluación habría sido <code>numero &lt; 1 || numero &gt; 10</code>, pero <code>numero</code> todavía no tendría valor (o tendría un valor por defecto), y todo se comportaría distinto. El <code>do while</code> evita ese problema porque no necesita saber nada de <code>numero</code> para entrar la primera vez.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejemplos-do-while">
+    <h2>Ejemplos progresivos con <code>do while</code></h2>
+
+    <h3>Ejemplo 1 — Imprimir al menos una vez</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">100</span>;
+
+<span class="kw">do</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"i vale: "</span> + i);
+    i = i + <span class="num">1</span>;
+} <span class="kw">while</span> (i &lt; <span class="num">5</span>);</pre>
+    </div>
+    <p>Imprime "i vale: 100" una vez, y termina. Porque aunque <code>100 &lt; 5</code> es falso, el <code>do</code> ya ejecutó el cuerpo antes de preguntar. Fíjate en el contraste: si esto fuera un <code>while</code>, no imprimiría nada.</p>
+
+    <h3>Ejemplo 2 — Menú que se repite hasta salir</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> opcion = <span class="num">0</span>;
+
+<span class="kw">do</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"--- MENÚ ---"</span>);
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"1. Saludar"</span>);
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"2. Despedirse"</span>);
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"0. Salir"</span>);
+
+    <span class="cmt">// simulado: opcion = leer del usuario</span>
+    opcion = <span class="num">1</span>;   <span class="cmt">// cambiar a 0 para salir</span>
+
+    <span class="kw">switch</span> (opcion) {
+        <span class="kw">case</span> <span class="num">1</span>: <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"¡Hola!"</span>); <span class="kw">break</span>;
+        <span class="kw">case</span> <span class="num">2</span>: <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"¡Adiós!"</span>); <span class="kw">break</span>;
+        <span class="kw">case</span> <span class="num">0</span>: <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Saliendo..."</span>); <span class="kw">break</span>;
+        <span class="kw">default</span>: <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Opción no válida"</span>);
+    }
+} <span class="kw">while</span> (opcion != <span class="num">0</span>);</pre>
+    </div>
+    <p>Este ejemplo es un patrón clásico: un menú que se muestra al menos una vez, ejecuta una acción según la opción, y se repite si la opción no fue "salir". Es uno de los casos donde <code>do while</code> es naturalmente la mejor opción. Fíjate también en el <code>switch</code> dentro: <code>do while</code> + <code>switch</code> es una combinación muy común para menús interactivos.</p>
+
+    <h3>Ejemplo 3 — Validación de contraseña</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span> contraseña;
+
+<span class="kw">do</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Ingresa una contraseña de al menos 8 caracteres: "</span>);
+    <span class="cmt">// simulado: contraseña = leer del usuario</span>
+    contraseña = <span class="str">"abc"</span>;   <span class="cmt">// cambiar a una válida para probar</span>
+} <span class="kw">while</span> (contraseña.length() &lt; <span class="num">8</span>);
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Contraseña aceptada"</span>);</pre>
+    </div>
+    <p>Se pide la contraseña, se verifica su longitud, y se repite mientras sea demasiado corta. La primera petición siempre ocurre, así que tiene sentido usar <code>do while</code>. Aquí aparece <code>.length()</code>, un método que devuelve la cantidad de caracteres de un <code>String</code>. No es central en este bloque, pero conviene que lo reconozcas.</p>
+
+    <h3>Ejemplo 4 — Adivinar un número</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> secreto = <span class="num">7</span>;
+<span class="kw">int</span> intento = <span class="num">0</span>;
+<span class="kw">int</span> intentos = <span class="num">0</span>;
+
+<span class="kw">do</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Adivina el número (1 al 10): "</span>);
+    <span class="cmt">// simulado: intento = leer del usuario</span>
+    intento = <span class="num">3</span>;   <span class="cmt">// cambiar a 7 para ganar</span>
+    intentos = intentos + <span class="num">1</span>;
+
+    <span class="kw">if</span> (intento &lt; secreto) {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Muy bajo"</span>);
+    } <span class="kw">else if</span> (intento &gt; secreto) {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Muy alto"</span>);
+    } <span class="kw">else</span> {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"¡Correcto! Lo lograste en "</span> + intentos + <span class="str">" intentos"</span>);
+    }
+} <span class="kw">while</span> (intento != secreto);</pre>
+    </div>
+    <p>Aquí se combinan <code>do while</code> + <code>if / else if / else</code>. Es un programa más cercano a lo real. Fíjate en que el bucle se repite mientras <code>intento != secreto</code>. Con la simulación puesta (siempre responde 3), el ciclo va a quedarse infinito. Es un ejemplo de que, cuando simulas, tienes que elegir respuestas que eventualmente te hagan salir, o vas a caer en bucle infinito igual que en un programa real.</p>
+
+    <h3>Ejemplo 5 — Sumar números hasta que el usuario ingrese 0</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> numero;
+<span class="kw">int</span> suma = <span class="num">0</span>;
+
+<span class="kw">do</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Ingresa un número (0 para terminar): "</span>);
+    <span class="cmt">// simulado: numero = leer del usuario</span>
+    numero = <span class="num">5</span>;   <span class="cmt">// cambiar a 0 para probar el final</span>
+
+    <span class="kw">if</span> (numero != <span class="num">0</span>) {
+        suma = suma + numero;
+    }
+} <span class="kw">while</span> (numero != <span class="num">0</span>);
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Suma total: "</span> + suma);</pre>
+    </div>
+    <p>Otro patrón clásico: acumular hasta que el usuario decida parar (ingresando 0). El <code>if</code> adentro evita sumar el 0 final. Y el <code>do while</code> garantiza que se le pida al menos un número. Con la simulación actual (siempre responde 5), esto queda en bucle infinito también. Para probarlo, tendrías que hacer que después de unas cuantas respuestas devuelva 0. Es normal que los ejemplos de <code>do while</code> que simulan entrada del usuario necesiten "respuestas inteligentes" para terminar; ese es el tipo de cosa que la consola real va a manejar por ti.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="errores-do-while">
+    <h2>Errores comunes con <code>do while</code></h2>
+
+    <h3>1. Olvidar el <code>;</code> después del <code>while (condición)</code></h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">do</span> {
+    ...
+} <span class="kw">while</span> (condición)   <span class="cmt">// ← falta el ;</span></pre>
+    </div>
+
+    <p>Es el error más específico de esta estructura. Java te va a dar un error de sintaxis si lo olvidas. Cada vez que escribas un <code>do while</code>, revisa el final.</p>
+
+    <h3>2. Usar <code>do while</code> cuando el cuerpo <em>no</em> debería ejecutarse si la condición es falsa</h3>
+
+    <p>Aquí hay un caso peligroso. A veces parece natural usar <code>do while</code>, pero el programa se comporta mal porque el cuerpo no debería ejecutarse en ciertos casos. Por ejemplo:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Quieres: para cada estudiante, si está inscrito, mostrar su nota</span>
+<span class="kw">boolean</span> inscrito = <span class="kw">false</span>;
+<span class="kw">double</span> nota = <span class="num">8.5</span>;
+
+<span class="kw">do</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Nota: "</span> + nota);
+} <span class="kw">while</span> (inscrito);</pre>
+    </div>
+
+    <p>Este programa muestra la nota <em>incluso si no está inscrito</em>, porque el <code>do</code> ejecuta el cuerpo antes de preguntar. Si la regla es "solo mostrar si está inscrito", <code>do while</code> es la elección incorrecta: aquí va un <code>if</code>, o un <code>while</code>.</p>
+
+    <p>La lección es esta: <code>do while</code> <strong>no</strong> es solo un <code>while</code> "al revés". Son herramientas para problemas distintos. Si dudas, pregúntate: <em>¿tiene sentido hacer esto aunque la condición sea falsa desde el principio?</em> Si la respuesta es no, no uses <code>do while</code>.</p>
+
+    <h3>3. Bucle infinito, igual que con <code>while</code></h3>
+
+    <p>El <code>do while</code> tiene los mismos problemas de bucle infinito que el <code>while</code>. Si dentro del cuerpo no cambias la variable que controla la condición, el ciclo se repite para siempre. Y hay un caso particular aquí: como el <code>do while</code> siempre ejecuta el cuerpo al menos una vez, si hay bucle infinito, se queda ejecutando <em>desde el primer intento</em>. No hay "una evaluación inicial que te salve".</p>
+
+    <h3>4. Inicializar mal la variable antes del <code>do</code></h3>
+
+    <p>A veces, dentro del <code>do</code>, la condición se refiere a una variable que todavía no tiene un valor bien establecido, y el programa se comporta raro. Aunque el <code>do while</code> no exige que la variable esté inicializada "correctamente" para entrar, sí la necesita para evaluar la condición después de cada vuelta. Hay que asegurarse de que el cuerpo la deje con un valor válido.</p>
+
+    <h3>5. Confundir <code>do while</code> con <code>while</code> al modificar código</h3>
+
+    <p>Si tienes un <code>while</code> que funciona y lo cambias a <code>do while</code> (o al revés) sin entender la diferencia, es fácil que el programa haga una vuelta extra o una vuelta de menos. Las estructuras se parecen pero <strong>no son intercambiables</strong>. Si vas a cambiar una por otra, pregúntate primero qué pasa si la condición es falsa desde el principio.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejercicios-do-while">
+    <h2>Ejercicios de <code>do while</code></h2>
+
+    <h3><span class="nivel nivel-reconocer">Reconocer</span></h3>
+    <p>¿Cuántas veces se ejecuta el cuerpo del <code>do while</code>? ¿Qué imprime?</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> n = <span class="num">10</span>;
+
+<span class="kw">do</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"n = "</span> + n);
+    n = n + <span class="num">1</span>;
+} <span class="kw">while</span> (n &lt; <span class="num">5</span>);</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-0">Imprime <code>n = 10</code> <strong>una sola vez</strong>. El cuerpo se ejecuta siempre al menos una vez, y después la condición <code>11 &lt; 5</code> es falsa, así que no repite. Si esto fuera un <code>while</code>, no imprimiría nada.</p>
+    </details>
+
+    <h3><span class="nivel nivel-completar">Completar</span></h3>
+    <p>Completa el <code>do while</code> para que muestre los números del 1 al 5.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">1</span>;
+
+<span class="kw">do</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+    i = i + <span class="num">1</span>;
+} <span class="kw">while</span> (_______________);</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-0"><code>i &lt;= 5</code>. Y no olvides el punto y coma al final: <code>} while (i &lt;= 5);</code>.</p>
+    </details>
+
+    <h3><span class="nivel nivel-modificar">Modificar</span></h3>
+    <p>Este programa debería imprimir los números del 5 al 1 en orden descendente, pero está roto. Encuentra y corrige el error.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">5</span>;
+
+<span class="kw">do</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+    i = i + <span class="num">1</span>;
+} <span class="kw">while</span> (i &gt;= <span class="num">1</span>);</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-2">El problema es que <code>i</code> se incrementa en lugar de decrementar. Con <code>i</code> creciendo, la condición <code>i &gt;= 1</code> siempre es verdadera y el ciclo es infinito.</p>
+      <div class="bloque-codigo">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">5</span>;
+
+<span class="kw">do</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+    i = i - <span class="num">1</span>;
+} <span class="kw">while</span> (i &gt;= <span class="num">1</span>);</pre>
+      </div>
+      <p class="mb-0">Fíjate en que este error es exactamente el mismo que viste con <code>while</code>, pero aplicado a <code>do while</code>. Los bucles infinitos no distinguen entre las dos estructuras: son un problema del ciclo en sí. Y una vez que reconoces el patrón, los detectas en cualquiera de las dos.</p>
+    </details>
+
+    <h3><span class="nivel nivel-construir">Construir</span></h3>
+    <p>Escribe un programa que pida al usuario un número positivo (mayor a 0) usando <code>do while</code>, asumiendo que tienes un <code>Scanner</code> en una variable llamada <code>scanner</code> y usando <code>scanner.nextInt()</code> para leer. Muestra "Número aceptado: X" al final.</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> numero;
+
+<span class="kw">do</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Ingresa un número positivo: "</span>);
+    numero = scanner.<span class="mth">nextInt</span>();
+} <span class="kw">while</span> (numero &lt;= <span class="num">0</span>);
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Número aceptado: "</span> + numero);</pre>
+      </div>
+      <p class="mb-0">Fíjate en el patrón: <em>pedir, leer, verificar</em>. Si el número no es positivo, se repite todo. El <code>do while</code> garantiza que se pida al menos una vez. Con un <code>while</code> hubieras tenido que inicializar <code>numero</code> en un valor negativo falso solo para entrar, lo cual sería artificial. El capítulo completo de Scanner viene en el Bloque 5, pero el patrón vale la pena verlo aquí.</p>
+    </details>
+
+    <h3><span class="nivel nivel-combinar">Combinar</span></h3>
+    <p>Escribe un programa que sume números introducidos por el usuario, terminando cuando ingrese 0. Al final, muestra la suma total y cuántos números se ingresaron (sin contar el 0).</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> numero;
+<span class="kw">int</span> suma = <span class="num">0</span>;
+<span class="kw">int</span> cantidad = <span class="num">0</span>;
+
+<span class="kw">do</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Ingresa un número (0 para terminar): "</span>);
+    numero = scanner.<span class="mth">nextInt</span>();
+
+    <span class="kw">if</span> (numero != <span class="num">0</span>) {
+        suma = suma + numero;
+        cantidad = cantidad + <span class="num">1</span>;
+    }
+} <span class="kw">while</span> (numero != <span class="num">0</span>);
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Suma total: "</span> + suma);
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Cantidad de números: "</span> + cantidad);</pre>
+      </div>
+      <p class="mb-0">Aquí tienes un <code>if</code> dentro del <code>do while</code>, y una variable acumuladora (<code>suma</code>) y un contador (<code>cantidad</code>) que se actualizan solo si el número no es 0. Este es el tipo de combinación que empieza a aparecer seguido: ciclos con decisiones adentro. Es exactamente el punto del manual donde el bajón está anticipado en la introducción del bloque. Si sientes que te cuesta, es la señal esperada, no una falla.</p>
+    </details>
+
+    <h3><span class="nivel nivel-crear">Crear</span></h3>
+    <p>Escribe un programa que simule una cuenta regresiva de un cohete. Empieza en 10, muestra cada número, y cuando llegue a 0, imprime "¡Despegue!". Usa <code>do while</code>.</p>
+    <p>Después, reescríbelo con <code>while</code>. Compara los dos. ¿Cuál te parece más natural para este problema? ¿Por qué?</p>
+
+    <details class="solucion">
+      <summary>Ver solución y comentario</summary>
+      <p class="mt-2 mb-2"><strong>Con <code>do while</code>:</strong></p>
+      <div class="bloque-codigo">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">10</span>;
+
+<span class="kw">do</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+    i = i - <span class="num">1</span>;
+} <span class="kw">while</span> (i &gt;= <span class="num">0</span>);
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"¡Despegue!"</span>);</pre>
+      </div>
+      <p class="mb-2"><strong>Con <code>while</code>:</strong></p>
+      <div class="bloque-codigo">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">10</span>;
+
+<span class="kw">while</span> (i &gt;= <span class="num">0</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+    i = i - <span class="num">1</span>;
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"¡Despegue!"</span>);</pre>
+      </div>
+      <p class="mb-0">Para este problema, <code>while</code> es más natural, porque la condición puede evaluarse antes sin problemas. La cuenta regresiva siempre se va a ejecutar al menos una vez aquí, pero si <code>i</code> empezara en -1, con <code>while</code> no se imprimiría nada (correcto: no hay cuenta regresiva desde -1), mientras que con <code>do while</code> sí se imprimiría el -1 (incorrecto). La lección: <strong>el <code>do while</code> no siempre es "mejor" para ciclos que sabes que van a ejecutarse al menos una vez; solo lo es cuando quieres garantizar esa primera ejecución sin importar la condición</strong>. Para la cuenta regresiva, "al menos una vez" ya viene garantizado por la condición inicial, así que <code>while</code> es más simple.</p>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="combinar-3">
+    <h2>Ciclos con <code>if</code> adentro (el momento del bajón)</h2>
+
+    <p>Llegamos al punto del bloque que anuncié al principio. Aquí es donde empiezan a aparecer ciclos con decisiones adentro, y es donde muchas personas sienten que "se les olvidó todo lo anterior". Vamos a ver un par de ejemplos, y después te voy a decir por qué esta sensación es normal.</p>
+
+    <h3>Ejemplo 1 — Contar los números pares del 1 al 20</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">1</span>;
+<span class="kw">int</span> pares = <span class="num">0</span>;
+
+<span class="kw">while</span> (i &lt;= <span class="num">20</span>) {
+    <span class="kw">if</span> (i % <span class="num">2</span> == <span class="num">0</span>) {
+        pares = pares + <span class="num">1</span>;
+    }
+    i = i + <span class="num">1</span>;
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Pares entre 1 y 20: "</span> + pares);</pre>
+    </div>
+
+    <p>Lee esto en español: "mientras <code>i</code> sea menor o igual a 20: si <code>i</code> es par, aumenta el contador de pares. Después, aumenta <code>i</code> en 1". Fíjate en la indentación: el <code>if</code> está <em>dentro</em> del <code>while</code>, y el <code>i = i + 1</code> también está dentro del <code>while</code>, pero <em>fuera</em> del <code>if</code>. Esa distinción es importante: el <code>i = i + 1</code> se ejecuta siempre, se cumpla o no el <code>if</code>.</p>
+
+    <h3>Ejemplo 2 — Sumar solo los números que cumplan una condición</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">1</span>;
+<span class="kw">int</span> suma = <span class="num">0</span>;
+
+<span class="kw">while</span> (i &lt;= <span class="num">100</span>) {
+    <span class="kw">if</span> (i % <span class="num">3</span> == <span class="num">0</span>) {
+        suma = suma + i;
+    }
+    i = i + <span class="num">1</span>;
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Suma de múltiplos de 3 entre 1 y 100: "</span> + suma);</pre>
+    </div>
+
+    <p>Suma solo los múltiplos de 3. El patrón es el mismo que el ejemplo anterior: contador que avanza siempre, y un <code>if</code> que decide si el valor actual se acumula o no.</p>
+
+    <h3>Ejemplo 3 — Con <code>else</code> dentro del ciclo</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">1</span>;
+<span class="kw">int</span> positivos = <span class="num">0</span>;
+<span class="kw">int</span> negativos = <span class="num">0</span>;
+
+<span class="cmt">// simulado: en la práctica leeríamos números del usuario</span>
+<span class="kw">int</span>[] numeros = {<span class="num">5</span>, <span class="num">-3</span>, <span class="num">7</span>, <span class="num">-1</span>, <span class="num">0</span>, <span class="num">4</span>};
+
+<span class="kw">while</span> (i &lt; numeros.length) {
+    <span class="kw">int</span> actual = numeros[i];
+
+    <span class="kw">if</span> (actual &gt; <span class="num">0</span>) {
+        positivos = positivos + <span class="num">1</span>;
+    } <span class="kw">else if</span> (actual &lt; <span class="num">0</span>) {
+        negativos = negativos + <span class="num">1</span>;
+    }
+
+    i = i + <span class="num">1</span>;
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Positivos: "</span> + positivos);
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Negativos: "</span> + negativos);</pre>
+    </div>
+
+    <p>Este ejemplo usa arreglos (que verás en el Bloque 6), pero lo importante aquí es la estructura: dentro del <code>while</code>, hay un <code>if / else if</code> que decide qué contador aumentar según el valor actual. Si te resulta confuso, ignora la parte de arreglos y concentra la vista en: <code>while</code> que recorre algo + <code>if/else if</code> que clasifica cada elemento.</p>
+
+    <p>Este es exactamente el patrón que da la sensación de "se me olvidó todo". Porque hay que sostener al mismo tiempo: la variable del ciclo, la condición del ciclo, el valor actual del elemento, la decisión del <code>if</code>, y dos contadores que cambian según la decisión. Es mucha información junta, y la memoria de trabajo se llena. Es el mismo fenómeno del Bloque 1: <em>cuatro o cinco piezas nuevas al mismo tiempo</em>.</p>
+
+    <div class="caja caja-anticipa">
+      <h5>Si esto te está costando, aquí está la explicación</h5>
+      <p class="mb-0">No se te olvidó <code>while</code>. No se te olvidó <code>if</code>. Lo que está pasando es que estás pidiéndole a tu mente que sostenga al mismo tiempo la <em>lógica de la repetición</em> y la <em>lógica de la decisión</em>, y esas dos cosas viven en "lugares" distintos cuando las aprendes por separado. Combinarlas requiere un reacomodo. Cuando lo logras, ya no vuelves atrás: escribes ciclos con decisiones como si nada. Pero el reacomodo se siente, durante un rato, como si hubieras perdido lo que sabías. Es la misma señal de aprendizaje que ya viviste en el Bloque 2, solo que ahora es más fuerte porque son más piezas.</p>
+    </div>
+
+    <p>Este es el momento perfecto para volver al protocolo del Bloque 1. Si el ejemplo se te hizo un nudo, haz lo que dice: <strong>aísla la pieza que no entiendes</strong>. Por ejemplo, escribe solo el <code>while</code> que recorre del 1 al 5 sin ningún <code>if</code> adentro. Después agrega el <code>if</code> que imprime solo los pares. Después agrega el contador. Cada paso es pequeño y verificable. Si todo junto no se entiende, sepáralo en piezas y vuelve a armarlo.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejemplos-combinar">
+    <h2>Más ejemplos combinando ciclos y decisiones</h2>
+
+    <h3>Ejemplo 1 — Números primos hasta un límite</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> limite = <span class="num">20</span>;
+<span class="kw">int</span> n = <span class="num">2</span>;
+
+<span class="kw">while</span> (n &lt;= limite) {
+    <span class="kw">int</span> i = <span class="num">2</span>;
+    <span class="kw">boolean</span> esPrimo = <span class="kw">true</span>;
+
+    <span class="kw">while</span> (i &lt; n) {
+        <span class="kw">if</span> (n % i == <span class="num">0</span>) {
+            esPrimo = <span class="kw">false</span>;
+        }
+        i = i + <span class="num">1</span>;
+    }
+
+    <span class="kw">if</span> (esPrimo) {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(n);
+    }
+
+    n = n + <span class="num">1</span>;
+}</pre>
+    </div>
+    <p>Este ejemplo tiene un <code>while</code> dentro de otro <code>while</code>, además de <code>if</code> dentro. Es lo más complejo que vas a ver en este bloque, y no te preocupes si necesitas leerlo varias veces. La idea: para cada número <code>n</code>, probamos si es divisible por algún <code>i</code> entre 2 y n-1. Si lo es, no es primo. Este es el tipo de programa donde la simulación a mano vale oro.</p>
+
+    <h3>Ejemplo 2 — Contar vocales en un texto</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span> texto = <span class="str">"Hola mundo"</span>;
+<span class="kw">int</span> i = <span class="num">0</span>;
+<span class="kw">int</span> vocales = <span class="num">0</span>;
+
+<span class="kw">while</span> (i &lt; texto.<span class="mth">length</span>()) {
+    <span class="kw">char</span> c = texto.<span class="mth">charAt</span>(i);
+
+    <span class="kw">if</span> (c == <span class="str">'a'</span> || c == <span class="str">'e'</span> || c == <span class="str">'i'</span> || c == <span class="str">'o'</span> || c == <span class="str">'u'</span>) {
+        vocales = vocales + <span class="num">1</span>;
+    }
+
+    i = i + <span class="num">1</span>;
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Vocales encontradas: "</span> + vocales);</pre>
+    </div>
+    <p>Otro <code>while</code> con <code>if</code> adentro. Aquí recorremos un <code>String</code> carácter por carácter, y contamos las vocales. Aparecen dos métodos nuevos (<code>.length()</code> y <code>.charAt(i)</code>), pero la lógica es la misma: recorrer y decidir, recorrer y decidir. Con "Hola mundo", cuenta 4 vocales (o, a, u, o).</p>
+
+    <h3>Ejemplo 3 — Encontrar el máximo sin arreglos</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> mayor = <span class="num">0</span>;
+<span class="kw">int</span> contador = <span class="num">1</span>;
+
+<span class="cmt">// simulado: leeríamos 5 números del usuario</span>
+<span class="kw">int</span>[] numeros = {<span class="num">12</span>, <span class="num">45</span>, <span class="num">7</span>, <span class="num">89</span>, <span class="num">23</span>};
+
+<span class="kw">while</span> (contador &lt; numeros.length) {
+    <span class="kw">int</span> actual = numeros[contador];
+
+    <span class="kw">if</span> (actual &gt; mayor) {
+        mayor = actual;
+    }
+
+    contador = contador + <span class="num">1</span>;
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"El mayor es: "</span> + mayor);</pre>
+    </div>
+    <p>El patrón "encontrar el mayor" es uno de los más útiles. Empiezas con un valor inicial y, en cada vuelta, comparas si el actual es mayor. Si sí, actualizas. Al terminar, tienes el mayor. Este es un patrón que vas a usar muchísimo en los siguientes bloques.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejercicios-combinar">
+    <h2>Ejercicios combinando ciclos y decisiones</h2>
+
+    <h3><span class="nivel nivel-reconocer">Reconocer</span></h3>
+    <p>¿Qué imprime este programa?</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">1</span>;
+
+<span class="kw">while</span> (i &lt;= <span class="num">6</span>) {
+    <span class="kw">if</span> (i % <span class="num">2</span> == <span class="num">0</span>) {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(i + <span class="str">" es par"</span>);
+    } <span class="kw">else</span> {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(i + <span class="str">" es impar"</span>);
+    }
+    i = i + <span class="num">1</span>;
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="flujo mt-2">1 es impar
+2 es par
+3 es impar
+4 es par
+5 es impar
+6 es par</div>
+      <p class="mb-0">El <code>if</code> clasifica cada número, y el <code>while</code> se encarga de recorrerlos. Fíjate en que el <code>i = i + 1</code> está fuera del <code>if</code>, así que se ejecuta siempre, sea par o impar.</p>
+    </details>
+
+    <h3><span class="nivel nivel-completar">Completar</span></h3>
+    <p>Completa el código para que sume solo los números pares entre 1 y 100.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">1</span>;
+<span class="kw">int</span> suma = <span class="num">0</span>;
+
+<span class="kw">while</span> (i &lt;= <span class="num">100</span>) {
+    <span class="kw">if</span> (_______________) {
+        suma = suma + i;
+    }
+    i = i + <span class="num">1</span>;
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Suma de pares: "</span> + suma);</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-0"><code>i % 2 == 0</code>. Es el patrón clásico para verificar si un número es par. El resultado final es 2550.</p>
+    </details>
+
+    <h3><span class="nivel nivel-modificar">Modificar</span></h3>
+    <p>Este programa debería contar cuántos números entre 1 y 50 son múltiplos de 5, pero tiene un bug. Encuéntralo y corrígelo.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">1</span>;
+<span class="kw">int</span> contador = <span class="num">0</span>;
+
+<span class="kw">while</span> (i &lt;= <span class="num">50</span>) {
+    <span class="kw">if</span> (i % <span class="num">5</span> == <span class="num">0</span>) {
+        contador = contador + <span class="num">1</span>;
+        i = i + <span class="num">1</span>;
+    }
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-2">Hay dos problemas. Primero, <code>i = i + 1</code> está <em>dentro</em> del <code>if</code>, así que solo incrementa cuando <code>i</code> es múltiplo de 5. Cuando <code>i</code> no es múltiplo, el ciclo se queda trabado en ese valor para siempre (bucle infinito). Segundo, el incremento debería estar <em>fuera</em> del <code>if</code>, para que se ejecute siempre.</p>
+      <div class="bloque-codigo">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">1</span>;
+<span class="kw">int</span> contador = <span class="num">0</span>;
+
+<span class="kw">while</span> (i &lt;= <span class="num">50</span>) {
+    <span class="kw">if</span> (i % <span class="num">5</span> == <span class="num">0</span>) {
+        contador = contador + <span class="num">1</span>;
+    }
+    i = i + <span class="num">1</span>;
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Múltiplos de 5: "</span> + contador);</pre>
+      </div>
+      <p class="mb-0">Este error es un clásico: incrementar la variable del ciclo dentro de una rama condicional. La variable del ciclo <strong>debe avanzar en cada vuelta</strong>, no solo cuando se cumple una condición. Regla simple: la línea que modifica la variable del ciclo va <em>al final del cuerpo del <code>while</code>, fuera de cualquier <code>if</code></em>. Casi nunca hay una buena razón para ponerla dentro de un <code>if</code>.</p>
+    </details>
+
+    <h3><span class="nivel nivel-construir">Construir</span></h3>
+    <p>Escribe un programa que, dado un número <code>n</code>, cuente cuántos de sus dígitos son pares. Por ejemplo, para <code>n = 2348</code>, la respuesta es 3 (2, 4, 8 son pares; 3 no lo es).</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> n = <span class="num">2348</span>;
+<span class="kw">int</span> pares = <span class="num">0</span>;
+
+<span class="kw">while</span> (n &gt; <span class="num">0</span>) {
+    <span class="kw">int</span> digito = n % <span class="num">10</span>;   <span class="cmt">// último dígito</span>
+
+    <span class="kw">if</span> (digito % <span class="num">2</span> == <span class="num">0</span>) {
+        pares = pares + <span class="num">1</span>;
+    }
+
+    n = n / <span class="num">10</span>;              <span class="cmt">// quitar el último dígito</span>
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Dígitos pares: "</span> + pares);</pre>
+      </div>
+      <p class="mb-0">El truco es <code>n % 10</code> para obtener el último dígito, y <code>n / 10</code> para eliminarlo. Se repite mientras queden dígitos. Es un patrón muy útil para trabajar con números. Y no, no necesitas convertirlo a String; con división y módulo lo haces directamente.</p>
+    </details>
+
+    <h3><span class="nivel nivel-combinar">Combinar</span></h3>
+    <p>Escribe un programa que recorra los números del 1 al 30 y, para cada uno:</p>
+    <ul>
+      <li>Si es divisible por 3 y por 5, muestre "FizzBuzz".</li>
+      <li>Si es divisible por 3 (pero no por 5), muestre "Fizz".</li>
+      <li>Si es divisible por 5 (pero no por 3), muestre "Buzz".</li>
+      <li>En cualquier otro caso, muestre el número.</li>
+    </ul>
+    <p>Este es el famoso ejercicio FizzBuzz, que aparece en entrevistas de trabajo. Hazlo con <code>while</code> y <code>if / else if</code>.</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> i = <span class="num">1</span>;
+
+<span class="kw">while</span> (i &lt;= <span class="num">30</span>) {
+    <span class="kw">if</span> (i % <span class="num">3</span> == <span class="num">0</span> &amp;&amp; i % <span class="num">5</span> == <span class="num">0</span>) {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"FizzBuzz"</span>);
+    } <span class="kw">else if</span> (i % <span class="num">3</span> == <span class="num">0</span>) {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Fizz"</span>);
+    } <span class="kw">else if</span> (i % <span class="num">5</span> == <span class="num">0</span>) {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Buzz"</span>);
+    } <span class="kw">else</span> {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(i);
+    }
+    i = i + <span class="num">1</span>;
+}</pre>
+      </div>
+      <p class="mb-0">La clave está en el orden: la primera condición es la más específica (divisible por ambos), y va primero. Si pusieras <code>i % 3 == 0</code> primero, los números divisibles por 3 y 5 caerían ahí y nunca llegarían a "FizzBuzz". Es el mismo principio del orden de <code>else if</code> que viste en el Bloque 2, ahora aplicado dentro de un ciclo.</p>
+    </details>
+
+    <h3><span class="nivel nivel-crear">Crear</span></h3>
+    <p>Escribe un programa que encuentre el primer número mayor a 1000 que sea divisible por 7, por 11 y por 13 al mismo tiempo. Usa <code>while</code>.</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> n = <span class="num">1001</span>;
+
+<span class="kw">while</span> (!(n % <span class="num">7</span> == <span class="num">0</span> &amp;&amp; n % <span class="num">11</span> == <span class="num">0</span> &amp;&amp; n % <span class="num">13</span> == <span class="num">0</span>)) {
+    n = n + <span class="num">1</span>;
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"El primer número es: "</span> + n);</pre>
+      </div>
+      <p class="mb-0">Este ciclo no tiene contador, y no sabemos cuántas vueltas va a dar. Solo sabemos que vamos a parar cuando encontremos el número. La condición usa una negación: <em>mientras NO se cumpla la propiedad, sigue buscando</em>. Cuando la propiedad se cumple (el número es divisible por los tres), la condición se vuelve falsa y salimos. El resultado es 1001 (porque 1001 = 7 × 11 × 13).</p>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="reto-final-3">
+    <h2>Reto del Bloque 3</h2>
+
+    <p>Este reto combina todo lo del bloque: <code>switch</code>, <code>while</code>, <code>do while</code>, <code>if / else if</code>, y decisiones dentro de ciclos.</p>
+
+    <p><strong>Reto: cajero automático interactivo</strong></p>
+
+    <p>Escribe un programa que simule un cajero automático. El cajero debe:</p>
+
+    <ol>
+      <li>Tener un saldo inicial (por ejemplo, 1000).</li>
+      <li>Mostrar un menú con tres opciones: 1) Consultar saldo, 2) Retirar, 3) Salir.</li>
+      <li>Leer la opción del usuario (puedes simularlo con variables, o usar <code>Scanner</code> si ya lo conoces del Bloque 1).</li>
+      <li>Ejecutar la acción correspondiente usando un <code>switch</code>.</li>
+      <li>Si el usuario elige retirar, pedir el monto y verificar que sea múltiplo de 100 y que no exceda el saldo. Si no cumple, mostrar un mensaje de error y no modificar el saldo.</li>
+      <li>Repetir todo hasta que el usuario elija salir.</li>
+    </ol>
+
+    <p>El menú debe mostrarse al menos una vez, así que el ciclo principal debería ser un <code>do while</code>. Y las verificaciones del retiro van adentro, usando <code>if</code> o <code>switch</code> según convenga.</p>
+
+    <p>Antes de escribir el código, <strong>haz el análisis en español</strong>, como en la sección "Antes de programar" del Bloque 2. Escribe los pasos en tu idioma, después tradúcelos a Java. Y cuando lo tengas, prueba el programa con varias combinaciones:</p>
+
+    <ul>
+      <li>Consultar saldo, después salir.</li>
+      <li>Retirar un monto válido (por ejemplo, 200) y ver cómo cambia el saldo.</li>
+      <li>Retirar un monto que no es múltiplo de 100 (por ejemplo, 250).</li>
+      <li>Retirar un monto mayor al saldo.</li>
+      <li>Elegir una opción no válida (por ejemplo, 5).</li>
+    </ul>
+
+    <details class="solucion">
+      <summary>Ver una posible solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> saldo = <span class="num">1000</span>;
+<span class="kw">int</span> opcion = <span class="num">0</span>;
+
+<span class="kw">do</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"\n--- CAJERO ---"</span>);
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"1. Consultar saldo"</span>);
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"2. Retirar"</span>);
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"3. Salir"</span>);
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Elige una opción: "</span>);
+
+    <span class="cmt">// simulado: opcion = leer del usuario</span>
+    opcion = <span class="num">2</span>;   <span class="cmt">// cambiar según se quiera probar</span>
+
+    <span class="kw">switch</span> (opcion) {
+        <span class="kw">case</span> <span class="num">1</span>:
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Tu saldo es: "</span> + saldo);
+            <span class="kw">break</span>;
+
+        <span class="kw">case</span> <span class="num">2</span>:
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Monto a retirar (múltiplo de 100): "</span>);
+            <span class="cmt">// simulado: monto = leer del usuario</span>
+            <span class="kw">int</span> monto = <span class="num">200</span>;
+
+            <span class="kw">if</span> (monto % <span class="num">100</span> != <span class="num">0</span>) {
+                <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Error: el monto debe ser múltiplo de 100"</span>);
+            } <span class="kw">else if</span> (monto &gt; saldo) {
+                <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Error: saldo insuficiente"</span>);
+            } <span class="kw">else</span> {
+                saldo = saldo - monto;
+                <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Retiro exitoso. Nuevo saldo: "</span> + saldo);
+            }
+            <span class="kw">break</span>;
+
+        <span class="kw">case</span> <span class="num">3</span>:
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Gracias por usar el cajero"</span>);
+            <span class="kw">break</span>;
+
+        <span class="kw">default</span>:
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Opción no válida"</span>);
+    }
+} <span class="kw">while</span> (opcion != <span class="num">3</span>);</pre>
+      </div>
+      <p class="mb-0">Fíjate en la estructura: <code>do while</code> exterior que envuelve todo (para que el menú se muestre al menos una vez y se repita hasta "salir"), y dentro un <code>switch</code> que maneja la opción elegida. Dentro del <code>case 2</code>, hay un <code>if / else if / else</code> que valida el retiro antes de aplicarlo. Es la primera vez que en el manual ves <strong>tres niveles de estructuras anidadas</strong>: <code>do while</code> → <code>switch</code> → <code>if / else if</code>. Si te cuesta leerlo todo junto, sigue el protocolo: aísla cada estructura y verifica que hace lo que crees que hace, después vuelve al conjunto.</p>
+    </details>
+
+    <p>Cuando termines, haz esto antes de cerrar el archivo:</p>
+
+    <ol>
+      <li>Lee tu solución línea por línea, simulando lo que hace Java para cada uno de los cinco casos de prueba.</li>
+      <li>Cambia los valores de la simulación y verifica que sigue funcionando.</li>
+      <li>Escribe un comentario explicando <em>por qué</em> elegiste cada estructura en cada lugar (¿por qué <code>do while</code> y no <code>while</code> para el menú? ¿por qué <code>switch</code> y no <code>else if</code> para las opciones?).</li>
+    </ol>
+
+    <p>El tercer paso es el más importante. Explicar el porqué convierte el código en aprendizaje.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="resumen-3">
+    <h2>Lo que llevas construido</h2>
+
+    <p>Al terminar este bloque, tienes estas piezas nuevas:</p>
+
+    <ul>
+      <li><strong><code>switch</code></strong> — elegir entre muchas opciones cuando se compara el mismo dato contra valores exactos.</li>
+      <li><strong><code>break</code> en <code>switch</code></strong> — terminar un caso. Y la idea de <em>fall through</em> intencional para agrupar casos.</li>
+      <li><strong><code>while</code></strong> — repetir mientras se cumple una condición, evaluada antes de cada vuelta.</li>
+      <li><strong><code>do while</code></strong> — repetir al menos una vez, evaluando la condición después.</li>
+      <li><strong>Contadores y acumuladores</strong> — los dos patrones más comunes en ciclos.</li>
+      <li><strong>Bucles infinitos</strong> — cómo reconocerlos y cómo evitarlos.</li>
+      <li><strong>Ciclos con decisiones dentro</strong> — el primer uso serio de combinar todo lo aprendido.</li>
+    </ul>
+
+    <p>Y estas son las piezas que combinaste de bloques anteriores:</p>
+
+    <ul>
+      <li>Variables, tipos, operadores, booleanos (Bloque 1).</li>
+      <li><code>if</code>, <code>else</code>, <code>else if</code>, operadores lógicos, anidados (Bloque 2).</li>
+    </ul>
+
+    <p>Si miras hacia atrás, desde el inicio del manual, ya tienes una cantidad enorme de piezas. Cuando empezaste, no sabías qué era una variable. Ahora escribes ciclos con decisiones dentro, y razonas sobre el orden de las condiciones en un <code>else if</code> anidado en un <code>do while</code>. Eso no es "haber avanzado un poco". Es haber construido una base real.</p>
+
+    <p>El siguiente bloque introduce <code>for</code>, que es la estructura de repetición más usada en Java, además de <code>break</code> y <code>continue</code>. Con esas piezas, tu arsenal básico de programación va a quedar completo. Y después viene Scanner como capítulo propio, y arreglos para cerrar.</p>
+
+    <p>Ya sabes lo que se siente combinar cosas nuevas: cuando llegues al <code>for</code> vas a tener que reorganizar. Es la misma experiencia que ya viviste dos veces en este manual. La tercera se siente igual, pero te toma menos tiempo, porque ya sabes que es reacomodo, no retroceso.</p>
+
+    <div class="caja caja-idea">
+      <p class="mb-0">Antes de pasar al Bloque 4, resuelve al menos un ejercicio de cada nivel en <code>switch</code>, <code>while</code>, <code>do while</code>, y en la sección combinada. No hace falta resolver todo. Pero sí probar cada tipo. Avanzar sin construir deja huecos que después cuestan más.</p>
+    </div>
+  </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.querySelectorAll('.bloque-codigo').forEach(function (bloque) {
+    var btn = bloque.querySelector('.btn-copiar');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var pre = bloque.querySelector('pre');
+      var texto = pre.innerText;
+      navigator.clipboard.writeText(texto).then(function () {
+        var original = btn.textContent;
+        btn.textContent = '¡Copiado!';
+        setTimeout(function () { btn.textContent = original; }, 1200);
+      });
+    });
+  });
+
+  var html = document.documentElement;
+  var btnTema = document.getElementById('btnTema');
+  var temaGuardado = localStorage.getItem('temaManual') || 'light';
+  aplicarTema(temaGuardado);
+
+  btnTema.addEventListener('click', function () {
+    var actual = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+    aplicarTema(actual);
+    localStorage.setItem('temaManual', actual);
+  });
+
+  function aplicarTema(tema) {
+    html.setAttribute('data-bs-theme', tema);
+    btnTema.innerHTML = tema === 'dark'
+      ? '<i class="bi bi-sun"></i>'
+      : '<i class="bi bi-moon-stars"></i>';
+  }
+
+  var sidebar = document.getElementById('sidebar');
+  var btnMenu = document.getElementById('btnMenu');
+  var btnCerrarMenu = document.getElementById('btnCerrarMenu');
+
+  function cerrarMenu() {
+    sidebar.classList.remove('abierto');
+    document.body.classList.remove('menu-abierto');
+    btnMenu.setAttribute('aria-expanded', 'false');
+  }
+
+  btnMenu.addEventListener('click', function () {
+    var abierto = sidebar.classList.toggle('abierto');
+    document.body.classList.toggle('menu-abierto', abierto);
+    btnMenu.setAttribute('aria-expanded', String(abierto));
+  });
+  btnCerrarMenu.addEventListener('click', cerrarMenu);
+  sidebar.querySelectorAll('a').forEach(function (enlace) {
+    enlace.addEventListener('click', cerrarMenu);
+  });
+
+  var enlaces = document.querySelectorAll('.sidebar .nav-link');
+  var secciones = [];
+  enlaces.forEach(function (a) {
+    var id = a.getAttribute('href');
+    if (id && id.startsWith('#')) {
+      var el = document.querySelector(id);
+      if (el) secciones.push({ el: el, link: a });
+    }
+  });
+
+  function actualizarActivo() {
+    var y = window.scrollY + 120;
+    var actual = null;
+    secciones.forEach(function (s) {
+      if (s.el.offsetTop <= y) actual = s;
+    });
+    enlaces.forEach(function (a) { a.classList.remove('active'); });
+    if (actual) actual.link.classList.add('active');
+  }
+  window.addEventListener('scroll', actualizarActivo);
+  window.addEventListener('load', actualizarActivo);
+</script>
+<script src="../../../public/java-manual.js"></script>
+</body>
+</html>

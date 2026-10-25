@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual de Java — Bloque 1: Antes de las estructuras de control</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+  :root {
+    --acento: #f89820;      /* naranja Java */
+    --acento-2: #5382a1;    /* azul Java */
+    --code-bg: #1e1e2e;
+    --code-fg: #cdd6f4;
+  }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.7;
+    scroll-behavior: smooth;
+  }
+  /* Sidebar */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 280px;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+    z-index: 1030;
+  }
+  [data-bs-theme="dark"] .sidebar {
+    background: #16181d;
+    border-right-color: #2a2d34;
+  }
+  .sidebar h6 {
+    text-transform: uppercase;
+    font-size: .75rem;
+    letter-spacing: .05em;
+    color: #6c757d;
+    margin-top: 1.25rem;
+  }
+  .sidebar .nav-link {
+    padding: .35rem .6rem;
+    border-radius: .35rem;
+    font-size: .92rem;
+    color: inherit;
+  }
+  .sidebar .nav-link:hover { background: rgba(248,152,32,.12); }
+  .sidebar .nav-link.active {
+    background: var(--acento);
+    color: #fff !important;
+    font-weight: 600;
+  }
+  .contenido {
+    margin-left: 280px;
+    padding: 2.5rem 3rem 6rem;
+    max-width: 900px;
+  }
+  /* Encabezados */
+  h1, h2, h3 { font-weight: 700; }
+  h2 {
+    margin-top: 3.5rem;
+    padding-bottom: .5rem;
+    border-bottom: 3px solid var(--acento);
+  }
+  h3 { margin-top: 2.2rem; color: var(--acento-2); }
+  [data-bs-theme="dark"] h3 { color: #8ab4d6; }
+
+  /* Bloques de código */
+  .bloque-codigo {
+    position: relative;
+    margin: 1.25rem 0;
+    border-radius: .5rem;
+    overflow: hidden;
+    background: var(--code-bg);
+  }
+  .bloque-codigo pre {
+    margin: 0;
+    padding: 1rem 1rem .9rem;
+    color: var(--code-fg);
+    font-size: .9rem;
+    line-height: 1.55;
+    overflow-x: auto;
+    font-family: "JetBrains Mono", Consolas, Menlo, monospace;
+  }
+  .bloque-codigo .btn-copiar {
+    position: absolute;
+    top: .5rem; right: .5rem;
+    background: rgba(255,255,255,.08);
+    color: #cdd6f4;
+    border: 1px solid rgba(255,255,255,.15);
+    font-size: .75rem;
+    padding: .2rem .55rem;
+    border-radius: .3rem;
+    opacity: 0;
+    transition: opacity .15s;
+  }
+  .bloque-codigo:hover .btn-copiar { opacity: 1; }
+  .bloque-codigo .btn-copiar:hover { background: rgba(248,152,32,.3); }
+  /* Resaltado simple */
+  .kw  { color: #cba6f7; }  /* keywords */
+  .str { color: #a6e3a1; }  /* strings */
+  .num { color: #fab387; }  /* números */
+  .cmt { color: #6c7086; font-style: italic; }
+  .cls { color: #f9e2af; }  /* clases */
+  .mth { color: #89b4fa; }  /* métodos */
+
+  /* Cajas especiales */
+  .caja {
+    border-radius: .5rem;
+    padding: 1rem 1.15rem;
+    margin: 1.25rem 0;
+    border-left: 5px solid;
+  }
+  .caja-detente  { background: #fff8e6; border-color: #f0ad4e; }
+  .caja-error    { background: #fdecec; border-color: #dc3545; }
+  .caja-protocolo{ background: #eef5ff; border-color: #4a7cff; }
+  .caja-idea     { background: #eefaf1; border-color: #28a745; }
+  .caja-anticipa { background: #f3e8ff; border-color: #a855f7; }
+  [data-bs-theme="dark"] .caja-detente   { background: #2e2612; }
+  [data-bs-theme="dark"] .caja-error     { background: #2e1618; }
+  [data-bs-theme="dark"] .caja-protocolo { background: #14202e; }
+  [data-bs-theme="dark"] .caja-idea      { background: #12291b; }
+  [data-bs-theme="dark"] .caja-anticipa  { background: #231531; }
+
+  .caja h5 { margin-top: 0; font-size: 1rem; font-weight: 700; }
+  .caja p:last-child, .caja ul:last-child { margin-bottom: 0; }
+
+  /* Niveles de ejercicio */
+  .nivel {
+    display: inline-block;
+    padding: .15rem .55rem;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    margin-right: .4rem;
+  }
+  .nivel-reconocer { background:#dbeafe; color:#1e40af; }
+  .nivel-completar { background:#dcfce7; color:#166534; }
+  .nivel-modificar { background:#fef3c7; color:#92400e; }
+  .nivel-construir { background:#fae8ff; color:#86198f; }
+  .nivel-combinar  { background:#ffe4e6; color:#9f1239; }
+  .nivel-crear     { background:#e0e7ff; color:#3730a3; }
+
+  /* Simulación paso a paso */
+  .simulacion table { font-size: .9rem; }
+  .simulacion th { background: #f1f3f5; }
+  [data-bs-theme="dark"] .simulacion th { background: #23262e; }
+
+  /* Soluciones */
+  details.solucion {
+    margin: .75rem 0;
+    border: 1px solid #dee2e6;
+    border-radius: .4rem;
+    padding: .6rem .9rem;
+    background: #fbfbfb;
+  }
+  [data-bs-theme="dark"] details.solucion {
+    background: #16181d; border-color: #2a2d34;
+  }
+  details.solucion summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: #495057;
+  }
+  [data-bs-theme="dark"] details.solucion summary { color: #adb5bd; }
+
+  /* Botón de tema */
+  .btn-tema {
+    position: fixed; top: 1rem; right: 1rem; z-index: 1040;
+  }
+  .btn-menu {
+    display: none;
+  }
+  .btn-cerrar-menu {
+    display: none;
+  }
+  @media (max-width: 991px) {
+    .btn-menu {
+      display: inline-flex;
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 1040;
+      align-items: center;
+      gap: .4rem;
+    }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: min(88vw, 320px);
+      height: 100vh;
+      transform: translateX(-100%);
+      transition: transform .2s ease;
+      box-shadow: 0 0 1.5rem rgba(0, 0, 0, .2);
+    }
+    .sidebar.abierto { transform: translateX(0); }
+    .btn-cerrar-menu {
+      display: inline-flex;
+      float: right;
+      margin-top: -.25rem;
+    }
+    body.menu-abierto { overflow: hidden; }
+    .contenido { margin-left: 0; padding: 1.5rem; }
+  }
+  /* Portada */
+  .portada {
+    background: linear-gradient(135deg, var(--acento) 0%, var(--acento-2) 100%);
+    color: #fff;
+    padding: 3rem 2rem;
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+  }
+  .portada h1 { font-size: 2.2rem; }
+  /* Piezas del rompecabezas */
+  .pieza {
+    display: inline-block;
+    background: #fff3e0;
+    border: 2px dashed var(--acento);
+    border-radius: .5rem;
+    padding: .3rem .7rem;
+    margin: .2rem;
+    font-family: monospace;
+    font-size: .85rem;
+  }
+  [data-bs-theme="dark"] .pieza { background: #2e2412; }
+</style>
+    <link rel="stylesheet" href="../../../public/java-manual.css">
+</head>
+<body class="java-manual">
+
+<!-- Botón tema -->
+<button class="btn btn-outline-secondary btn-sm btn-tema" id="btnTema" title="Cambiar tema">
+  <i class="bi bi-moon-stars"></i>
+</button>
+
+<!-- Botón de menú para móviles -->
+<button class="btn btn-primary btn-sm btn-menu" id="btnMenu" type="button"
+        aria-controls="sidebar" aria-expanded="false">
+  <i class="bi bi-list"></i>
+  <span>Menú</span>
+</button>
+
+<!-- Sidebar -->
+<nav class="sidebar" id="sidebar" aria-label="Navegación del bloque 1">
+  <div class="px-2 pb-2 border-bottom">
+    <button class="btn btn-outline-secondary btn-sm btn-cerrar-menu" id="btnCerrarMenu"
+            type="button" aria-label="Cerrar menú">
+      <i class="bi bi-x-lg"></i>
+    </button>
+    <strong style="color:var(--acento)">Manual Java</strong><br>
+    <small class="text-secondary">Bloque 1 · Parte 0</small>
+  </div>
+
+  <a class="nav-link mt-2" href="index.html">
+    <i class="bi bi-house-door me-1"></i> Volver al índice
+  </a>
+
+  <h6>Introducción</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#bienvenida">Bienvenida</a></li>
+    <li><a class="nav-link" href="#por-que-cuesta">Por qué programar cuesta al inicio</a></li>
+    <li><a class="nav-link" href="#comparacion">Cuando miras a los demás</a></li>
+    <li><a class="nav-link" href="#identidad">La pregunta que sí sirve</a></li>
+    <li><a class="nav-link" href="#curva">La curva no es recta</a></li>
+    <li><a class="nav-link" href="#protocolo">Cuando te sientas atorado</a></li>
+  </ul>
+
+  <h6>Parte 0 · Antes de las estructuras</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#que-es-programa">¿Qué es un programa?</a></li>
+    <li><a class="nav-link" href="#que-hace-java">¿Qué hace Java por ti?</a></li>
+    <li><a class="nav-link" href="#variables">Variables</a></li>
+    <li><a class="nav-link" href="#tipos">Tipos de datos</a></li>
+    <li><a class="nav-link" href="#println">Mostrar cosas: println</a></li>
+    <li><a class="nav-link" href="#operadores-matematicos">Operadores matemáticos</a></li>
+    <li><a class="nav-link" href="#operadores-comparacion">Operadores de comparación</a></li>
+    <li><a class="nav-link" href="#booleanos">Valores booleanos</a></li>
+    <li><a class="nav-link" href="#expresiones">Expresiones</a></li>
+    <li><a class="nav-link" href="#lectura-linea">Leer un programa línea por línea</a></li>
+    <li><a class="nav-link" href="#ejercicios-p0">Ejercicios de la Parte 0</a></li>
+  </ul>
+
+  <h6>Al final</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#lo-que-llevas">Lo que llevas construido</a></li>
+  </ul>
+</nav>
+
+<!-- Contenido -->
+<main class="contenido">
+
+  <div class="portada">
+    <h1>Aprender a Programar con Java</h1>
+    <p class="mb-0 fs-5">Bloque 1 — Antes de las estructuras de control</p>
+    <p class="mb-0"><small>Programar no es memorizar. Es aprender a reconocer qué pieza necesitas.</small></p>
+  </div>
+
+  <!-- ============================================================ -->
+  <section id="bienvenida">
+    <h2>Bienvenida</h2>
+
+    <p>Si abriste este manual, probablemente ya intentaste aprender Java antes y en algún punto te perdiste. O viste a alguien más programar y sentiste que iba demasiado rápido. O te dijeron "es fácil, solo es lógica" y aun así no te salió. Este manual parte de una idea distinta: no estás aquí para memorizar cosas, estás aquí para construir piezas y aprender a reconocer cuándo las necesitas.</p>
+
+    <p>Vamos a trabajar como si armáramos un rompecabezas. Cada cosa de Java —una variable, un <code>if</code>, un <code>for</code>, un <code>Scanner</code>— es una pieza. Las piezas no se estudian por separado para después buscarles uso. Se estudian resolviendo problemas concretos donde esa pieza era necesaria. La pregunta que vamos a repetir siempre es la misma:</p>
+
+    <div class="caja caja-idea">
+      <p class="mb-0"><strong>Primero piensa en el problema. Después piensa en el código.</strong></p>
+    </div>
+
+    <p>Antes de escribir una sola línea de Java, vas a decir en español qué quieres que pase. Después vamos a identificar qué pieza resuelve eso. Y solo al final la vas a escribir. Esto no es un rodeo: es la única forma en que la sintaxis se queda pegada, porque deja de ser algo que memorizas y pasa a ser algo que reconoces.</p>
+
+    <p>Este primer bloque es corto comparado con los que siguen. No tiene estructuras de control todavía —esas empiezan en el Bloque 2—. Lo que hace es preparar el terreno: explicar cómo funciona tu cabeza cuando algo es nuevo, y darte las piezas mínimas de Java sin las cuales ninguna estructura tendría sentido.</p>
+
+    <p>Lee con calma. No hay prisa. Y si en algún momento sientes que no entiendes algo, antes de cerrar el archivo, salta a <a href="#protocolo">"Cuando te sientas atorado"</a>. Está ahí por una razón.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="por-que-cuesta">
+    <h2>Por qué programar cuesta al inicio (y no es culpa tuya)</h2>
+
+    <p>Hay algo que conviene decirte de frente, porque muy poca gente te lo dice cuando empiezas: <strong>programar te va a costar al principio, y eso no significa que no sirvas para esto.</strong> Significa que estás usando una parte de tu mente que hasta ahora no habías exigido de esta forma.</p>
+
+    <p>Para sostener una idea nueva en la cabeza mientras la relacionas con otra, tu mente usa algo que se llama <strong>memoria de trabajo</strong>. Es como una mesa pequeña donde pones temporalmente las cosas que estás pensando ahora mismo. Esa mesa tiene un límite. Y el límite es el mismo para todos: no hay personas con una mesa más grande y personas con una mesa más chica. Todos tenemos una mesa parecida, y todos la llenamos igual de rápido.</p>
+
+    <p>Cuando lees una línea como esta:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> edad = scanner.<span class="mth">nextInt</span>();
+<span class="kw">if</span> (edad &gt;= <span class="num">18</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Mayor de edad"</span>);
+}</pre>
+    </div>
+
+    <p>tu memoria de trabajo tiene que sostener al mismo tiempo: qué es <code>int</code>, qué es <code>scanner</code>, qué hace <code>nextInt()</code>, qué es <code>edad</code>, qué significa <code>&gt;=</code>, qué hace <code>if</code>, qué son las llaves, qué hace <code>println</code>. Son ocho piezas nuevas al mismo tiempo. La mesa se te llena y por eso "no entiendes": no es que te falte capacidad, es que tienes demasiadas cosas encima a la vez.</p>
+
+    <p>Por eso este manual introduce <strong>una pieza por vez</strong>, y por eso cada pieza se explica antes con una situación en español antes de mostrarte la sintaxis. No es porque tú seas lento. Es porque así funciona la atención humana cuando algo es nuevo, y porque nadie aprende bien cuando la mesa está saturada.</p>
+
+    <div class="caja caja-idea">
+      <h5>Lo que esto cambia en la práctica</h5>
+      <p class="mb-0">Si vas despacio, no estás "quedándote atrás". Estás haciendo lo único que funciona cuando hay muchas piezas nuevas en juego. Ir despacio no es debilidad. Es estrategia.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="comparacion">
+    <h2>Cuando miras a los demás y parece que entienden más rápido</h2>
+
+    <p>Esto pasa mucho: estás en clase, o viendo un video, o alguien a tu lado resuelve el ejercicio antes que tú. Sientes que "a esa persona sí le da la cabeza". Antes de aceptar esa conclusión, mira lo que estás comparando.</p>
+
+    <p>Tú solo ves el resultado final: el código que ya funciona, la respuesta que ya salió, la persona que ya llegó al final. No ves los quince intentos anteriores que hizo. No ves la vez que se quedó media hora atorada en lo mismo que a ti te está costando ahora. No ves los errores de compilación que tuvo que leer para entender qué había hecho mal. No ves nada de lo que pasó antes del momento en que tú miraste.</p>
+
+    <p>Comparar tu proceso completo (con todas sus dudas y vueltas) contra el resultado final de otra persona no es una comparación justa. Es un <strong>error de información</strong>: te falta el dato de todo lo que no viste. No es que tú entiendas menos. Es que estás comparando dos cosas distintas —tu interior contra el exterior de alguien más— y eso siempre da una conclusión equivocada.</p>
+
+    <div class="caja caja-detente">
+      <h5>Detente un momento y piensa</h5>
+      <p class="mb-0">La próxima vez que sientas "los demás entienden más rápido", pregúntate: <em>¿estoy viendo el proceso de esa persona, o solo su resultado?</em> Casi siempre es lo segundo.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="identidad">
+    <h2>La pregunta que sí sirve (y la que no)</h2>
+
+    <p>Hay una pregunta que muchos estudiantes se hacen en silencio y que no tiene respuesta útil:</p>
+
+    <p class="text-center fst-italic fs-5 my-3">"¿Soy bueno o malo para programar?"</p>
+
+    <p>Esta pregunta no tiene una respuesta real porque no describe nada que exista. Nadie "es" bueno o malo para programar de nacimiento, del mismo modo que nadie "es" bueno o malo para tocar guitarra antes de haber practicado. La pregunta asume que hay un rasgo fijo dentro de ti que decide si puedes o no. Ese rasgo no existe.</p>
+
+    <p>Hay otra pregunta, que se parece pero es totalmente distinta:</p>
+
+    <p class="text-center fst-italic fs-5 my-3">"¿Qué piezas me faltan construir?"</p>
+
+    <p>Esta sí tiene respuesta. Y la respuesta cambia cada semana que practicas. Al empezar este bloque no sabes qué es una variable. Al terminarlo vas a saber qué es, cómo se declara, cómo se usa y para qué sirve. Esa es una pieza que construiste. La siguiente semana construyes otras.</p>
+
+    <p>Piensa en el rompecabezas. Cuando empiezas, tienes la caja casi vacía. No piensas "no soy bueno para armar rompecabezas"; piensas "me faltan piezas". Con el tiempo, las piezas se van juntando. Y en algún punto ya no te acuerdas de cuándo no sabías hacerlo.</p>
+
+    <div class="caja caja-idea">
+      <h5>La idea que quiero que te lleves</h5>
+      <p class="mb-0">No te falta talento. Te faltan piezas que todavía no has construido. Y las piezas se construyen practicando — no se traen de fábrica.</p>
+    </div>
+
+    <p>Vas a volver a encontrarte con esta idea más adelante en el manual, formulada de otra manera, cuando ya tengas más piezas encima de la mesa. No la repetimos igual a propósito: queremos que la reconozcas cuando aparezca, no que la memorices como frase.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="curva">
+    <h2>La curva no es una línea recta</h2>
+
+    <p>Cuando empiezas a aprender, hay un momento en que las cosas parecen encajar. Entiendes variables, entiendes mostrar cosas en pantalla, sientes que vas avanzando. Luego llegas a algo nuevo y de golpe todo se siente confuso otra vez, como si hubieras olvidado lo anterior. Esa sensación tiene un nombre y un porqué, y conviene que la reconozcas antes de que te pase.</p>
+
+    <p>El aprendizaje no avanza en línea recta. Avanza en escalones: subes, te estabilizas, y cuando llega una pieza que hay que <em>combinar</em> con las anteriores, bajas de nuevo un poco. No porque hayas retrocedido, sino porque tu mente tiene que reacomodar las piezas que ya tenía guardadas para que encajen con la nueva. Ese reacomodo se siente, durante un rato, como confusión.</p>
+
+    <p>En este manual el primer bajón predecible va a aparecer en el Bloque 2, cuando tengas que combinar por primera vez una variable con un <code>if</code>. Y va a volver a aparecer más fuerte en el Bloque 4, cuando pongas un <code>for</code> dentro de otro <code>for</code>, o un <code>if</code> dentro de un <code>for</code>. Ese segundo bajón es el más fuerte del manual, y está anunciado aquí justamente para que cuando llegue lo reconozcas en lugar de asustarte.</p>
+
+    <div class="caja caja-anticipa">
+      <h5>Anticipa esto</h5>
+      <p class="mb-0">Cuando sientas que "olvidaste todo" al combinar dos piezas que ya sabías por separado, no lo olvidaste. Lo estás reacomodando. Eso es aprendizaje, no retroceso. Sigue. En un par de días vuelve a sentirse claro.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="protocolo">
+    <h2>Cuando te sientas atorado</h2>
+
+    <p>Este manual no te va a repetir frases de ánimo en cada capítulo. En cambio, te da un procedimiento —uno solo— al que puedes volver cada vez que sientas que no avanzas. No es para errores de sintaxis únicamente. Es para esa sensación más grande de "no entiendo nada" o "esto no es para mí".</p>
+
+    <div class="caja caja-protocolo">
+      <h5>Cuando te sientas atorado</h5>
+      <ol class="mb-0">
+        <li><strong>Nombra lo que sientes.</strong> Una frase simple: "estoy confundido", "siento que no avanzo", "me frustré". Ponerle nombre ya baja la intensidad.</li>
+        <li><strong>Pregúntate si eso es un hecho o una interpretación.</strong> "No entiendo esta línea" es un hecho. "Nunca voy a poder" es una interpretación —y probablemente no es cierta.</li>
+        <li><strong>Busca la pieza específica que no entendiste.</strong> Casi nunca es "todo". Es una sola pieza dentro de varias que sí entendiste. Encuéntrala.</li>
+        <li><strong>Aísla esa pieza y revísala sola.</strong> Sácala del programa completo, ponla en un archivo nuevo con lo mínimo necesario, y mira qué hace. Después vuelve al conjunto.</li>
+      </ol>
+    </div>
+
+    <p>Puedes volver a este recuadro las veces que quieras. No está aquí como decoración: es la herramienta más práctica del manual, porque la mayoría de los bloqueos no son intelectuales, son emocionales. Cuando la emoción se calma, la pieza que faltaba aparece casi siempre sola.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="que-es-programa">
+    <h2>¿Qué es un programa?</h2>
+
+    <p>Antes de Java, antes de variables, antes de cualquier cosa: ¿qué es un programa? Un programa es <strong>una lista ordenada de instrucciones que le dices a una computadora para que haga algo por ti</strong>. Nada más. Nada menos.</p>
+
+    <p>La computadora no piensa. No adivina. No tiene sentido común. Hace exactamente lo que le dices, en el orden en que se lo dices, sin interpretar nada. Si le dices "suma dos números" pero no le dijiste qué números, no va a inventar ninguno. Si le dices "repite esto cinco veces" pero no le dijiste cuándo parar, va a seguir hasta que algo se rompa. Toda la dificultad de programar viene de ahí: tú tienes que decirle todo lo que necesitas, paso por paso, sin dar nada por obvio.</p>
+
+    <p>Esto, que al principio se siente como una desventaja, en realidad es lo que hace a la computadora útil. Como no adivina, puedes confiar en que va a hacer exactamente lo que le pediste. La otra cara de esa confianza es tu responsabilidad: si el programa hace algo raro, es porque en algún lado le pediste que hiciera eso —aunque no te hayas dado cuenta.</p>
+
+    <h3>Antes de Java (situación cotidiana)</h3>
+    <p>Imagina que le explicas a alguien cómo preparar un café, pero esa persona nunca ha visto una cocina, nunca ha visto una taza, nunca ha oído la palabra "café". No puedes decir "prepara café". Tienes que decir: agarra la taza, ponla sobre la mesa, agarra la cafetera, presiona el botón, espera, sirve. Cada paso explícito. Un programa es esa lista de pasos, escrita en un idioma que la computadora pueda ejecutar sin ambigüedad.</p>
+
+    <h3>La idea en español</h3>
+    <p>Antes de cualquier código, siempre podrás describir en español qué quieres que pase. Si no puedes describirlo en español, no puedes escribirlo en Java. Esta es la primera regla del manual y la vas a usar hasta el final.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="que-hace-java">
+    <h2>¿Qué hace Java por ti?</h2>
+
+    <p>Java es uno de los muchos idiomas en los que le puedes hablar a una computadora. Es un idioma con reglas, con vocabulario y con gramática. Escribes tu lista de instrucciones en Java, y después otro programa (el <strong>compilador</strong> y la <strong>máquina virtual</strong>) se encarga de traducirlo a algo que el procesador entienda directamente.</p>
+
+    <p>No necesitas entender cómo funciona el compilador para aprender a programar. Lo mencionamos solo para que sepas que hay alguien traduciendo. Cuando escribes Java en VSCode y le das "Run", pasan tres cosas: 1) el compilador revisa que no hayas escrito algo con errores de gramática; 2) si todo está bien, traduce a un formato que la máquina virtual pueda ejecutar; 3) la máquina virtual ejecuta la traducción, paso por paso, en el orden que tú indicaste.</p>
+
+    <div class="caja caja-detente">
+      <h5>Detente un momento y piensa</h5>
+      <p class="mb-0">Java revisa tu gramática <em>antes</em> de ejecutar. Eso significa que si tienes un error de sintaxis, el programa nunca llega a correr. Es útil saberlo: cuando tu programa no arranca, hay dos tipos de fallas posibles —gramaticales (no arranca) o de lógica (arranca, pero hace algo distinto a lo que querías). Confundirlas es lo que hace que uno se frustre más de lo necesario.</p>
+    </div>
+
+    <h3>La estructura mínima de un programa Java</h3>
+    <p>Todo programa en Java, desde el más pequeño hasta el más grande, tiene un esqueleto parecido. Vamos a verlo antes de escribir nada más:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">public class</span> <span class="cls">Hola</span> {
+    <span class="kw">public static void</span> <span class="mth">main</span>(<span class="cls">String</span>[] args) {
+        <span class="cmt">// Aquí van las instrucciones</span>
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Hola"</span>);
+    }
+}</pre>
+    </div>
+
+    <p>No te preocupes por entender todas las palabras todavía. Lo que importa por ahora es reconocer tres zonas:</p>
+
+    <ul>
+      <li><code>public class Hola</code> — el <strong>nombre</strong> del programa. Se llama <code>Hola</code> porque tú lo decidiste (el archivo debe llamarse <code>Hola.java</code>).</li>
+      <li><code>public static void main(String[] args)</code> — el <strong>punto de entrada</strong>. Java empieza a ejecutar exactamente aquí, no antes ni después.</li>
+      <li>Todo lo que esté entre las llaves del <code>main</code> — <strong>tus instrucciones</strong>. Esto es lo que vas a ir escribiendo.</li>
+    </ul>
+
+    <p>En los siguientes bloques vas a escribir muchísimas líneas dentro de ese <code>main</code>. La estructura de arriba la vas a repetir tantas veces que al final la escribes sin pensar. Por ahora no la memorices: solo reconócela cuando la veas.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="variables">
+    <h2>Variables</h2>
+
+    <p>Una variable es <strong>un espacio con nombre donde guardas un dato para usarlo después</strong>. Eso es todo. Un cajón con una etiqueta.</p>
+
+    <p>Cuando en tu vida guardas el número de teléfono de alguien en una nota que dice "teléfono de Ana", estás usando una variable. La nota no es el teléfono: es un lugar donde apuntaste el teléfono. En Java pasa lo mismo: la variable es el nombre, el valor es el dato guardado dentro.</p>
+
+    <h3>Antes de Java (situación cotidiana)</h3>
+    <p>Piensa en las cajas de la mudanza. Cada caja tiene una etiqueta con lo que hay dentro ("libros", "ropa", "platos"). Después no necesitas abrir todas las cajas para saber qué hay: lees la etiqueta. Una variable es eso: una etiqueta, en tu programa, que te dice qué hay guardado.</p>
+
+    <h3>La idea en español</h3>
+    <p>Si vas a necesitar un dato más adelante en tu programa —más de una vez, o para hacer algo con él— guárdalo en una variable. Si no lo vas a necesitar, no lo guardes. Así de simple.</p>
+
+    <h3>La nueva pieza</h3>
+    <p>En Java, para crear una variable se escribe el <strong>tipo</strong> del dato, después el <strong>nombre</strong>, después un <code>=</code>, y después el <strong>valor</strong>:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> edad = <span class="num">20</span>;</pre>
+    </div>
+
+    <p>Traducido al español: "crea un espacio llamado <code>edad</code>, que solo puede guardar números enteros, y mete dentro el número 20".</p>
+
+    <h3>Errores comunes</h3>
+    <ul>
+      <li><strong>Olvidar el <code>;</code> al final.</strong> Java no adivina dónde termina una instrucción. Si te falta el punto y coma, el compilador se queja.</li>
+      <li><strong>Escribir el tipo dos veces al reasignar.</strong> El tipo se declara <em>una sola vez</em>, cuando creas la variable. Para cambiar su valor después, solo usas el nombre: <code>edad = 21;</code>.</li>
+      <li><strong>Usar una variable antes de crearla.</strong> Tiene que existir primero. El orden importa.</li>
+      <li><strong>Nombres con espacios o con caracteres raros.</strong> El nombre de una variable no puede tener espacios ni empezar con números. Convención: empieza en minúscula, sin espacios, y si quieres varias palabras las unes con mayúscula (<code>edadUsuario</code>, <code>precioTotal</code>).</li>
+    </ul>
+
+    <h3>Detente un momento y piensa</h3>
+    <p>Antes de seguir, mira este fragmento y predice qué muestra por pantalla. Después lo ejecutas tú mismo:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> x = <span class="num">5</span>;
+x = <span class="num">10</span>;
+<span class="cls">System</span>.out.<span class="mth">println</span>(x);</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver explicación</summary>
+      <p class="mt-2 mb-0">Muestra <code>10</code>. La variable <code>x</code> empezó guardando 5, pero en la segunda línea se reemplazó por 10. Una variable guarda <em>un solo valor a la vez</em>: el último que le pusiste. Esto es distinto a las matemáticas, donde un signo igual como "x = 10" sería una afirmación de igualdad permanente. En Java, <code>=</code> significa "guarda este valor dentro".</p>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="tipos">
+    <h2>Tipos de datos</h2>
+
+    <p>Cada variable en Java guarda un <em>tipo</em> específico de dato. No es capricho: como la computadora no adivina, tú le tienes que decir desde el principio qué va a guardar esa variable, para que sepa cuánto espacio reservarle y qué operaciones permitirle.</p>
+
+    <p>Hay muchos tipos en Java. Para empezar vas a necesitar cuatro. Los presentamos con la situación en español primero:</p>
+
+    <h3>Antes de Java</h3>
+    <p>Piensa en los recipientes de una cocina: hay uno para líquidos, otro para sólidos, otro para cosas pequeñas. No mezclas el aceite con la harina. Los tipos de datos son eso: recipientes distintos para cosas distintas.</p>
+
+    <h3>Los cuatro tipos que vas a usar primero</h3>
+
+    <div class="table-responsive">
+      <table class="table table-bordered align-middle">
+        <thead>
+          <tr><th>Tipo</th><th>Qué guarda</th><th>Ejemplo</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>int</code></td><td>Números enteros (sin decimales)</td><td><code>int edad = 20;</code></td></tr>
+          <tr><td><code>double</code></td><td>Números con decimales</td><td><code>double precio = 19.99;</code></td></tr>
+          <tr><td><code>boolean</code></td><td>Verdadero o falso</td><td><code>boolean activo = true;</code></td></tr>
+          <tr><td><code>String</code></td><td>Texto (una cadena de caracteres)</td><td><code>String nombre = "Ana";</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p><code>String</code> se escribe con mayúscula al inicio —no como los otros— porque técnicamente no es un tipo "primitivo" como <code>int</code> o <code>double</code>. Por ahora no importa la razón: solo recuerda que se escribe con mayúscula. Los textos van siempre entre comillas dobles.</p>
+
+    <h3>Errores comunes</h3>
+    <ul>
+      <li><strong>Guardar texto en un <code>int</code> o un número en un <code>String</code>.</strong> Java te lo va a rechazar. El tipo tiene que coincidir con el dato.</li>
+      <li><strong>Usar comillas simples para un <code>String</code>.</strong> Las comillas simples (<code>'</code>) son para un solo carácter (tipo <code>char</code>), no para textos. Un texto siempre va con dobles (<code>"</code>).</li>
+      <li><strong>Poner decimales en un <code>int</code>.</strong> <code>int x = 3.5;</code> da error. Si hay decimales, usa <code>double</code>.</li>
+      <li><strong>Confundir el tipo con el nombre.</strong> En <code>int edad = 20;</code>, <code>int</code> es el tipo y <code>edad</code> es el nombre. La primera palabra siempre es el tipo; la segunda, el nombre que tú eliges.</li>
+    </ul>
+
+    <h3>Detente un momento y piensa</h3>
+    <p>De estos cuatro ejemplos, ¿cuáles tienen errores de tipo?</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> a = <span class="num">7</span>;
+<span class="kw">double</span> b = <span class="num">3</span>;
+<span class="kw">String</span> c = <span class="str">"Hola"</span>;
+<span class="kw">boolean</span> d = <span class="str">"true"</span>;
+<span class="kw">int</span> e = <span class="num">4.5</span>;</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver cuáles están mal y por qué</summary>
+      <p class="mt-2 mb-2">Están mal <code>d</code> y <code>e</code>:</p>
+      <ul class="mb-0">
+        <li><code>d</code>: <code>boolean</code> guarda <code>true</code> o <code>false</code> sin comillas. Si le pones comillas, se convierte en un texto, no en un valor lógico.</li>
+        <li><code>e</code>: <code>int</code> no acepta decimales. Habría que usar <code>double</code>.</li>
+        <li><code>b</code> no tiene error: <code>double b = 3;</code> es válido, Java convierte el 3 a 3.0 automáticamente.</li>
+      </ul>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="println">
+    <h2>Mostrar cosas por pantalla: <code>println</code></h2>
+
+    <p>Un programa que no muestra nada no sirve de mucho. La primera instrucción que vas a aprender —y probablemente la que más vas a escribir en tu vida— es <code>System.out.println(...)</code>. Sirve para <strong>mostrar algo en la consola</strong>.</p>
+
+    <h3>Antes de Java (situación cotidiana)</h3>
+    <p>Si tuvieras que mostrarle un resultado a alguien, lo escribirías en una hoja y se la pasarías. <code>println</code> es tu hoja: es la forma que tiene tu programa de "decir en voz alta" lo que está pasando. Es lo único que tú, como humano, vas a ver de todo lo que tu programa hace por dentro.</p>
+
+    <h3>La idea en español</h3>
+    <p>Cada vez que quieras ver qué tiene una variable, qué salió de un cálculo, o simplemente qué está haciendo tu programa en este momento, usa <code>println</code>. Va a ser tu principal herramienta de depuración durante todo el manual.</p>
+
+    <h3>La nueva pieza</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Hola mundo"</span>);
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="num">42</span>);
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="num">3.14</span>);</pre>
+    </div>
+
+    <p>También puedes mostrar el valor de una variable:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> edad = <span class="num">20</span>;
+<span class="cls">System</span>.out.<span class="mth">println</span>(edad);</pre>
+    </div>
+
+    <p>Y puedes combinar texto con variables usando el signo <code>+</code>:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> edad = <span class="num">20</span>;
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Tu edad es: "</span> + edad);</pre>
+    </div>
+
+    <p>Esto muestra: <code>Tu edad es: 20</code>. Al <code>+</code> entre texto y número se le llama <strong>concatenación</strong>: pega las dos cosas como si fueran una sola cadena de texto.</p>
+
+    <h3>La diferencia entre <code>println</code> y <code>print</code></h3>
+    <p><code>println</code> (con "ln" al final) <strong>imprime y salta de línea</strong>. <code>print</code> (sin "ln") imprime pero <strong>deja el cursor en la misma línea</strong>, para que lo siguiente se pegue justo después. Por ahora vas a usar casi siempre <code>println</code>; <code>print</code> lo vas a necesitar más adelante, cuando quieras mostrar cosas en una sola línea.</p>
+
+    <h3>Errores comunes</h3>
+    <ul>
+      <li><strong>Olvidar las comillas dobles en un texto.</strong> <code>println(Hola)</code> dará error porque Java busca una variable llamada <code>Hola</code>, no un texto.</li>
+      <li><strong>Usar <code>Println</code> con P mayúscula.</strong> Java es sensible a mayúsculas. Es <code>println</code>, con p minúscula.</li>
+      <li><strong>Olvidar el <code>;</code> al final.</strong> Como cualquier instrucción.</li>
+      <li><strong>Poner <code>+</code> entre dos números esperando que se muestren pegados.</strong> Si sumas dos números con <code>+</code>, Java hace la suma aritmética, no la concatenación. <code>println(2 + 3)</code> muestra <code>5</code>, no <code>23</code>.</li>
+    </ul>
+
+    <h3>Detente un momento y piensa</h3>
+    <p>¿Qué muestra cada uno de estos tres fragmentos?</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Fragmento A</span>
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="num">2</span> + <span class="num">3</span>);
+
+<span class="cmt">// Fragmento B</span>
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"2"</span> + <span class="num">3</span>);
+
+<span class="cmt">// Fragmento C</span>
+<span class="kw">int</span> a = <span class="num">2</span>;
+<span class="kw">int</span> b = <span class="num">3</span>;
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Total: "</span> + a + b);</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver respuestas</summary>
+      <p class="mt-2 mb-2">Fragmento A: <code>5</code>. Ambos son números, así que el <code>+</code> suma.</p>
+      <p class="mb-2">Fragmento B: <code>23</code>. Uno de los dos es texto, así que el <code>+</code> concatena.</p>
+      <p class="mb-0">Fragmento C: <code>Total: 23</code>. Cuando el primer operando del <code>+</code> es un texto, todo lo que venga después se convierte a texto y se pega. <strong>Importante:</strong> si querías sumar <code>a</code> y <code>b</code>, tienes que usar paréntesis: <code>"Total: " + (a + b)</code>, y eso muestra <code>Total: 5</code>. Este comportamiento confunde a todo el mundo la primera vez.</p>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="operadores-matematicos">
+    <h2>Operadores matemáticos</h2>
+
+    <p>Java puede hacer cálculos. Los operadores básicos son los mismos que ya conoces de matemáticas, con un par de detalles:</p>
+
+    <div class="table-responsive">
+      <table class="table table-bordered align-middle">
+        <thead>
+          <tr><th>Operador</th><th>Qué hace</th><th>Ejemplo</th><th>Resultado</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>+</code></td><td>Suma</td><td><code>5 + 3</code></td><td><code>8</code></td></tr>
+          <tr><td><code>-</code></td><td>Resta</td><td><code>5 - 3</code></td><td><code>2</code></td></tr>
+          <tr><td><code>*</code></td><td>Multiplicación</td><td><code>5 * 3</code></td><td><code>15</code></td></tr>
+          <tr><td><code>/</code></td><td>División</td><td><code>6 / 3</code></td><td><code>2</code></td></tr>
+          <tr><td><code>%</code></td><td>Módulo (resto)</td><td><code>7 % 3</code></td><td><code>1</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>El operador que no conocías: <code>%</code></h3>
+    <p>El signo <code>%</code> en Java no significa "porcentaje". Significa <strong>resto de la división</strong>. <code>7 % 3</code> se lee "el resto de dividir 7 entre 3", y como 7 dividido entre 3 da 2 y sobra 1, el resultado es 1. Vas a usar mucho este operador más adelante, sobre todo para saber si un número es par (<code>n % 2 == 0</code>).</p>
+
+    <h3>La trampa clásica: la división entre enteros</h3>
+    <p>Si divides dos <code>int</code>, Java te da un <code>int</code> —es decir, <em>sin decimales</em>. <code>7 / 2</code> en Java no da <code>3.5</code>, da <code>3</code>. La parte decimal se descarta, no se redondea. Esto sorprende a todo el mundo la primera vez, y conviene que lo tengas presente:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">println</span>(<span class="num">7</span> / <span class="num">2</span>);        <span class="cmt">// 3</span>
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="num">7</span> / <span class="num">2.0</span>);      <span class="cmt">// 3.5</span>
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="num">7.0</span> / <span class="num">2</span>);      <span class="cmt">// 3.5</span></pre>
+    </div>
+
+    <p>Si al menos uno de los dos operandos es <code>double</code>, el resultado también lo es. Si ambos son <code>int</code>, el resultado es <code>int</code>.</p>
+
+    <h3>Errores comunes</h3>
+    <ul>
+      <li><strong>Esperar decimales de una división entre enteros.</strong> Como acabamos de ver. Si necesitas decimales, convierte alguno a <code>double</code>.</li>
+      <li><strong>Confundir <code>%</code> con porcentaje.</strong> No lo es. Es el resto.</li>
+      <li><strong>Olvidar la precedencia.</strong> Java respeta el orden normal: <code>*</code>, <code>/</code> y <code>%</code> antes que <code>+</code> y <code>-</code>. Si quieres forzar un orden, usa paréntesis. Cuando dudes, pon paréntesis —no molesta a nadie y evita errores.</li>
+      <li><strong>Dividir entre cero.</strong> En Java, <code>7 / 0</code> con enteros lanza una excepción y el programa se detiene. No es un tema de este bloque, pero conviene saberlo.</li>
+    </ul>
+
+    <h3>Detente un momento y piensa</h3>
+    <p>Predice el resultado de cada operación antes de mirarlo:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="num">10</span> / <span class="num">3</span>
+<span class="num">10.0</span> / <span class="num">3</span>
+<span class="num">10</span> % <span class="num">3</span>
+<span class="num">2</span> + <span class="num">3</span> * <span class="num">4</span>
+(<span class="num">2</span> + <span class="num">3</span>) * <span class="num">4</span></pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver resultados</summary>
+      <ul class="mt-2 mb-0">
+        <li><code>3</code> — división entera, se descarta el decimal.</li>
+        <li><code>3.333...</code> — uno es <code>double</code>, resultado <code>double</code>.</li>
+        <li><code>1</code> — 10 entre 3 es 3 y sobra 1.</li>
+        <li><code>14</code> — la multiplicación va antes que la suma.</li>
+        <li><code>20</code> — los paréntesis fuerzan la suma primero.</li>
+      </ul>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="operadores-comparacion">
+    <h2>Operadores de comparación</h2>
+
+    <p>Hasta aquí has visto operadores que <em>calculan</em> valores (suma, resta, etc.). Ahora vas a ver operadores que <strong>comparan</strong> dos valores y devuelven un resultado de tipo <code>boolean</code>: o <code>true</code> o <code>false</code>.</p>
+
+    <p>Estos operadores son la base de las estructuras de control. Un <code>if</code>, por ejemplo, decide qué hacer según el resultado de una comparación. Sin comparaciones no hay decisiones, y sin decisiones no hay programa útil.</p>
+
+    <div class="table-responsive">
+      <table class="table table-bordered align-middle">
+        <thead>
+          <tr><th>Operador</th><th>Significa</th><th>Ejemplo</th><th>Resultado</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>==</code></td><td>¿Son iguales?</td><td><code>5 == 5</code></td><td><code>true</code></td></tr>
+          <tr><td><code>!=</code></td><td>¿Son distintos?</td><td><code>5 != 5</code></td><td><code>false</code></td></tr>
+          <tr><td><code>&gt;</code></td><td>Mayor que</td><td><code>5 &gt; 3</code></td><td><code>true</code></td></tr>
+          <tr><td><code>&lt;</code></td><td>Menor que</td><td><code>5 &lt; 3</code></td><td><code>false</code></td></tr>
+          <tr><td><code>&gt;=</code></td><td>Mayor o igual que</td><td><code>5 &gt;= 5</code></td><td><code>true</code></td></tr>
+          <tr><td><code>&lt;=</code></td><td>Menor o igual que</td><td><code>5 &lt;= 3</code></td><td><code>false</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>La trampa más grande del bloque: <code>=</code> no es <code>==</code></h3>
+    <p>Esto es distinto a matemáticas, y es una de las fuentes de error más comunes al empezar:</p>
+
+    <ul>
+      <li><code>=</code> (un solo signo igual) significa <strong>asignar</strong>: "guarda este valor en esta variable".</li>
+      <li><code>==</code> (dos signos iguales) significa <strong>comparar</strong>: "dime si estos dos valores son iguales".</li>
+    </ul>
+
+    <p>Son dos operaciones totalmente distintas. <code>edad = 20</code> guarda 20 en <code>edad</code>. <code>edad == 20</code> pregunta si <code>edad</code> vale 20 y devuelve <code>true</code> o <code>false</code>.</p>
+
+    <div class="caja caja-error">
+      <h5>Si escribes <code>=</code> donde iba <code>==</code></h5>
+      <p class="mb-0">Java te va a dar un error de compilación, porque en el lugar donde espera un <code>boolean</code> (una comparación) le estás dando una asignación. En otros lenguajes esto no da error y causa bugs silenciosos terribles. En Java, por lo menos, te avisa.</p>
+    </div>
+
+    <h3>Comparar textos</h3>
+    <p>Aquí viene otra diferencia con lo que esperarías. En Java, los <code>String</code> no se comparan con <code>==</code> cuando quieres saber si su contenido es igual. Se compara con <code>.equals()</code>. No te preocupes por el porqué todavía —lo veremos cuando toque— pero apunta esto:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span> a = <span class="str">"hola"</span>;
+<span class="cls">String</span> b = <span class="str">"hola"</span>;
+<span class="cls">System</span>.out.<span class="mth">println</span>(a.<span class="mth">equals</span>(b));   <span class="cmt">// true  ← así SÍ</span>
+<span class="cls">System</span>.out.<span class="mth">println</span>(a == b);           <span class="cmt">// puede dar true o false, no confíes</span></pre>
+    </div>
+
+    <p>Por ahora quédate con la regla: <strong>para comparar textos, usa <code>.equals()</code>, no <code>==</code>.</strong></p>
+
+    <h3>Errores comunes</h3>
+    <ul>
+      <li><strong>Usar <code>=</code> en lugar de <code>==</code>.</strong> Ya lo dijimos, pero conviene repetirlo. Va a pasarte. Cuando el compilador se queje, revisa esto primero.</li>
+      <li><strong>Usar <code>==</code> con <code>String</code>.</strong> Usa <code>.equals()</code>.</li>
+      <li><strong>Olvidar que el resultado es <code>boolean</code>.</strong> <code>5 &gt; 3</code> no es "5 es mayor que 3" en un sentido vago: es un valor literal, <code>true</code>, que puedes guardar en una variable y usar después.</li>
+    </ul>
+
+    <h3>Detente un momento y piensa</h3>
+    <p>¿Qué valor tiene cada comparación?</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="num">10</span> == <span class="num">10</span>
+<span class="num">10</span> != <span class="num">10</span>
+<span class="num">10</span> &gt;= <span class="num">9</span>
+<span class="num">10</span> &lt; <span class="num">9</span></pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver respuestas</summary>
+      <ul class="mt-2 mb-0">
+        <li><code>true</code></li>
+        <li><code>false</code></li>
+        <li><code>true</code></li>
+        <li><code>false</code></li>
+      </ul>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="booleanos">
+    <h2>Valores booleanos</h2>
+
+    <p>Un valor <code>boolean</code> solo puede ser una de dos cosas: <code>true</code> o <code>false</code>. Verdadero o falso. Nada más.</p>
+
+    <p>Parece poco, pero la mitad de la lógica de un programa se construye sobre esto. Toda decisión que toma un programa (¿entra al ciclo? ¿muestra este mensaje? ¿suma este valor?) se reduce, en el fondo, a un <code>boolean</code>. Y aprender a pensar en términos de "esto es verdadero o falso" es aprender a pensar como la computadora.</p>
+
+    <h3>Antes de Java (situación cotidiana)</h3>
+    <p>Un interruptor de luz: encendido o apagado. No hay un tercer estado. Un boolean es eso, pero para cualquier afirmación de tu programa: "el usuario escribió una edad válida" es true o false. No es "más o menos".</p>
+
+    <h3>La nueva pieza</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">boolean</span> aprobado = <span class="kw">true</span>;
+<span class="kw">boolean</span> reprobado = <span class="kw">false</span>;
+
+<span class="kw">int</span> edad = <span class="num">20</span>;
+<span class="kw">boolean</span> mayorDeEdad = edad &gt;= <span class="num">18</span>;   <span class="cmt">// true</span></pre>
+    </div>
+
+    <p>Mira la última línea con atención. Ahí no escribiste <code>true</code> ni <code>false</code> directamente: escribiste una comparación, y Java la evaluó y guardó el resultado. Es una forma de construir booleanos a partir de datos. La vas a usar muchísimo.</p>
+
+    <h3>Operadores lógicos: combinar booleanos</h3>
+    <p>Puedes combinar varios booleanos con tres operadores:</p>
+
+    <div class="table-responsive">
+      <table class="table table-bordered align-middle">
+        <thead>
+          <tr><th>Operador</th><th>Significa</th><th>Es <code>true</code> cuando…</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>&amp;&amp;</code> (Y)</td><td>Ambas cosas son verdaderas</td><td>los dos lados son <code>true</code></td></tr>
+          <tr><td><code>||</code> (O)</td><td>Al menos una es verdadera</td><td>al menos uno de los lados es <code>true</code></td></tr>
+          <tr><td><code>!</code> (NO)</td><td>Niega lo que sigue</td><td>lo que sigue es <code>false</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">boolean</span> a = <span class="kw">true</span>;
+<span class="kw">boolean</span> b = <span class="kw">false</span>;
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(a &amp;&amp; b);   <span class="cmt">// false (no son ambos true)</span>
+<span class="cls">System</span>.out.<span class="mth">println</span>(a || b);   <span class="cmt">// true  (al menos a es true)</span>
+<span class="cls">System</span>.out.<span class="mth">println</span>(!a);       <span class="cmt">// false</span>
+<span class="cls">System</span>.out.<span class="mth">println</span>(!b);       <span class="cmt">// true</span></pre>
+    </div>
+
+    <p>Estos tres operadores te van a permitir expresar condiciones más ricas: "si la edad es mayor o igual a 18 Y tiene identificación", "si el saldo es mayor a 0 O tiene crédito", "si NO está bloqueado", etc.</p>
+
+    <h3>Errores comunes</h3>
+    <ul>
+      <li><strong>Usar <code>&amp;</code> o <code>|</code> en vez de <code>&amp;&amp;</code> o <code>||</code>.</strong> Existen ambos, pero se comportan distinto. Por ahora, siempre dobles.</li>
+      <li><strong>Poner <code>boolean x = "true";</code>.</strong> Con comillas, <code>"true"</code> es un texto, no un boolean. Sin comillas es un boolean.</li>
+      <li><strong>Confundir <code>!</code> con <code>!=</code>.</strong> <code>!a</code> niega el valor de <code>a</code>. <code>a != b</code> compara si <code>a</code> y <code>b</code> son distintos. Cosas diferentes.</li>
+    </ul>
+
+    <h3>Detente un momento y piensa</h3>
+    <p>Con <code>int x = 7;</code> y <code>int y = 3;</code>, ¿qué valor tiene cada expresión?</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre>(x &gt; y) &amp;&amp; (y &gt; <span class="num">0</span>)
+(x &lt; y) || (y == <span class="num">3</span>)
+!(x == <span class="num">7</span>)</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver respuestas</summary>
+      <ul class="mt-2 mb-0">
+        <li><code>true</code> — <code>x &gt; y</code> es true y <code>y &gt; 0</code> también.</li>
+        <li><code>true</code> — <code>x &lt; y</code> es false, pero <code>y == 3</code> es true, y con <code>||</code> basta con uno.</li>
+        <li><code>false</code> — <code>x == 7</code> es true, pero <code>!</code> lo niega.</li>
+      </ul>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="expresiones">
+    <h2>Expresiones</h2>
+
+    <p>Una <strong>expresión</strong> es cualquier combinación de valores, variables y operadores que produce un resultado. <code>5</code> es una expresión. <code>5 + 3</code> es una expresión. <code>edad &gt;= 18</code> es una expresión. <code>nombre.equals("Ana")</code> es una expresión.</p>
+
+    <p>Todo lo que has visto en las secciones anteriores —variables, tipos, operadores— son los ingredientes para construir expresiones. Y las expresiones son el material con el que vas a construir, en el Bloque 2, las condiciones de los <code>if</code> y las condiciones de los ciclos.</p>
+
+    <h3>Antes de Java (situación cotidiana)</h3>
+    <p>Una expresión en español sería "mi edad más cinco". No es una instrucción ("haz algo"), es un valor que se calcula: <em>cuánto da</em> "mi edad más cinco". En Java, las expresiones son iguales: son pedazos de información que Java calcula cuando llega a ellos, y el resultado es un valor de algún tipo.</p>
+
+    <h3>La nueva pieza</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> a = <span class="num">5</span>;
+<span class="kw">int</span> b = <span class="num">3</span>;
+
+<span class="kw">int</span> suma       = a + b;              <span class="cmt">// expresión aritmética → 8</span>
+<span class="kw">boolean</span> mayor = a &gt; b;              <span class="cmt">// expresión de comparación → true</span>
+<span class="kw">boolean</span> logica = (a &gt; b) &amp;&amp; (a &gt; <span class="num">0</span>); <span class="cmt">// expresión lógica → true</span></pre>
+    </div>
+
+    <p>Cada línea guarda el <em>resultado</em> de la expresión. Java evalúa primero el lado derecho del <code>=</code>, y después guarda el valor en la variable de la izquierda.</p>
+
+    <h3>Cómo leer una expresión</h3>
+    <p>Cuando veas una expresión complicada, no la leas toda de golpe. Divídela en pedazos por paréntesis, resuelve cada pedazo por separado, y después combina. Esto lo vas a hacer mucho cuando estés revisando por qué una condición no se comporta como esperas:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Supón: edad = 20, tieneIdentificacion = true</span>
+<span class="kw">boolean</span> puedeEntrar = (edad &gt;= <span class="num">18</span>) &amp;&amp; tieneIdentificacion;
+<span class="cmt">//          Paso 1: edad &gt;= 18         → true</span>
+<span class="cmt">//          Paso 2: tieneIdentificacion → true</span>
+<span class="cmt">//          Paso 3: true &amp;&amp; true        → true</span></pre>
+    </div>
+
+    <p>Descomponer una expresión en pasos, en voz baja o por escrito, es una de las habilidades más útiles que puedes desarrollar como programador. No es un truco de principiante: lo seguimos haciendo siempre, en todos los niveles.</p>
+
+    <h3>Errores comunes</h3>
+    <ul>
+      <li><strong>Tratar de entender una expresión larga de golpe.</strong> Si no la entiendes, divídela. Casi siempre el problema está en un solo pedazo.</li>
+      <li><strong>Olvidar que Java evalúa primero el lado derecho de <code>=</code>.</strong> Esto importa cuando la expresión depende de la variable misma: <code>x = x + 1</code> significa "toma lo que hay en <code>x</code>, súmale 1, guarda el resultado en <code>x</code>".</li>
+      <li><strong>Confundir el tipo del resultado.</strong> <code>a + b</code> con dos <code>int</code> da <code>int</code>. Si esperabas un <code>double</code>, revisa los tipos de los operandos.</li>
+    </ul>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="lectura-linea">
+    <h2>Leer un programa línea por línea</h2>
+
+    <p>Hasta aquí, todo ha sido piezas por separado. Ahora vamos a leer un programa completo <strong>línea por línea, simulando lo que hace la computadora</strong>. Esto es una de las habilidades más importantes que te va a dejar el manual: aprender a <em>ejecutar mentalmente</em> un programa, en lugar de solo escribirlo y ver qué pasa.</p>
+
+    <p>Ejecutar mentalmente es lo que te va a permitir entender por qué un programa no hace lo que esperabas, sin tener que adivinar. Y es una habilidad que se construye practicándola, no leyéndola.</p>
+
+    <h3>El programa</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">public class</span> <span class="cls">Saludo</span> {
+    <span class="kw">public static void</span> <span class="mth">main</span>(<span class="cls">String</span>[] args) {
+        <span class="cls">String</span> nombre = <span class="str">"Ana"</span>;
+        <span class="kw">int</span> edad = <span class="num">17</span>;
+        <span class="kw">boolean</span> esMayor = edad &gt;= <span class="num">18</span>;
+
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Hola, "</span> + nombre);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Mayor de edad: "</span> + esMayor);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Dentro de un año tendrás "</span> + (edad + <span class="num">1</span>));
+    }
+}</pre>
+    </div>
+
+    <h3>Lo que hace la computadora, paso por paso</h3>
+
+    <div class="simulacion">
+      <table class="table table-bordered">
+        <thead>
+          <tr><th>#</th><th>Línea ejecutada</th><th>Estado después</th><th>Salida</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td><code>String nombre = "Ana";</code></td><td><code>nombre = "Ana"</code></td><td>—</td></tr>
+          <tr><td>2</td><td><code>int edad = 17;</code></td><td><code>edad = 17</code></td><td>—</td></tr>
+          <tr><td>3</td><td><code>boolean esMayor = edad &gt;= 18;</code></td><td><code>esMayor = false</code></td><td>—</td></tr>
+          <tr><td>4</td><td><code>println("Hola, " + nombre);</code></td><td>igual</td><td><code>Hola, Ana</code></td></tr>
+          <tr><td>5</td><td><code>println("Mayor de edad: " + esMayor);</code></td><td>igual</td><td><code>Mayor de edad: false</code></td></tr>
+          <tr><td>6</td><td><code>println("Dentro de un año tendrás " + (edad + 1));</code></td><td>igual</td><td><code>Dentro de un año tendrás 18</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Tres cosas que quiero que observes:</p>
+
+    <ul>
+      <li>Las líneas 1-3 no muestran nada. Solo <em>preparan</em> variables para usarlas después. Un programa que solo declara variables no hace nada visible.</li>
+      <li>La línea 3 evalúa una expresión (<code>edad &gt;= 18</code>) y guarda su resultado en una variable. Ese resultado (<code>false</code> en este caso) es lo que después se muestra en la línea 5.</li>
+      <li>En la línea 6, los paréntesis alrededor de <code>edad + 1</code> son importantes. Sin ellos, Java interpretaría <code>"Dentro de un año tendrás " + edad</code> como concatenación, y después sumaría el 1 al texto —y saldría <code>Dentro de un año tendrás 171</code>. Los paréntesis son los que hacen que se sume primero.</li>
+    </ul>
+
+    <div class="caja caja-detente">
+      <h5>Detente un momento y piensa</h5>
+      <p class="mb-0">Antes de seguir, cierra el manual por un momento y escribe en un papel (o en un archivo) qué mostraría el programa si en la línea 2 cambiaras <code>edad = 17</code> por <code>edad = 20</code>. Después vuelve, compara, y solo entonces sigue leyendo. Este tipo de predicción es la que construye comprensión real.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejercicios-p0">
+    <h2>Ejercicios de la Parte 0</h2>
+
+    <p>Los ejercicios de este manual están organizados por nivel. No son para "resolver y ya": son para hacerte pensar. Antes de mirar la solución de cada uno, intenta resolverlo por tu cuenta. Aunque te salga mal, el intento es lo que enseña.</p>
+
+    <p>Los niveles son siempre los mismos:</p>
+    <ul>
+      <li><span class="nivel nivel-reconocer">Reconocer</span> Identificar piezas dentro de un código dado.</li>
+      <li><span class="nivel nivel-completar">Completar</span> Rellenar una parte que falta en un código casi terminado.</li>
+      <li><span class="nivel nivel-modificar">Modificar</span> Cambiar algo de un código que ya funciona.</li>
+      <li><span class="nivel nivel-construir">Construir</span> Escribir desde cero algo pequeño.</li>
+      <li><span class="nivel nivel-combinar">Combinar</span> Juntar dos o más piezas ya vistas.</li>
+      <li><span class="nivel nivel-crear">Crear</span> Resolver un problema nuevo, sin plantilla.</li>
+    </ul>
+
+    <h3><span class="nivel nivel-reconocer">Reconocer</span></h3>
+    <p>Mira este fragmento. Sin ejecutarlo, dime: ¿cuántas variables se declaran? ¿De qué tipo es cada una? ¿Qué se imprime y en qué orden?</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> a = <span class="num">3</span>;
+<span class="cls">String</span> s = <span class="str">"x"</span>;
+<span class="kw">double</span> d = <span class="num">2.5</span>;
+<span class="cls">System</span>.out.<span class="mth">println</span>(s + a);
+<span class="cls">System</span>.out.<span class="mth">println</span>(a + d);</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-0">Se declaran 3 variables: <code>a</code> (<code>int</code>), <code>s</code> (<code>String</code>), <code>d</code> (<code>double</code>). Se imprime <code>x3</code> en la primera línea (concatenación porque uno es texto), y <code>5.5</code> en la segunda (suma aritmética porque son números).</p>
+    </details>
+
+    <h3><span class="nivel nivel-completar">Completar</span></h3>
+    <p>Falta una línea para que el programa muestre <code>Total: 15</code>. Complétala:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> a = <span class="num">10</span>;
+<span class="kw">int</span> b = <span class="num">5</span>;
+<span class="cmt">// tu línea aquí</span></pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-0"><code>System.out.println("Total: " + (a + b));</code></p>
+      <p class="mb-0">Los paréntesis son importantes. Sin ellos, Java concatenaría <code>a</code> y <code>b</code> como texto y mostraría <code>Total: 105</code>.</p>
+    </details>
+
+    <h3><span class="nivel nivel-modificar">Modificar</span></h3>
+    <p>Este programa calcula el promedio de dos números, pero está mal. Arréglalo para que dé el resultado correcto (esperado: <code>3.5</code>).</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> a = <span class="num">7</span>;
+<span class="kw">int</span> b = <span class="num">2</span>;
+<span class="cls">System</span>.out.<span class="mth">println</span>(a / b);</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-2">Hay varias formas. La más directa: convertir uno de los operandos a <code>double</code>.</p>
+      <div class="bloque-codigo">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> a = <span class="num">7</span>;
+<span class="kw">int</span> b = <span class="num">2</span>;
+<span class="cls">System</span>.out.<span class="mth">println</span>((<span class="kw">double</span>) a / b);</pre>
+      </div>
+      <p class="mb-0">El <code>(double)</code> antes de <code>a</code> se llama <em>cast</em>: le dice a Java que trate ese valor como <code>double</code> solo en esa operación. Como uno de los operandos ahora es <code>double</code>, el resultado también lo es.</p>
+    </details>
+
+    <h3><span class="nivel nivel-construir">Construir</span></h3>
+    <p>Escribe un programa que:</p>
+    <ul>
+      <li>Guarde en una variable tu nombre.</li>
+      <li>Guarde en otra tu edad.</li>
+      <li>Guarde en otra el año actual.</li>
+      <li>Muestre un mensaje como: <code>Hola Ana, naciste aproximadamente en 2005</code> (calculado a partir de los datos, no escrito a mano).</li>
+    </ul>
+
+    <details class="solucion">
+      <summary>Ver una posible solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">public class</span> <span class="cls">Datos</span> {
+    <span class="kw">public static void</span> <span class="mth">main</span>(<span class="cls">String</span>[] args) {
+        <span class="cls">String</span> nombre = <span class="str">"Ana"</span>;
+        <span class="kw">int</span> edad = <span class="num">20</span>;
+        <span class="kw">int</span> añoActual = <span class="num">2025</span>;
+        <span class="kw">int</span> añoNacimiento = añoActual - edad;
+
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Hola "</span> + nombre + <span class="str">", naciste aproximadamente en "</span> + añoNacimiento);
+    }
+}</pre>
+      </div>
+      <p class="mb-0">Nota cómo <code>añoNacimiento</code> no es un número escrito a mano, es el resultado de una expresión que usa las otras dos variables. Esa es la idea de "construir" —no escribir el resultado, sino construir cómo llegar a él.</p>
+    </details>
+
+    <h3><span class="nivel nivel-combinar">Combinar</span></h3>
+    <p>Escribe un programa que calcule el precio final de un producto con IVA. Tienes:</p>
+    <ul>
+      <li><code>double precio = 100.0;</code></li>
+      <li>El IVA es del 16%.</li>
+      <li>Debe mostrar dos líneas: el precio sin IVA y el precio con IVA.</li>
+    </ul>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">public class</span> <span class="cls">Factura</span> {
+    <span class="kw">public static void</span> <span class="mth">main</span>(<span class="cls">String</span>[] args) {
+        <span class="kw">double</span> precio = <span class="num">100.0</span>;
+        <span class="kw">double</span> iva = <span class="num">0.16</span>;
+        <span class="kw">double</span> precioConIva = precio * (<span class="num">1</span> + iva);
+
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Precio sin IVA: "</span> + precio);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Precio con IVA: "</span> + precioConIva);
+    }
+}</pre>
+      </div>
+      <p class="mb-0">Fíjate en <code>precio * (1 + iva)</code>. Multiplicar por 1.16 es equivalente a sumarle el 16%. Podrías también haber escrito <code>precio + precio * iva</code>, que da lo mismo. Las dos formas son válidas.</p>
+    </details>
+
+    <h3><span class="nivel nivel-crear">Crear</span></h3>
+    <p>Elige un problema pequeño de tu vida cotidiana que se pueda resolver con lo que ya sabes (variables, operadores, <code>println</code>). Algunas ideas: convertir grados Celsius a Fahrenheit, calcular cuántos días han pasado desde tu cumpleaños, calcular el total de una compra con varios productos, dividir la cuenta de un restaurante entre varias personas. Escríbelo. Después, léelo línea por línea simulando lo que hace la computadora, como hicimos en la sección anterior.</p>
+
+    <p>No hay solución para este ejercicio —es tuyo. Pero si quieres comparar, elige cualquier ejemplo de los anteriores y trata de reconstruirlo. El hábito de "leer simulando" es más importante que el resultado.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="lo-que-llevas">
+    <h2>Lo que llevas construido</h2>
+
+    <p>Si llegaste hasta aquí y leíste con calma, ya tienes más piezas de las que probablemente sientes. Vamos a contarlas:</p>
+
+    <ul>
+      <li>Sabes qué es un programa y por qué la computadora no adivina.</li>
+      <li>Reconoces la estructura mínima de un programa Java (clase + <code>main</code> + instrucciones).</li>
+      <li>Sabes declarar variables y por qué se declaran <em>una sola vez</em>.</li>
+      <li>Conoces cuatro tipos básicos: <code>int</code>, <code>double</code>, <code>boolean</code>, <code>String</code>.</li>
+      <li>Sabes mostrar cosas con <code>println</code> y combinar texto con variables.</li>
+      <li>Conoces los operadores matemáticos, incluido el <code>%</code> que al principio no sabías que existía.</li>
+      <li>Sabes comparar con <code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code>.</li>
+      <li>Sabes lo que es un <code>boolean</code> y cómo combinar booleanos con <code>&amp;&amp;</code>, <code>||</code>, <code>!</code>.</li>
+      <li>Sabes leer un programa línea por línea simulando lo que hace la computadora.</li>
+    </ul>
+
+    <p>Eso, en lenguaje de rompecabezas, es un montón de piezas. Y aquí viene lo importante: hace una hora, cuando empezaste este bloque, ninguna de estas piezas estaba en tu mesa. Ahora sí. No porque tengas talento especial —porque las construiste.</p>
+
+    <p>Este es el primer lugar del manual donde aparece la idea que ya viste en la introducción. Volverá a aparecer una vez más, más adelante, cuando estés haciendo el proyecto final con arreglos. Cuando llegues ahí, vas a poder contar tus piezas de nuevo, y la lista va a ser mucho más larga que esta.</p>
+
+    <p>El Bloque 2 empieza con <code>if</code>. Por fin vas a poder hacer que tu programa <em>decida cosas</em>. Y como ya tienes variables, comparaciones y booleanos, vas a poder entender el <code>if</code> sin que se te llene la mesa, porque esas piezas ya las tienes guardadas.</p>
+
+    <div class="caja caja-idea">
+      <p class="mb-0">Antes de seguir al Bloque 2, resuelve al menos un ejercicio de cada nivel en esta sección. El manual no avanza por páginas, avanza por piezas construidas. Si saltas sin construir, las siguientes piezas no van a encajar.</p>
+    </div>
+  </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // ============ Copiar código ============
+  document.querySelectorAll('.bloque-codigo').forEach(function (bloque) {
+    var btn = bloque.querySelector('.btn-copiar');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var pre = bloque.querySelector('pre');
+      var texto = pre.innerText;
+      navigator.clipboard.writeText(texto).then(function () {
+        var original = btn.textContent;
+        btn.textContent = '¡Copiado!';
+        setTimeout(function () { btn.textContent = original; }, 1200);
+      });
+    });
+  });
+
+  // ============ Modo claro/oscuro ============
+  var html = document.documentElement;
+  var btnTema = document.getElementById('btnTema');
+  var temaGuardado = localStorage.getItem('temaManual') || 'light';
+  aplicarTema(temaGuardado);
+
+  btnTema.addEventListener('click', function () {
+    var actual = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+    aplicarTema(actual);
+    localStorage.setItem('temaManual', actual);
+  });
+
+  function aplicarTema(tema) {
+    html.setAttribute('data-bs-theme', tema);
+    btnTema.innerHTML = tema === 'dark'
+      ? '<i class="bi bi-sun"></i>'
+      : '<i class="bi bi-moon-stars"></i>';
+  }
+
+  // ============ Menú móvil ============
+  var sidebar = document.getElementById('sidebar');
+  var btnMenu = document.getElementById('btnMenu');
+  var btnCerrarMenu = document.getElementById('btnCerrarMenu');
+
+  function cerrarMenu() {
+    sidebar.classList.remove('abierto');
+    document.body.classList.remove('menu-abierto');
+    btnMenu.setAttribute('aria-expanded', 'false');
+  }
+
+  btnMenu.addEventListener('click', function () {
+    var abierto = sidebar.classList.toggle('abierto');
+    document.body.classList.toggle('menu-abierto', abierto);
+    btnMenu.setAttribute('aria-expanded', String(abierto));
+  });
+  btnCerrarMenu.addEventListener('click', cerrarMenu);
+  sidebar.querySelectorAll('a').forEach(function (enlace) {
+    enlace.addEventListener('click', cerrarMenu);
+  });
+
+  // ============ Scroll-spy manual ============
+  var enlaces = document.querySelectorAll('.sidebar .nav-link');
+  var secciones = [];
+  enlaces.forEach(function (a) {
+    var id = a.getAttribute('href');
+    if (id && id.startsWith('#')) {
+      var el = document.querySelector(id);
+      if (el) secciones.push({ el: el, link: a });
+    }
+  });
+
+  function actualizarActivo() {
+    var y = window.scrollY + 120;
+    var actual = null;
+    secciones.forEach(function (s) {
+      if (s.el.offsetTop <= y) actual = s;
+    });
+    enlaces.forEach(function (a) { a.classList.remove('active'); });
+    if (actual) actual.link.classList.add('active');
+  }
+  window.addEventListener('scroll', actualizarActivo);
+  window.addEventListener('load', actualizarActivo);
+</script>
+<script src="../../../public/java-manual.js"></script>
+</body>
+</html>

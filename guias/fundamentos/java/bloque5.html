@@ -1,0 +1,1893 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual de Java — Bloque 5: Scanner y parseo</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+  :root {
+    --acento: #f89820;
+    --acento-2: #5382a1;
+    --code-bg: #1e1e2e;
+    --code-fg: #cdd6f4;
+  }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.7;
+    scroll-behavior: smooth;
+  }
+  .sidebar {
+    position: fixed; top: 0; left: 0;
+    width: 280px; height: 100vh;
+    overflow-y: auto; padding: 1rem;
+    background: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+    z-index: 1030;
+  }
+  [data-bs-theme="dark"] .sidebar { background: #16181d; border-right-color: #2a2d34; }
+  .sidebar h6 {
+    text-transform: uppercase; font-size: .75rem;
+    letter-spacing: .05em; color: #6c757d; margin-top: 1.25rem;
+  }
+  .sidebar .nav-link {
+    padding: .35rem .6rem; border-radius: .35rem;
+    font-size: .92rem; color: inherit;
+  }
+  .sidebar .nav-link:hover { background: rgba(248,152,32,.12); }
+  .sidebar .nav-link.active { background: var(--acento); color: #fff !important; font-weight: 600; }
+  .contenido { margin-left: 280px; padding: 2.5rem 3rem 6rem; max-width: 900px; }
+  .btn-menu, .btn-cerrar-menu { display: none; }
+  @media (max-width: 991px) {
+    .btn-menu {
+      display: inline-flex; position: fixed; top: 1rem; left: 1rem;
+      z-index: 1040; align-items: center; gap: .4rem;
+    }
+    .sidebar {
+      position: fixed; top: 0; left: 0; width: min(88vw, 320px); height: 100vh;
+      transform: translateX(-100%); transition: transform .2s ease;
+      box-shadow: 0 0 1.5rem rgba(0, 0, 0, .2);
+    }
+    .sidebar.abierto { transform: translateX(0); }
+    .btn-cerrar-menu { display: inline-flex; float: right; margin-top: -.25rem; }
+    body.menu-abierto { overflow: hidden; }
+    .contenido { margin-left: 0; padding: 1.5rem; }
+  }
+  h1, h2, h3 { font-weight: 700; }
+  h2 { margin-top: 3.5rem; padding-bottom: .5rem; border-bottom: 3px solid var(--acento); }
+  h3 { margin-top: 2.2rem; color: var(--acento-2); }
+  [data-bs-theme="dark"] h3 { color: #8ab4d6; }
+
+  .bloque-codigo {
+    position: relative; margin: 1.25rem 0;
+    border-radius: .5rem; overflow: hidden;
+    background: var(--code-bg);
+  }
+  .bloque-codigo pre {
+    margin: 0; padding: 1rem 1rem .9rem;
+    color: var(--code-fg); font-size: .9rem; line-height: 1.55;
+    overflow-x: auto;
+    font-family: "JetBrains Mono", Consolas, Menlo, monospace;
+  }
+  .bloque-codigo .btn-copiar {
+    position: absolute; top: .5rem; right: .5rem;
+    background: rgba(255,255,255,.08); color: #cdd6f4;
+    border: 1px solid rgba(255,255,255,.15);
+    font-size: .75rem; padding: .2rem .55rem;
+    border-radius: .3rem; opacity: 0; transition: opacity .15s;
+  }
+  .bloque-codigo:hover .btn-copiar { opacity: 1; }
+  .bloque-codigo .btn-copiar:hover { background: rgba(248,152,32,.3); }
+  .kw  { color: #cba6f7; }
+  .str { color: #a6e3a1; }
+  .num { color: #fab387; }
+  .cmt { color: #6c7086; font-style: italic; }
+  .cls { color: #f9e2af; }
+  .mth { color: #89b4fa; }
+
+  .caja { border-radius: .5rem; padding: 1rem 1.15rem; margin: 1.25rem 0; border-left: 5px solid; }
+  .caja-detente   { background: #fff8e6; border-color: #f0ad4e; }
+  .caja-error     { background: #fdecec; border-color: #dc3545; }
+  .caja-protocolo { background: #eef5ff; border-color: #4a7cff; }
+  .caja-idea      { background: #eefaf1; border-color: #28a745; }
+  .caja-anticipa  { background: #f3e8ff; border-color: #a855f7; }
+  [data-bs-theme="dark"] .caja-detente   { background: #2e2612; }
+  [data-bs-theme="dark"] .caja-error     { background: #2e1618; }
+  [data-bs-theme="dark"] .caja-protocolo { background: #14202e; }
+  [data-bs-theme="dark"] .caja-idea      { background: #12291b; }
+  [data-bs-theme="dark"] .caja-anticipa  { background: #231531; }
+  .caja h5 { margin-top: 0; font-size: 1rem; font-weight: 700; }
+  .caja p:last-child, .caja ul:last-child, .caja ol:last-child { margin-bottom: 0; }
+
+  .nivel {
+    display: inline-block; padding: .15rem .55rem;
+    border-radius: 999px; font-size: .72rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .03em; margin-right: .4rem;
+  }
+  .nivel-reconocer { background:#dbeafe; color:#1e40af; }
+  .nivel-completar { background:#dcfce7; color:#166534; }
+  .nivel-modificar { background:#fef3c7; color:#92400e; }
+  .nivel-construir { background:#fae8ff; color:#86198f; }
+  .nivel-combinar  { background:#ffe4e6; color:#9f1239; }
+  .nivel-crear     { background:#e0e7ff; color:#3730a3; }
+
+  .simulacion table { font-size: .9rem; }
+  .simulacion th { background: #f1f3f5; }
+  [data-bs-theme="dark"] .simulacion th { background: #23262e; }
+
+  details.solucion {
+    margin: .75rem 0; border: 1px solid #dee2e6;
+    border-radius: .4rem; padding: .6rem .9rem; background: #fbfbfb;
+  }
+  [data-bs-theme="dark"] details.solucion { background: #16181d; border-color: #2a2d34; }
+  details.solucion summary { cursor: pointer; font-weight: 600; color: #495057; }
+  [data-bs-theme="dark"] details.solucion summary { color: #adb5bd; }
+
+  .btn-tema { position: fixed; top: 1rem; right: 1rem; z-index: 1040; }
+
+  .portada {
+    background: linear-gradient(135deg, var(--acento) 0%, var(--acento-2) 100%);
+    color: #fff; padding: 3rem 2rem; border-radius: 1rem; margin-bottom: 2rem;
+  }
+  .portada h1 { font-size: 2.2rem; }
+
+  .flujo {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: .5rem;
+    padding: 1rem 1.25rem;
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: .85rem;
+    line-height: 1.5;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  [data-bs-theme="dark"] .flujo { background: #16181d; border-color: #2a2d34; }
+</style>
+    <link rel="stylesheet" href="../../../public/java-manual.css">
+</head>
+<body class="java-manual">
+
+<button class="btn btn-outline-secondary btn-sm btn-tema" id="btnTema" title="Cambiar tema">
+  <i class="bi bi-moon-stars"></i>
+</button>
+
+<button class="btn btn-primary btn-sm btn-menu" id="btnMenu" type="button"
+        aria-controls="sidebar" aria-expanded="false">
+  <i class="bi bi-list"></i>
+  <span>Menú</span>
+</button>
+
+<nav class="sidebar" id="sidebar" aria-label="Navegación del bloque 5">
+  <div class="px-2 pb-2 border-bottom">
+    <button class="btn btn-outline-secondary btn-sm btn-cerrar-menu" id="btnCerrarMenu"
+            type="button" aria-label="Cerrar menú">
+      <i class="bi bi-x-lg"></i>
+    </button>
+    <strong style="color:var(--acento)">Manual Java</strong><br>
+    <small class="text-secondary">Bloque 5 · Scanner</small>
+  </div>
+  <a class="nav-link mt-2" href="index.html">
+    <i class="bi bi-house-door me-1"></i> Volver al índice
+  </a>
+
+  <h6>Antes de empezar</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#bienvenida-5">Bienvenida al Bloque 5</a></li>
+    <li><a class="nav-link" href="#que-problema-resuelve">¿Qué problema resuelve Scanner?</a></li>
+  </ul>
+
+  <h6>La pieza básica</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#importar-scanner">Importar y crear el Scanner</a></li>
+    <li><a class="nav-link" href="#nextint">Leer un entero: <code>nextInt()</code></a></li>
+    <li><a class="nav-link" href="#nextdouble">Leer un decimal: <code>nextDouble()</code></a></li>
+    <li><a class="nav-link" href="#nextline">Leer texto completo: <code>nextLine()</code></a></li>
+    <li><a class="nav-link" href="#next">Leer una palabra: <code>next()</code></a></li>
+    <li><a class="nav-link" href="#nextboolean">Leer un booleano: <code>nextBoolean()</code></a></li>
+    <li><a class="nav-link" href="#tabla-scanner">Tabla resumen de métodos</a></li>
+  </ul>
+
+  <h6>El obstáculo universal</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#buffer">El buffer: cómo funciona por dentro</a></li>
+    <li><a class="nav-link" href="#nextint-nextline">El error <code>nextInt()</code> + <code>nextLine()</code></a></li>
+    <li><a class="nav-link" href="#soluciones-buffer">Las tres soluciones</a></li>
+    <li><a class="nav-link" href="#inputmismatch">El otro error: <code>InputMismatchException</code></a></li>
+  </ul>
+
+  <h6>Parseo (la alternativa)</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#que-es-parseo">¿Qué es parsear?</a></li>
+    <li><a class="nav-link" href="#parse-int">Convertir a entero: <code>Integer.parseInt()</code></a></li>
+    <li><a class="nav-link" href="#parse-double">Convertir a decimal: <code>Double.parseDouble()</code></a></li>
+    <li><a class="nav-link" href="#parse-otros">Otros parseos útiles</a></li>
+    <li><a class="nav-link" href="#parse-vs-scanner">Parseo vs Scanner: cuándo usar cada uno</a></li>
+    <li><a class="nav-link" href="#parse-errores">Errores comunes al parsear</a></li>
+  </ul>
+
+  <h6>Validar antes de leer</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#hasnext"><code>hasNextInt()</code> y variantes</a></li>
+    <li><a class="nav-link" href="#patron-validacion">Patrón: pedir hasta que sea válido</a></li>
+  </ul>
+
+  <h6>Aplicación</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#ejemplos-5">Ejemplos progresivos</a></li>
+    <li><a class="nav-link" href="#ejercicios-5">Ejercicios</a></li>
+    <li><a class="nav-link" href="#reto-final-5">Reto del Bloque 5</a></li>
+    <li><a class="nav-link" href="#resumen-5">Lo que llevas construido</a></li>
+  </ul>
+</nav>
+
+<main class="contenido">
+
+  <div class="portada">
+    <h1>Scanner y parseo</h1>
+    <p class="mb-0 fs-5">Bloque 5 — Leer datos del usuario</p>
+    <p class="mb-0"><small>Hasta ahora tu programa ya sabía sus datos. Aquí empieza a preguntarlos.</small></p>
+  </div>
+
+  <!-- ============================================================ -->
+  <section id="bienvenida-5">
+    <h2>Bienvenida al Bloque 5</h2>
+
+    <p>Hasta este punto del manual, todos los programas <strong>ya sabían sus datos</strong>. Cuando escribiste <code>int edad = 20;</code> o <code>String nombre = "Ana";</code>, el programa no le preguntó nada a nadie: el valor estaba escrito directamente en el código. Eso sirve para aprender, pero no es cómo funcionan los programas reales.</p>
+
+    <p>Un programa real casi nunca conoce sus datos de antemano. Un cajero no sabe cuánto dinero vas a retirar. Un juego no sabe qué nombre le vas a poner al personaje. Una calculadora no sabe qué números vas a operar. Los programas reales <strong>preguntan</strong>.</p>
+
+    <p>Este bloque introduce la pieza que permite eso: <code>Scanner</code>. Es la clase de Java que sirve para leer datos que el usuario escribe por teclado, uno por uno, en el orden en que los escribe. Y también introduce algo relacionado pero distinto: el <strong>parseo</strong>, que es convertir texto a números (o a otros tipos) cuando ya tienes el texto guardado y quieres tratarlo como dato.</p>
+
+    <p>Vas a aprender:</p>
+
+    <ul>
+      <li>Cómo crear un <code>Scanner</code> y leer los tipos más comunes: <code>int</code>, <code>double</code>, <code>String</code>, <code>boolean</code>.</li>
+      <li>El <strong>obstáculo más famoso de Java para principiantes</strong>: combinar <code>nextInt()</code> con <code>nextLine()</code> y que la segunda lectura "se salte".</li>
+      <li>Qué es el <strong>buffer de entrada</strong> y por qué causa esos comportamientos raros.</li>
+      <li>Cómo <strong>validar</strong> antes de leer, con <code>hasNextInt()</code>, para evitar errores cuando el usuario escribe algo distinto a lo esperado.</li>
+      <li>Cómo <strong>parsear</strong> texto a números, y en qué casos es mejor opción que leer directamente con Scanner.</li>
+    </ul>
+
+    <p>Este bloque es más largo que los anteriores porque Scanner tiene muchos detalles. Pero casi todos esos detalles están agrupados alrededor de <em>dos</em> problemas concretos: el buffer sucio, y la validación de la entrada. Si entiendes esos dos, el resto es mecánico.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="que-problema-resuelve">
+    <h2>¿Qué problema resuelve Scanner?</h2>
+
+    <p>Antes de tocar sintaxis, quiero que la idea quede clara.</p>
+
+    <p>Hasta ahora, un programa que sumaba dos números se veía así:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> a = <span class="num">5</span>;
+<span class="kw">int</span> b = <span class="num">3</span>;
+<span class="kw">int</span> suma = a + b;
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Suma: "</span> + suma);</pre>
+    </div>
+
+    <p>Los valores 5 y 3 están <em>escritos en el código</em>. Si quieres sumar otros números, tienes que abrir el archivo, cambiar los valores, recompilar y volver a ejecutar. Eso no es cómo se usan los programas: nadie va a abrir el código fuente para cambiar la edad que quiere calcular.</p>
+
+    <p>Lo que quieres es esto:</p>
+
+    <div class="flujo">Ingresa el primer número: _
+Ingresa el segundo número: _
+Suma: _</div>
+
+    <p>El programa <strong>pregunta</strong> los datos, y tú los escribes en la consola mientras el programa corre. Eso es lo que resuelve <code>Scanner</code>: leer datos que llegan por teclado <em>mientras el programa está en ejecución</em>, y guardarlos en variables para usarlos después.</p>
+
+    <p>Un <code>Scanner</code> es, entonces, <strong>la pieza que le permite a tu programa escuchar</strong>. Antes tenía los datos escritos en el archivo; ahora los recibe de afuera. Es la pieza que separa a un programa de práctica de un programa que hace algo útil.</p>
+
+    <div class="caja caja-idea">
+      <p class="mb-0">La idea a recordar: <strong>Scanner es la pieza que le permite al programa escuchar al usuario</strong>. No es un adorno, no es una formalidad: es lo que convierte un cálculo fijo en un programa interactivo.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="importar-scanner">
+    <h2>Importar y crear el Scanner</h2>
+
+    <p>Para usar <code>Scanner</code> hay que hacer dos cosas antes de leer nada:</p>
+
+    <ol>
+      <li><strong>Importar</strong> la clase <code>Scanner</code> desde el paquete <code>java.util</code>.</li>
+      <li><strong>Crear</strong> un objeto <code>Scanner</code> que lea desde la entrada estándar (el teclado).</li>
+    </ol>
+
+    <p>Vamos con la pieza mínima:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">import</span> java.util.Scanner;
+
+<span class="kw">public class</span> <span class="cls">Saludo</span> {
+    <span class="kw">public static void</span> <span class="mth">main</span>(<span class="cls">String</span>[] args) {
+        <span class="cls">Scanner</span> scanner = <span class="kw">new</span> <span class="cls">Scanner</span>(<span class="cls">System</span>.in);
+
+        <span class="cmt">// aquí leeremos datos</span>
+    }
+}</pre>
+    </div>
+
+    <p>Vamos parte por parte:</p>
+
+    <ul>
+      <li><strong><code>import java.util.Scanner;</code></strong> — va <em>arriba del todo</em>, antes de la declaración de la clase. Le dice a Java: "voy a usar la clase <code>Scanner</code> que vive en el paquete <code>java.util</code>". Sin esta línea, Java no sabe qué es <code>Scanner</code> y no compila.</li>
+      <li><strong><code>Scanner scanner = new Scanner(System.in);</code></strong> — crea el objeto. <code>Scanner</code> (con mayúscula) es el tipo. <code>scanner</code> (minúscula) es el nombre de la variable, y tú eliges cómo llamarla (podría ser <code>leer</code>, <code>entrada</code>, <code>sc</code>, etc.). <code>new</code> es la palabra que se usa para crear objetos en Java. <code>System.in</code> significa "lee desde la entrada estándar", que es el teclado.</li>
+    </ul>
+
+    <p>La línea de creación se pone <em>una sola vez</em>, al principio del <code>main</code>, y a partir de ahí el mismo <code>scanner</code> sirve para leer todos los datos que necesites. No se crea uno nuevo por cada lectura.</p>
+
+    <h3>Errores comunes con el import y la creación</h3>
+
+    <ul>
+      <li><strong>Olvidar el <code>import</code></strong>: si no pones <code>import java.util.Scanner;</code>, Java te dice "cannot find symbol: class Scanner". Es un error muy común y fácil de arreglar: solo hay que agregar la línea.</li>
+      <li><strong>Usar <code>scanner</code> con mayúscula cuando declaras</strong>: si escribes <code>Scanner Scanner = new Scanner(...)</code>, Java se confunde porque ya existe una clase llamada <code>Scanner</code>. Usa minúsculas para el nombre.</li>
+      <li><strong>Poner <code>System.in</code> con mayúscula al inicio</strong>: es <code>System.in</code>, con la S mayúscula, la i minúscula. Es de las cosas que se te va a olvidar una vez y vas a aprender para siempre.</li>
+      <li><strong>Crear el <code>Scanner</code> antes del <code>main</code></strong>: tiene que ir dentro del <code>main</code>, no afuera de la clase.</li>
+    </ul>
+
+    <p>Un detalle de estilo: si vas a leer desde el teclado, se llama a la variable <code>scanner</code> (o <code>teclado</code>, <code>entrada</code>). Si vas a leer desde un archivo, se llama al constructor con el archivo, pero eso no lo vamos a usar en este manual. Aquí siempre vamos a leer del teclado.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="nextint">
+    <h2>Leer un entero: <code>nextInt()</code></h2>
+
+    <p>Una vez que tienes el <code>Scanner</code> creado, leer un entero es simple:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa tu edad: "</span>);
+<span class="kw">int</span> edad = scanner.<span class="mth">nextInt</span>();
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Tu edad es: "</span> + edad);</pre>
+    </div>
+
+    <p>Vamos parte por parte:</p>
+
+    <ul>
+      <li><strong><code>System.out.print("Ingresa tu edad: ");</code></strong> — muestra un mensaje <em>sin</em> salto de línea, para que el cursor quede en la misma línea y el usuario escriba justo después del mensaje. Esto es convención: se llama "prompt". Con <code>println</code> también funciona, solo que el cursor queda en la línea siguiente.</li>
+      <li><strong><code>scanner.nextInt()</code></strong> — lee el siguiente <code>int</code> de la entrada. <em>Se queda esperando</em> hasta que el usuario escribe un número y presiona Enter. Cuando eso pasa, devuelve el número y el programa continúa.</li>
+      <li><strong><code>int edad = ...</code></strong> — guarda el valor devuelto por <code>nextInt()</code> en una variable.</li>
+    </ul>
+
+    <p>La ejecución real se ve así en la consola:</p>
+
+    <div class="flujo">Ingresa tu edad: 20
+Tu edad es: 20</div>
+
+    <p>El "20" después de los dos puntos lo escribió el usuario. Todo lo demás lo imprimió el programa. Y fíjate: el cursor se queda esperando al lado del mensaje "Ingresa tu edad: " porque usamos <code>print</code> (sin "ln"). Eso hace que la experiencia se sienta natural.</p>
+
+    <h3>El patrón de pedir + leer</h3>
+
+    <p>Vas a repetir esto muchísimas veces. Se llama el patrón <em>pedir + leer</em>:</p>
+
+    <ol>
+      <li>Mostrar un mensaje claro de qué se está pidiendo.</li>
+      <li>Leer el valor con el método que corresponda al tipo.</li>
+      <li>Guardarlo en una variable.</li>
+    </ol>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"¿Cómo te llamas? "</span>);
+<span class="cls">String</span> nombre = scanner.<span class="mth">nextLine</span>();
+
+<span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"¿Cuántos años tienes? "</span>);
+<span class="kw">int</span> edad = scanner.<span class="mth">nextInt</span>();
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Hola "</span> + nombre + <span class="str">", tienes "</span> + edad + <span class="str">" años."</span>);</pre>
+    </div>
+
+    <p>Ojo: este ejemplo tiene un problema que no se ve a simple vista, y es exactamente el obstáculo del que hablamos en este bloque. Pero antes de entrar en eso, necesito que veas cada método por separado. Después entenderás por qué este orden (<code>nextLine</code> primero, <code>nextInt</code> después) funciona, mientras que el orden inverso da problemas.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="nextdouble">
+    <h2>Leer un decimal: <code>nextDouble()</code></h2>
+
+    <p>Para leer un número con decimales, el método es <code>nextDouble()</code>:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa el precio: "</span>);
+<span class="kw">double</span> precio = scanner.<span class="mth">nextDouble</span>();
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"El precio es: "</span> + precio);</pre>
+    </div>
+
+    <p>La ejecución en consola:</p>
+
+    <div class="flujo">Ingresa el precio: 19.99
+El precio es: 19.99</div>
+
+    <p>Hay dos detalles que sorprenden al principio:</p>
+
+    <ul>
+      <li><strong>El separador decimal puede ser punto o coma</strong>, según la <em>configuración regional</em> de tu Java. En la mayoría de las configuraciones de español (México, España, Argentina, etc.), <code>nextDouble()</code> espera el <strong>punto</strong> como separador decimal (19.99), no la coma (19,99). Si escribes 19,99, Java puede interpretar que escribiste el número 19 seguido de algo que no entiende, y lanzar un error. Esta es una fuente de confusión enorme, porque en matemáticas en español se usa la coma. Regla práctica: en el código y en la consola de Java, usa punto.</li>
+      <li><strong>Si el usuario escribe un número sin decimales (por ejemplo, 20), funciona igual</strong>. Java convierte el 20 a 20.0 automáticamente, porque es un valor válido como <code>double</code>. No hay que escribir "20.0" obligatoriamente.</li>
+    </ul>
+
+    <h3>Precisión: el punto flotante no es exacto</h3>
+
+    <p>Un detalle que vale la pena saber: <code>double</code> no puede representar todos los decimales con exactitud. <code>0.1 + 0.2</code> en Java no da exactamente <code>0.3</code>, da <code>0.30000000000000004</code>. Esto no es un error de Java: es cómo funcionan los números de punto flotante en cualquier lenguaje. No vas a necesitar profundizar en esto por ahora, pero cuando hagas cuentas con dinero y los resultados no den exactos, ya sabrás por qué.</p>
+
+    <p>Para evitar la mayoría de estos problemas en cuentas de dinero, se suele usar <code>int</code> con centavos (500 = 5.00), o la clase <code>BigDecimal</code> (que no vemos en este manual). Por ahora, vive con la imprecisión: es pequeña y no afecta la mayoría de los ejercicios.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="nextline">
+    <h2>Leer texto completo: <code>nextLine()</code></h2>
+
+    <p>Para leer una línea entera de texto (todo lo que el usuario escriba hasta presionar Enter), el método es <code>nextLine()</code>:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Escribe tu nombre completo: "</span>);
+<span class="cls">String</span> nombre = scanner.<span class="mth">nextLine</span>();
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Hola, "</span> + nombre);</pre>
+    </div>
+
+    <p>La ejecución:</p>
+
+    <div class="flujo">Escribe tu nombre completo: Ana López García
+Hola, Ana López García</div>
+
+    <p><code>nextLine()</code> lee <strong>toda la línea</strong>, incluyendo los espacios. Esto es lo que lo distingue de <code>next()</code>, que lee solo una palabra. Si el usuario escribe "Ana López García", <code>nextLine()</code> devuelve el texto completo, mientras que <code>next()</code> devolvería solo "Ana".</p>
+
+    <h3>Un detalle importante: <code>nextLine()</code> consume el Enter</h3>
+
+    <p>Cada vez que el usuario escribe algo y presiona Enter, se envían <em>dos</em> cosas al programa: el texto que escribió, y un carácter invisible de "fin de línea" (que en la práctica es un "\n").</p>
+
+    <p>Los métodos como <code>nextInt()</code>, <code>nextDouble()</code> y <code>next()</code> <strong>leen el valor y dejan el "\n" en el buffer</strong>. Es decir, no se comen el Enter: lo dejan ahí, esperando a que alguien más lo lea.</p>
+
+    <p><code>nextLine()</code>, en cambio, <strong>lee todo hasta el Enter, incluyendo el Enter mismo</strong>. Si el buffer tiene un "\n" esperando, <code>nextLine()</code> lo consume y devuelve una cadena vacía <code>""</code>.</p>
+
+    <p>Esa diferencia es la causa del error más famoso de Scanner. Lo vas a ver en detalle en la sección siguiente, pero ya lo puedes ir intuyendo: si lees un <code>int</code> con <code>nextInt()</code> y después quieres leer un texto con <code>nextLine()</code>, el <code>nextLine()</code> se encuentra con el "\n" que dejó el <code>nextInt()</code>, y devuelve vacío en lugar de esperar a que el usuario escriba.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="next">
+    <h2>Leer una sola palabra: <code>next()</code></h2>
+
+    <p><code>next()</code> lee <strong>la siguiente palabra</strong>, es decir, todo hasta el primer espacio en blanco (o hasta el fin de línea). No incluye el espacio ni el salto de línea en el resultado, y <em>no consume el Enter</em>.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Escribe dos palabras: "</span>);
+<span class="cls">String</span> primera = scanner.<span class="mth">next</span>();
+<span class="cls">String</span> segunda = scanner.<span class="mth">next</span>();
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Primera: "</span> + primera);
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Segunda: "</span> + segunda);</pre>
+    </div>
+
+    <p>Si el usuario escribe <code>hola mundo</code> y presiona Enter, este programa imprime:</p>
+
+    <div class="flujo">Primera: hola
+Segunda: mundo</div>
+
+    <p>El primer <code>next()</code> lee "hola", el segundo lee "mundo". Si el usuario hubiera escrito tres palabras, el tercer <code>next()</code> leería la tercera. Y si el usuario hubiera escrito una sola palabra, el segundo <code>next()</code> se quedaría esperando una segunda palabra del usuario antes de continuar.</p>
+
+    <p><strong>Cuándo usar <code>next()</code> en lugar de <code>nextLine()</code></strong>: cuando quieres leer una sola palabra (un nombre de usuario sin espacios, una contraseña, una palabra clave). <code>next()</code> tiene la ventaja de que no se traga el Enter, así que no causa el problema del buffer sucio que sí causa <code>nextLine()</code> después de otros métodos.</p>
+
+    <p><strong>Cuándo NO usar <code>next()</code></strong>: cuando el dato puede tener espacios. Un nombre completo, una dirección, una frase. Ahí va <code>nextLine()</code>.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="nextboolean">
+    <h2>Leer un booleano: <code>nextBoolean()</code></h2>
+
+    <p>Para leer un valor verdadero/falso, existe <code>nextBoolean()</code>:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"¿Estás registrado? (true/false): "</span>);
+<span class="kw">boolean</span> registrado = scanner.<span class="mth">nextBoolean</span>();
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Registrado: "</span> + registrado);</pre>
+    </div>
+
+    <p><code>nextBoolean()</code> espera que el usuario escriba exactamente <code>true</code> o <code>false</code>, en minúsculas, sin comillas. Cualquier otra cosa (por ejemplo, "si", "no", "sí", "1", "0") genera un <code>InputMismatchException</code> y el programa termina con error.</p>
+
+    <p>Esto es incómodo en la práctica. Los usuarios no escriben "true" o "false" naturalmente. Por eso <code>nextBoolean()</code> casi no se usa en programas reales: en su lugar, se pide un <code>int</code> (1 o 0), o un <code>String</code> ("si" o "no"), y se convierte con un <code>if</code>:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"¿Estás registrado? (si/no): "</span>);
+<span class="cls">String</span> respuesta = scanner.<span class="mth">nextLine</span>();
+<span class="kw">boolean</span> registrado = respuesta.<span class="mth">equalsIgnoreCase</span>(<span class="str">"si"</span>);</pre>
+    </div>
+
+    <p>Este patrón —leer texto y convertirlo a lo que necesitas— es más cercano al <strong>parseo</strong>, que vas a ver más adelante en este bloque. Lo menciono aquí solo para que veas que <code>nextBoolean()</code> existe, pero rara vez lo vas a usar.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="tabla-scanner">
+    <h2>Tabla resumen de métodos de Scanner</h2>
+
+    <p>Aquí tienes todos los métodos de <code>Scanner</code> que vas a usar en este manual. Vale la pena tenerlos de un vistazo:</p>
+
+    <div class="table-responsive">
+      <table class="table table-bordered align-middle">
+        <thead>
+          <tr><th>Método</th><th>Devuelve</th><th>Qué lee</th><th>Consume el Enter</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>nextInt()</code></td><td><code>int</code></td><td>El siguiente entero</td><td>No</td></tr>
+          <tr><td><code>nextDouble()</code></td><td><code>double</code></td><td>El siguiente decimal (con punto)</td><td>No</td></tr>
+          <tr><td><code>nextLong()</code></td><td><code>long</code></td><td>El siguiente entero largo</td><td>No</td></tr>
+          <tr><td><code>nextBoolean()</code></td><td><code>boolean</code></td><td>La siguiente palabra <code>true</code> o <code>false</code></td><td>No</td></tr>
+          <tr><td><code>next()</code></td><td><code>String</code></td><td>La siguiente palabra (sin espacios)</td><td>No</td></tr>
+          <tr><td><code>nextLine()</code></td><td><code>String</code></td><td>Toda la línea (con espacios)</td><td><strong>Sí</strong></td></tr>
+          <tr><td><code>hasNextInt()</code></td><td><code>boolean</code></td><td>¿Hay un int disponible?</td><td>No</td></tr>
+          <tr><td><code>hasNextDouble()</code></td><td><code>boolean</code></td><td>¿Hay un double disponible?</td><td>No</td></tr>
+          <tr><td><code>hasNextLine()</code></td><td><code>boolean</code></td><td>¿Hay una línea disponible?</td><td>No</td></tr>
+          <tr><td><code>hasNext()</code></td><td><code>boolean</code></td><td>¿Hay otra palabra disponible?</td><td>No</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>La columna "consume el Enter" es la clave para el problema del buffer. Los métodos que no consumen el Enter dejan un "\n" pendiente en el buffer, y eso causa el error que vamos a ver en la siguiente sección. Fíjate en que <strong>solo <code>nextLine()</code> consume el Enter</strong>: es el único que limpia el buffer. Todo lo demás lo deja sucio.</p>
+
+    <p>Y algo importante sobre los <code>hasNext...()</code>: no leen, solo <em>verifican</em> si se puede leer. Son útiles para preguntar antes de intentar (lo verás en la sección de validación). Por ahora, basta con saber que existen y qué hacen.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="buffer">
+    <h2>El buffer de entrada: cómo funciona por dentro</h2>
+
+    <p>Antes de ver el error más famoso de Scanner, necesito que entiendas una idea. Es simple, pero sin ella el error parece magia.</p>
+
+    <p>Cuando el usuario escribe algo y presiona Enter, todos esos caracteres no llegan directamente al programa. Van a un <strong>buffer de entrada</strong>, que es como una fila temporal donde se van acumulando. El programa, cuando pide un dato con <code>nextAlgo()</code>, va a esa fila, toma lo que necesita, y <em>deja el resto ahí</em> para la siguiente lectura.</p>
+
+    <p>Piensa en un tubo de entrada. El usuario escribe "20" y presiona Enter. En el tubo quedan estos caracteres:</p>
+
+    <div class="flujo">2 0 \n</div>
+
+    <p>El carácter <code>\n</code> es invisible: representa el Enter. Cuando el programa llama a <code>nextInt()</code>, Java mira el tubo, lee "2" y "0" hasta el primer espacio en blanco, los convierte al número 20, y <strong>deja el <code>\n</code> en el tubo</strong>. El método <code>nextInt()</code> no consume el Enter: solo lee los dígitos.</p>
+
+    <p>Ahora, si el programa llama a <code>nextLine()</code>, va al tubo y encuentra... un <code>\n</code>. Y como <code>nextLine()</code> "lee todo hasta el primer Enter, inclusive", lee ese <code>\n</code>, devuelve la cadena vacía <code>""</code>, y sigue. No espera a que el usuario escriba nada, porque ya encontró el Enter que dejó <code>nextInt()</code> antes.</p>
+
+    <p>Eso es todo. Ese es el mecanismo. Es simple, pero sorprende la primera vez porque el programa compila bien, corre, y muestra un comportamiento que "no tiene sentido" si no sabes qué pasa por dentro.</p>
+
+    <div class="caja caja-idea">
+      <p class="mb-0"><strong>La idea del buffer, en una línea:</strong> cada vez que el usuario presiona Enter, se mete un <code>\n</code> en el buffer. Los métodos como <code>nextInt()</code> leen su valor pero no se comen el <code>\n</code>. Solo <code>nextLine()</code> se come el <code>\n</code>. Si mezclas un <code>nextInt()</code> con un <code>nextLine()</code> inmediatamente después, el <code>nextLine()</code> va a leer el <code>\n</code> del <code>nextInt()</code>, no lo que el usuario escriba.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="nextint-nextline">
+    <h2>El error universal: <code>nextInt()</code> seguido de <code>nextLine()</code></h2>
+
+    <p>Este es el punto más importante de todo el bloque. Y es el error que comete casi todo el mundo que aprende Java por primera vez, en cualquier país, con cualquier profesor. Tiene hasta nombre en foros: <em>"Scanner skip"</em> o <em>"Scanner no me lee el nextLine"</em>. Si te pasa, no estás haciendo nada mal que no le pase a los demás. Estás topándote con el mismo obstáculo que se topa todo el mundo.</p>
+
+    <p>Veamos el error en concreto:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa tu edad: "</span>);
+<span class="kw">int</span> edad = scanner.<span class="mth">nextInt</span>();
+
+<span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa tu nombre: "</span>);
+<span class="cls">String</span> nombre = scanner.<span class="mth">nextLine</span>();
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Hola "</span> + nombre + <span class="str">", tienes "</span> + edad + <span class="str">" años."</span>);</pre>
+    </div>
+
+    <p>Cuando lo ejecutas, pasa esto:</p>
+
+    <div class="flujo">Ingresa tu edad: 20
+Ingresa tu nombre: Hola , tienes 20 años.</div>
+
+    <p>El programa <strong>no le pide el nombre al usuario</strong>. Salta directo al mensaje final, y muestra el nombre vacío. Al usuario le hubiera gustado escribir "Ana", pero el programa nunca le dio la oportunidad.</p>
+
+    <h3>¿Por qué pasa esto? (con el buffer en la mano)</h3>
+
+    <p>Apliquemos lo que aprendimos del buffer, paso por paso:</p>
+
+    <ol>
+      <li>El programa imprime "Ingresa tu edad: ".</li>
+      <li>El usuario escribe <code>20</code> y presiona Enter.</li>
+      <li>El buffer ahora contiene: <code>2 0 \n</code></li>
+      <li>El programa llama a <code>nextInt()</code>. Lee "20", lo convierte a 20, y guarda <code>20</code> en <code>edad</code>. <strong>El buffer ahora contiene: <code>\n</code></strong></li>
+      <li>El programa imprime "Ingresa tu nombre: ".</li>
+      <li>El programa llama a <code>nextLine()</code>. Va al buffer, encuentra <code>\n</code>, lo lee, y devuelve una cadena vacía <code>""</code>. El buffer queda vacío.</li>
+      <li>El programa sigue. <code>nombre</code> es <code>""</code>, la cadena vacía.</li>
+    </ol>
+
+    <p>Por eso el usuario nunca llega a escribir nada: el <code>nextLine()</code> encontró el <code>\n</code> que dejó el <code>nextInt()</code> antes, y no esperó.</p>
+
+    <p>La causa de todo es que <strong><code>nextInt()</code> no consume el Enter</strong>. Y <strong><code>nextLine()</code> sí espera consumir un Enter</strong>. Cuando los pones juntos en ese orden, el <code>nextLine()</code> se "come" el Enter del <code>nextInt()</code>, y no llega a leer nada nuevo.</p>
+
+    <div class="caja caja-anticipa">
+      <h5>Antes de seguir con la solución: quiero que sepas algo</h5>
+      <p class="mb-0">Este error es tan común que cualquier persona con experiencia en Java lo ha tenido. No revela falta de atención ni de capacidad. Es una <em>particularidad del lenguaje</em> que hay que conocer y ya. Cuando lo hayas visto dos o tres veces, lo vas a reconocer al instante. Mientras tanto, es solo un obstáculo más de la lista.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="soluciones-buffer">
+    <h2>Las tres soluciones al error del buffer</h2>
+
+    <p>Ya sabes por qué pasa. Ahora, cómo arreglarlo. Hay tres formas estándar. Las tres funcionan; cada una tiene su contexto:</p>
+
+    <h3>Solución 1: limpiar el buffer con un <code>nextLine()</code> extra</h3>
+
+    <p>Después del <code>nextInt()</code> (o cualquier otro método que no consuma el Enter), haces un <code>nextLine()</code> vacío. Ese <code>nextLine()</code> consume el <code>\n</code> que quedó pendiente, y deja el buffer limpio para la siguiente lectura.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa tu edad: "</span>);
+<span class="kw">int</span> edad = scanner.<span class="mth">nextInt</span>();
+scanner.<span class="mth">nextLine</span>();   <span class="cmt">// ← limpia el buffer, tira el \n</span>
+
+<span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa tu nombre: "</span>);
+<span class="cls">String</span> nombre = scanner.<span class="mth">nextLine</span>();</pre>
+    </div>
+
+    <p>Ahora funciona como se espera:</p>
+
+    <div class="flujo">Ingresa tu edad: 20
+Ingresa tu nombre: Ana
+Hola Ana, tienes 20 años.</div>
+
+    <p>El primer <code>nextLine()</code> (el "extra") lee el <code>\n</code> pendiente y lo descarta. El segundo <code>nextLine()</code> (el que guardamos en <code>nombre</code>) lee lo que el usuario escriba.</p>
+
+    <p>Algo a tener presente: el <code>nextLine()</code> extra se usa <em>solo después de un método que no consume el Enter</em>. Si lo pones después de otro <code>nextLine()</code>, no hace falta: el primer <code>nextLine()</code> ya limpió.</p>
+
+    <h3>Solución 2: leer todo con <code>nextLine()</code> y parsear</h3>
+
+    <p>Otra forma: en lugar de mezclar <code>nextInt()</code> con <code>nextLine()</code>, <strong>lees todo como texto</strong> con <code>nextLine()</code>, y después conviertes a número cuando lo necesites. Esto evita el problema del buffer por completo, porque <code>nextLine()</code> siempre limpia.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa tu edad: "</span>);
+<span class="cls">String</span> edadTexto = scanner.<span class="mth">nextLine</span>();
+<span class="kw">int</span> edad = <span class="cls">Integer</span>.<span class="mth">parseInt</span>(edadTexto);
+
+<span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa tu nombre: "</span>);
+<span class="cls">String</span> nombre = scanner.<span class="mth">nextLine</span>();</pre>
+    </div>
+
+    <p>Esta es la solución que muchos programadores con experiencia prefieren, porque es consistente: siempre usas <code>nextLine()</code> y después parseas al tipo que necesites. Nunca tienes que preocuparte por el orden de los métodos ni por dejar el buffer sucio.</p>
+
+    <p>La desventaja: si el usuario escribe algo que no es un número, <code>Integer.parseInt</code> lanza una excepción y el programa falla (a menos que la captures, cosa que verás más adelante). Por eso, cuando uses esta forma, conviene validar antes, o estar dispuesto a manejar el error. Volveremos a esto en la sección de parseo.</p>
+
+    <h3>Solución 3: usar <code>next()</code> en lugar de <code>nextLine()</code> para datos sin espacios</h3>
+
+    <p>Si el dato que vas a leer después del <code>nextInt()</code> no tiene espacios (un nombre de usuario, una contraseña, una sola palabra), puedes usar <code>next()</code> en lugar de <code>nextLine()</code>. <code>next()</code> no se come el Enter, así que no se topa con el <code>\n</code> pendiente.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa tu edad: "</span>);
+<span class="kw">int</span> edad = scanner.<span class="mth">nextInt</span>();
+
+<span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa tu nombre de usuario: "</span>);
+<span class="cls">String</span> usuario = scanner.<span class="mth">next</span>();   <span class="cmt">// ← next en lugar de nextLine</span></pre>
+    </div>
+
+    <p>Esto funciona porque <code>next()</code> salta los espacios en blanco (incluyendo el <code>\n</code>) y lee la siguiente palabra. No se "come" el <code>\n</code> del <code>nextInt()</code> como basura: lo salta, y espera al siguiente token real. Es limpio.</p>
+
+    <p>La limitación: si el usuario escribe "Ana López", <code>next()</code> solo lee "Ana", y "López" queda en el buffer para la siguiente lectura (o se pierde si no hay siguiente lectura). Para nombres completos, no sirve.</p>
+
+    <h3>¿Cuál usar?</h3>
+
+    <ul>
+      <li><strong>Si el dato siguiente es una sola palabra sin espacios</strong>: usa <code>next()</code>. Es la más limpia.</li>
+      <li><strong>Si el dato siguiente puede tener espacios</strong> (nombre completo, dirección, frase): usa <code>nextLine()</code> con el "extra" antes para limpiar el buffer. Es el patrón más común.</li>
+      <li><strong>Si quieres consistencia y evitar todo el problema</strong>: lee todo con <code>nextLine()</code> y parsea. Es la que menos sorpresas da una vez que la dominas.</li>
+    </ul>
+
+    <p>No hay una respuesta "correcta" universal. Cualquiera de las tres funciona. Con práctica, vas a ir reconociendo cuál te conviene en cada situación. Y si en algún momento no sabes qué pasó, imprime lo que leíste para ver qué es lo que llegó:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"[DEBUG] Leí: '"</span> + nombre + <span class="str">"'"</span>);</pre>
+    </div>
+
+    <p>Ese truco —imprimir entre comillas simples lo que leíste— es la mejor forma de descubrir si un <code>nextLine()</code> está leyendo vacío. Si te sale <code>[DEBUG] Leí: ''</code>, es que el buffer estaba sucio.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="inputmismatch">
+    <h2>El otro error: <code>InputMismatchException</code></h2>
+
+    <p>Hay un segundo error con Scanner que también es muy común. Se llama <code>InputMismatchException</code>, y ocurre cuando pides un tipo y el usuario escribe otro.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa tu edad: "</span>);
+<span class="kw">int</span> edad = scanner.<span class="mth">nextInt</span>();</pre>
+    </div>
+
+    <p>Si el usuario escribe <code>20</code>, todo bien. Pero si escribe <code>veinte</code>, o <code>20 años</code>, o simplemente presiona Enter sin escribir nada, Java lanza una excepción:</p>
+
+    <div class="flujo">Ingresa tu edad: veinte
+Exception in thread "main" java.util.InputMismatchException
+    at java.base/java.util.Scanner.throwFor(Scanner.java:939)
+    at java.base/java.util.Scanner.next(Scanner.java:1594)
+    ...
+    at Saludo.main(Saludo.java:5)</div>
+
+    <p>El programa <strong>termina abruptamente</strong>. No muestra el resto del código. No se recupera. Simplemente se detiene.</p>
+
+    <h3>Por qué ocurre</h3>
+
+    <p><code>nextInt()</code> espera encontrar un entero. Cuando encuentra algo que no puede interpretar como entero, no adivina, no convierte: lanza una excepción. Java es muy estricto con los tipos.</p>
+
+    <p>Esto es en realidad <em>bueno</em> en términos de seguridad: te avisa que algo salió mal, en lugar de usar un valor incorrecto silenciosamente. Pero es molesto para los usuarios, que pueden equivocarse al escribir. Un programa robusto debería poder manejar esto sin reventar.</p>
+
+    <h3>Cómo evitarlo: validar con <code>hasNextInt()</code></h3>
+
+    <p>La clase <code>Scanner</code> tiene métodos <code>hasNextAlgo()</code> que <em>verifican</em> si el siguiente dato es del tipo esperado, sin intentar leerlo. Si el resultado es <code>true</code>, entonces sí puedes leerlo con seguridad. Si es <code>false</code>, sabes que no hay un entero esperando, y puedes pedir de nuevo o mostrar un mensaje.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa tu edad: "</span>);
+
+<span class="kw">if</span> (scanner.<span class="mth">hasNextInt</span>()) {
+    <span class="kw">int</span> edad = scanner.<span class="mth">nextInt</span>();
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Edad: "</span> + edad);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Eso no es un número entero"</span>);
+    scanner.<span class="mth">nextLine</span>();   <span class="cmt">// limpia el valor inválido del buffer</span>
+}</pre>
+    </div>
+
+    <p>Con <code>hasNextInt()</code>, verificas primero y solo lees si estás seguro. Si el usuario escribió "veinte", el <code>else</code> maneja el caso sin que el programa reviente.</p>
+
+    <p>Nota el <code>scanner.nextLine()</code> en el <code>else</code>: es necesario para limpiar la entrada inválida. Si no lo haces, el valor inválido sigue en el buffer, y la próxima lectura también va a fallar. Es el mismo concepto de "buffer sucio" que viste antes.</p>
+
+    <h3>Los <code>hasNext</code> más usados</h3>
+
+    <ul>
+      <li><code>hasNextInt()</code> — ¿hay un <code>int</code> disponible?</li>
+      <li><code>hasNextDouble()</code> — ¿hay un <code>double</code> disponible?</li>
+      <li><code>hasNextBoolean()</code> — ¿hay un <code>boolean</code> disponible?</li>
+      <li><code>hasNext()</code> — ¿hay otra palabra disponible?</li>
+      <li><code>hasNextLine()</code> — ¿hay otra línea disponible?</li>
+    </ul>
+
+    <p>Todos devuelven <code>boolean</code>. Ninguno consume nada del buffer. Son la forma segura de leer sin riesgo de excepción.</p>
+
+    <p>En la siguiente sección vas a ver el patrón completo de validación, que combina <code>hasNextInt()</code> con un <code>while</code> para pedir hasta que el usuario escriba algo válido. Es uno de los patrones más útiles que vas a aprender en este bloque.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="que-es-parseo">
+    <h2>¿Qué es parsear?</h2>
+
+    <p>Parsear es <strong>convertir un valor de un tipo a otro</strong>, típicamente desde texto hacia un tipo numérico o lógico. Es una operación muy común, y tiene sus propios métodos, separados de Scanner.</p>
+
+    <p>Antes de ver los métodos, piensa en la situación:</p>
+
+    <p>Cuando usas <code>scanner.nextInt()</code>, el programa <em>ya sabe</em> que el usuario va a escribir un entero, y directamente convierte. Pero hay casos donde tienes el texto guardado como <code>String</code> y necesitas convertirlo después:</p>
+
+    <ul>
+      <li>Tienes un <code>String edad = "20"</code> y quieres sumarle 1. No puedes: <code>"20"</code> es texto, no número. Primero hay que convertirlo a <code>int</code>.</li>
+      <li>Tienes un <code>String precio = "19.99"</code> que vino de un archivo o de la red, y quieres calcular con él. Hay que convertirlo a <code>double</code>.</li>
+      <li>Tienes un <code>String respuesta = "true"</code> y quieres usarlo como <code>boolean</code> en un <code>if</code>. Hay que convertirlo.</li>
+    </ul>
+
+    <p>Parsear es hacer esa conversión. Los métodos de parseo son métodos <em>estáticos</em> de las clases envoltorio (<code>Integer</code>, <code>Double</code>, etc.), y se llaman así: <code>Integer.parseInt(texto)</code>.</p>
+
+    <div class="caja caja-idea">
+      <p class="mb-0"><strong>Diferencia clave entre Scanner y parseo:</strong> Scanner <em>lee</em> de la entrada (teclado, archivo). El parseo <em>convierte</em> algo que ya tienes. Si ya tienes el texto en una variable, no necesitas Scanner: usas parseo. Si necesitas leer algo nuevo del usuario, usas Scanner (y a veces parseas lo que leíste).</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="parse-int">
+    <h2>Convertir a entero: <code>Integer.parseInt()</code></h2>
+
+    <p>El método más común de parseo. Convierte un <code>String</code> en un <code>int</code>:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span> texto = <span class="str">"42"</span>;
+<span class="kw">int</span> numero = <span class="cls">Integer</span>.<span class="mth">parseInt</span>(texto);
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(numero + <span class="num">1</span>);   <span class="cmt">// 43</span></pre>
+    </div>
+
+    <p>Fíjate: <code>"42"</code> es texto, pero después del <code>parseInt</code> es un número. Por eso <code>numero + 1</code> da 43, no "421". Sin el parseo, <code>texto + 1</code> daría <code>"421"</code> (concatenación).</p>
+
+    <h3>El caso típico: leer con <code>nextLine()</code> y parsear</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa tu edad: "</span>);
+<span class="cls">String</span> edadTexto = scanner.<span class="mth">nextLine</span>();
+<span class="kw">int</span> edad = <span class="cls">Integer</span>.<span class="mth">parseInt</span>(edadTexto);</pre>
+    </div>
+
+    <p>Este es el patrón que mencioné en la solución 2 del buffer sucio: leer todo con <code>nextLine()</code>, y convertir al tipo que necesites. Es consistente y evita el problema del <code>\n</code> pendiente.</p>
+
+    <h3>Qué pasa si el texto no es un número</h3>
+
+    <p>Si el String no representa un entero válido, <code>parseInt</code> lanza una excepción <code>NumberFormatException</code>, y el programa termina con error. Igual que con <code>nextInt()</code>:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">Integer</span>.<span class="mth">parseInt</span>(<span class="str">"hola"</span>);       <span class="cmt">// ← NumberFormatException</span>
+<span class="cls">Integer</span>.<span class="mth">parseInt</span>(<span class="str">"20 años"</span>);    <span class="cmt">// ← NumberFormatException</span>
+<span class="cls">Integer</span>.<span class="mth">parseInt</span>(<span class="str">""</span>);           <span class="cmt">// ← NumberFormatException</span>
+<span class="cls">Integer</span>.<span class="mth">parseInt</span>(<span class="str">"20"</span>);         <span class="cmt">// ✓ esto sí funciona, devuelve 20</span>
+<span class="cls">Integer</span>.<span class="mth">parseInt</span>(<span class="str">"-7"</span>);         <span class="cmt">// ✓ esto también, devuelve -7</span>
+<span class="cls">Integer</span>.<span class="mth">parseInt</span>(<span class="str">" 20"</span>);        <span class="cmt">// ✓ los espacios al inicio se ignoran</span></pre>
+    </div>
+
+    <p>Por eso, si vas a parsear algo que viene de la entrada del usuario, conviene validar antes (o manejar la excepción, cosa que verás más adelante). O simplemente pedir al usuario que escriba solo dígitos, y estar preparado para que se equivoque.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="parse-double">
+    <h2>Convertir a decimal: <code>Double.parseDouble()</code></h2>
+
+    <p>Equivalente al anterior, pero para <code>double</code>:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span> texto = <span class="str">"19.99"</span>;
+<span class="kw">double</span> precio = <span class="cls">Double</span>.<span class="mth">parseDouble</span>(texto);
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(precio * <span class="num">2</span>);   <span class="cmt">// 39.98</span></pre>
+    </div>
+
+    <p>Igual que con <code>parseInt</code>, si el texto no representa un número válido, lanza <code>NumberFormatException</code>. Y ojo con el punto decimal: <code>Double.parseDouble("19,99")</code> lanza excepción. Tiene que ser punto.</p>
+
+    <h3>El caso típico: leer un precio con <code>nextLine()</code> y parsear</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa el precio: "</span>);
+<span class="cls">String</span> precioTexto = scanner.<span class="mth">nextLine</span>();
+<span class="kw">double</span> precio = <span class="cls">Double</span>.<span class="mth">parseDouble</span>(precioTexto);</pre>
+    </div>
+
+    <p>Este patrón es muy útil, porque el usuario a veces escribe <code>19.99</code> y a veces <code>19</code>. Los dos funcionan con <code>parseDouble</code> (el segundo se convierte a <code>19.0</code> automáticamente).</p>
+
+    <h3>Parseo desde <code>nextLine()</code>: el detalle de la coma decimal</h3>
+
+    <p>En algunos países, el separador decimal que se usa naturalmente es la coma, no el punto. Si estás enseñando a estudiantes hispanohablantes, es posible que escriban <code>19,99</code> y el parseo falle. Hay dos enfoques:</p>
+
+    <ul>
+      <li><strong>Enseñar a usar punto</strong>: explicar que en el código y en la consola de Java el separador es el punto, aunque en matemáticas se use coma. Es la opción simple y funciona.</li>
+      <li><strong>Reemplazar la coma por punto antes de parsear</strong>: <code>Double.parseDouble(texto.replace(",", "."))</code>. Esto maneja el caso en el que el usuario escribe con coma. Es más robusto, pero agrega complejidad.</li>
+    </ul>
+
+    <p>Para los ejercicios del manual, la primera opción es suficiente. Menciono la segunda para que sepas que existe.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="parse-otros">
+    <h2>Otros parseos útiles</h2>
+
+    <h3><code>Long.parseLong()</code></h3>
+
+    <p>Igual que <code>Integer.parseInt</code>, pero devuelve un <code>long</code> (entero de 64 bits, hasta aproximadamente 9.2 × 10^18). Útil cuando el número puede ser muy grande para un <code>int</code>.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span> texto = <span class="str">"9000000000"</span>;   <span class="cmt">// no cabe en int, sí en long</span>
+<span class="kw">long</span> grande = <span class="cls">Long</span>.<span class="mth">parseLong</span>(texto);</pre>
+    </div>
+
+    <h3><code>Boolean.parseBoolean()</code></h3>
+
+    <p>Convierte un <code>String</code> a <code>boolean</code>. Es peculiar, y vale la pena entender su comportamiento: <strong>devuelve <code>true</code> solo si el texto (ignorando mayúsculas) es exactamente <code>"true"</code></strong>. Cualquier otro texto devuelve <code>false</code>. No lanza excepción.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">Boolean</span>.<span class="mth">parseBoolean</span>(<span class="str">"true"</span>);       <span class="cmt">// true</span>
+<span class="cls">Boolean</span>.<span class="mth">parseBoolean</span>(<span class="str">"TRUE"</span>);       <span class="cmt">// true</span>
+<span class="cls">Boolean</span>.<span class="mth">parseBoolean</span>(<span class="str">"TrUe"</span>);       <span class="cmt">// true</span>
+<span class="cls">Boolean</span>.<span class="mth">parseBoolean</span>(<span class="str">"false"</span>);      <span class="cmt">// false</span>
+<span class="cls">Boolean</span>.<span class="mth">parseBoolean</span>(<span class="str">"si"</span>);         <span class="cmt">// false ← ojo, no es "true"</span>
+<span class="cls">Boolean</span>.<span class="mth">parseBoolean</span>(<span class="str">"hola"</span>);       <span class="cmt">// false</span>
+<span class="cls">Boolean</span>.<span class="mth">parseBoolean</span>(<span class="str">""</span>);           <span class="cmt">// false</span></pre>
+    </div>
+
+    <p>Esto es útil y peligroso a la vez. Útil porque nunca falla con excepción. Peligroso porque <code>"si"</code> devuelve <code>false</code> silenciosamente, y probablemente no era lo que querías. Si el usuario va a responder "si" o "no", mejor hazlo a mano:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span> respuesta = scanner.<span class="mth">nextLine</span>().<span class="mth">trim</span>().<span class="mth">toLowerCase</span>();
+<span class="kw">boolean</span> dijoSi = respuesta.<span class="mth">equals</span>(<span class="str">"si"</span>) || respuesta.<span class="mth">equals</span>(<span class="str">"sí"</span>) || respuesta.<span class="mth">equals</span>(<span class="str">"s"</span>) || respuesta.<span class="mth">equals</span>(<span class="str">"yes"</span>) || respuesta.<span class="mth">equals</span>(<span class="str">"y"</span>);</pre>
+    </div>
+
+    <h3><code>Integer.parseInt(texto, base)</code></h3>
+
+    <p>Hay una versión de <code>parseInt</code> que recibe la base numérica como segundo argumento. Útil para convertir binario, octal o hexadecimal:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">Integer</span>.<span class="mth">parseInt</span>(<span class="str">"1010"</span>, <span class="num">2</span>);       <span class="cmt">// 10 (binario)</span>
+<span class="cls">Integer</span>.<span class="mth">parseInt</span>(<span class="str">"FF"</span>, <span class="num">16</span>);         <span class="cmt">// 255 (hexadecimal)</span>
+<span class="cls">Integer</span>.<span class="mth">parseInt</span>(<span class="str">"777"</span>, <span class="num">8</span>);        <span class="cmt">// 511 (octal)</span></pre>
+    </div>
+
+    <p>Poco común en programas de principiante, pero útil saber que existe. Si en algún momento necesitas leer un número binario o hexadecimal, ya tienes la pieza.</p>
+
+    <h3>Lo contrario: convertir un número a texto</h3>
+
+    <p>La conversión inversa (número → texto) es automática cuando concatenas con un String. Si necesitas forzarla, tienes <code>String.valueOf(numero)</code>:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> numero = <span class="num">42</span>;
+<span class="cls">String</span> texto1 = <span class="cls">String</span>.<span class="mth">valueOf</span>(numero);   <span class="cmt">// "42"</span>
+<span class="cls">String</span> texto2 = <span class="str">""</span> + numero;                  <span class="cmt">// "42" (concatenación)</span>
+<span class="cls">String</span> texto3 = <span class="cls">Integer</span>.<span class="mth">toString</span>(numero);   <span class="cmt">// "42"</span></pre>
+    </div>
+
+    <p>Las tres formas funcionan. La concatenación (<code>"" + numero</code>) es la más común, y la vas a ver en todos lados.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="parse-vs-scanner">
+    <h2>Parseo vs Scanner: cuándo usar cada uno</h2>
+
+    <p>Ya tienes las dos piezas. La pregunta natural es: ¿cuándo usar una y cuándo la otra?</p>
+
+    <p>La respuesta corta: <strong>Scanner cuando lees del usuario, parseo cuando ya tienes el dato como String</strong>. Pero hay más matices.</p>
+
+    <div class="table-responsive">
+      <table class="table table-bordered align-middle">
+        <thead>
+          <tr><th>Situación</th><th>Qué usar</th><th>Por qué</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Leer un número del usuario directamente</td>
+            <td><code>nextInt()</code> o <code>nextDouble()</code></td>
+            <td>Lee y convierte en un solo paso</td>
+          </tr>
+          <tr>
+            <td>Leer un texto del usuario y después usarlo como número</td>
+            <td><code>nextLine()</code> + <code>Integer.parseInt()</code></td>
+            <td>Evita el problema del buffer sucio</td>
+          </tr>
+          <tr>
+            <td>Tienes un String (de un archivo, de otro método) y quieres convertirlo</td>
+            <td><code>Integer.parseInt()</code> o similar</td>
+            <td>No hay nada que leer, solo convertir</td>
+          </tr>
+          <tr>
+            <td>Leer varias cosas mezcladas en una sola línea</td>
+            <td><code>nextLine()</code> + <code>split()</code> + parseo</td>
+            <td>Más flexible para entradas complejas</td>
+          </tr>
+          <tr>
+            <td>Leer un dato que puede ser de varios tipos</td>
+            <td><code>nextLine()</code> + <code>hasNextInt()</code> o parseo con try/catch</td>
+            <td>Permite manejar la conversión con gracia</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>La recomendación práctica</h3>
+
+    <p>Si estás empezando, la forma más simple y menos problemática es esta:</p>
+
+    <p><strong>Leer todo con <code>nextLine()</code>, y parsear cuando necesites un número.</strong></p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa tu edad: "</span>);
+<span class="kw">int</span> edad = <span class="cls">Integer</span>.<span class="mth">parseInt</span>(scanner.<span class="mth">nextLine</span>());
+
+<span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa tu nombre completo: "</span>);
+<span class="cls">String</span> nombre = scanner.<span class="mth">nextLine</span>();
+
+<span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa tu estatura (en metros): "</span>);
+<span class="kw">double</span> estatura = <span class="cls">Double</span>.<span class="mth">parseDouble</span>(scanner.<span class="mth">nextLine</span>());</pre>
+    </div>
+
+    <p>Este patrón tiene varias ventajas:</p>
+
+    <ul>
+      <li>No tienes que preocuparte por el orden de los métodos ni por el buffer sucio. <code>nextLine()</code> siempre limpia.</li>
+      <li>Es consistente: siempre usas <code>nextLine</code>, y después decides cómo interpretar.</li>
+      <li>Si más adelante quieres cambiar de tipo (por ejemplo, permitir decimales donde antes eran enteros), solo cambias el parseo, no la lectura.</li>
+    </ul>
+
+    <p>La desventaja es que no manejas la excepción si el usuario escribe algo no numérico. Pero eso lo puedes resolver con validación previa (que ves en la siguiente sección) o con try/catch (que no vemos en este manual pero que vas a ver más adelante).</p>
+
+    <p>Si en algún momento del manual ves que mezclo <code>nextInt()</code> con <code>nextLine()</code> en un ejemplo, es porque quiero mostrar un patrón específico o porque el ejemplo lo requiere. Pero cuando yo escriba programas "en serio" o en los ejercicios, voy a usar preferentemente el patrón de leer con <code>nextLine()</code> y parsear. Es el que menos sorpresas da.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="parse-errores">
+    <h2>Errores comunes al parsear</h2>
+
+    <h3>1. Parsear un String vacío</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">Integer</span>.<span class="mth">parseInt</span>(<span class="str">""</span>);   <span class="cmt">// ← NumberFormatException</span></pre>
+    </div>
+
+    <p>Un String vacío no es un número, aunque a veces parezca que "no tiene nada de malo". Antes de parsear, verifica que el texto no esté vacío:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span> texto = scanner.<span class="mth">nextLine</span>().<span class="mth">trim</span>();   <span class="cmt">// trim() quita espacios sobrantes</span>
+
+<span class="kw">if</span> (texto.<span class="mth">isEmpty</span>()) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"No escribiste nada"</span>);
+} <span class="kw">else</span> {
+    <span class="kw">int</span> numero = <span class="cls">Integer</span>.<span class="mth">parseInt</span>(texto);
+    ...
+}</pre>
+    </div>
+
+    <h3>2. Parsear texto con espacios al inicio o al final</h3>
+
+    <p><code>Integer.parseInt("  20  ")</code> funciona, porque parseInt ignora los espacios. Pero <code>Integer.parseInt("20 30")</code> no funciona, porque el texto entero no es un número. <code>trim()</code> te ayuda a eliminar los espacios de los bordes:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span> texto = <span class="str">"  20  "</span>;
+<span class="kw">int</span> numero = <span class="cls">Integer</span>.<span class="mth">parseInt</span>(texto.<span class="mth">trim</span>());   <span class="cmt">// 20</span></pre>
+    </div>
+
+    <h3>3. Olvidar el punto y coma decimal correcto</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">Double</span>.<span class="mth">parseDouble</span>(<span class="str">"19,99"</span>);   <span class="cmt">// ← NumberFormatException</span>
+<span class="cls">Double</span>.<span class="mth">parseDouble</span>(<span class="str">"19.99"</span>);   <span class="cmt">// ✓ 19.99</span></pre>
+    </div>
+
+    <p>El separador decimal en Java siempre es punto. Si quieres aceptar coma, tendrás que reemplazarla antes:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span> texto = <span class="str">"19,99"</span>;
+<span class="kw">double</span> precio = <span class="cls">Double</span>.<span class="mth">parseDouble</span>(texto.<span class="mth">replace</span>(<span class="str">","</span>, <span class="str">"."</span>));   <span class="cmt">// 19.99</span></pre>
+    </div>
+
+    <h3>4. Confundir <code>parseInt</code> con <code>nextInt</code></h3>
+
+    <p>Los dos convierten a entero, pero de fuentes distintas:</p>
+
+    <ul>
+      <li><code>scanner.nextInt()</code> — <em>lee</em> un entero del teclado.</li>
+      <li><code>Integer.parseInt(texto)</code> — <em>convierte</em> un String a entero.</li>
+    </ul>
+
+    <p>Si tienes un String y quieres un int, no puedes llamar <code>scanner.nextInt()</code>: eso leería <em>otro</em> dato del teclado. Tienes que usar <code>Integer.parseInt</code>.</p>
+
+    <h3>5. Confundir <code>Integer</code> con <code>int</code></h3>
+
+    <p>En Java, <code>int</code> (minúscula) es el tipo primitivo. <code>Integer</code> (mayúscula) es la clase envoltorio, que tiene métodos útiles como <code>parseInt</code>. Cuando llamas al método, es <code>Integer.parseInt</code> (clase, mayúscula). Cuando declaras la variable, es <code>int x</code> (tipo, minúscula). Es un error fácil de cometer al principio.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> x = <span class="cls">Integer</span>.<span class="mth">parseInt</span>(<span class="str">"5"</span>);   <span class="cmt">// ✓ correcto</span>
+<span class="cls">Integer</span> y = <span class="kw">int</span>.<span class="mth">parseInt</span>(<span class="str">"5"</span>);   <span class="cmt">// ✗ error de sintaxis</span></pre>
+    </div>
+
+    <p>Aunque ambos tipos existen y se comportan parecido, en el código que escribas usa <code>int</code> para declarar variables y <code>Integer</code> para llamar métodos estáticos. Es la convención.</p>
+
+    <h3>6. No quitar el <code>\n</code> pendiente antes de parsear</h3>
+
+    <p>Si haces esto:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> edad = scanner.<span class="mth">nextInt</span>();
+<span class="cls">String</span> nombre = <span class="cls">Integer</span>.<span class="mth">parseInt</span>(scanner.<span class="mth">nextLine</span>());   <span class="cmt">// ← bug</span></pre>
+    </div>
+
+    <p>El <code>nextLine()</code> va a leer el <code>\n</code> pendiente del <code>nextInt()</code>, y <code>Integer.parseInt("")</code> va a fallar con <code>NumberFormatException</code>. Es el mismo problema del buffer sucio, ahora manifestado como una excepción al parsear. La solución es la misma: limpiar el buffer antes, o usar el patrón de leer todo con <code>nextLine()</code> y parsear.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="hasnext">
+    <h2>Validar antes de leer: <code>hasNextInt()</code> y variantes</h2>
+
+    <p>Un programa robusto no asume que el usuario va a escribir lo correcto. Verifica antes de leer. Para eso existen los métodos <code>hasNextAlgo()</code>.</p>
+
+    <p>La idea es simple: <strong>antes de llamar a <code>nextInt()</code>, pregúntale a <code>hasNextInt()</code> si hay un entero disponible</strong>. Si la respuesta es <code>true</code>, lee con seguridad. Si es <code>false</code>, maneja el caso (mensaje, o pedir de nuevo).</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa tu edad: "</span>);
+
+<span class="kw">if</span> (scanner.<span class="mth">hasNextInt</span>()) {
+    <span class="kw">int</span> edad = scanner.<span class="mth">nextInt</span>();
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Edad: "</span> + edad);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Eso no es un número"</span>);
+    scanner.<span class="mth">nextLine</span>();   <span class="cmt">// limpia el valor inválido del buffer</span>
+}</pre>
+    </div>
+
+    <p>Este patrón es la base de todo programa que lee datos y no quiere terminar abruptamente. Los <code>hasNext...()</code> no leen, solo preguntan.</p>
+
+    <h3>Comportamiento particular: <code>hasNextInt()</code> no consume el Enter</h3>
+
+    <p>Los métodos <code>hasNextAlgo()</code> <em>no consumen nada</em> del buffer. Solo miran qué hay. Si dicen <code>true</code>, después puedes leer con <code>nextAlgo()</code>. Si dicen <code>false</code>, tienes que limpiar el buffer tú mismo (con <code>nextLine()</code>), o el valor inválido se va a quedar ahí para la próxima lectura.</p>
+
+    <p>Ese detalle es importante: si no limpias el buffer cuando el dato no es válido, la siguiente lectura va a fallar también. Por eso en los ejemplos de <code>hasNextInt</code>, siempre verás un <code>nextLine()</code> dentro del <code>else</code>.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="patron-validacion">
+    <h2>Patrón completo: pedir hasta que el usuario ingrese algo válido</h2>
+
+    <p>Este es el patrón que combina todo lo anterior. Es uno de los más útiles que vas a aprender con Scanner, y probablemente lo uses en todos tus programas interactivos a partir de ahora.</p>
+
+    <p>La idea: pedir un dato, verificar si es válido, y si no lo es, pedir de nuevo. Repetir hasta que sea válido.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Ingresa un número entero (escribe 'q' para salir):"</span>);
+
+<span class="kw">while</span> (!scanner.<span class="mth">hasNextInt</span>()) {
+    <span class="cls">String</span> entrada = scanner.<span class="mth">next</span>();
+
+    <span class="kw">if</span> (entrada.<span class="mth">equalsIgnoreCase</span>(<span class="str">"q"</span>)) {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Adiós"</span>);
+        <span class="kw">return</span>;   <span class="cmt">// termina el programa</span>
+    }
+
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"'"</span> + entrada + <span class="str">"' no es un número válido. Intenta de nuevo:"</span>);
+}
+
+<span class="kw">int</span> numero = scanner.<span class="mth">nextInt</span>();
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Número aceptado: "</span> + numero);</pre>
+    </div>
+
+    <p>Este programa pide un número. Mientras el usuario no escriba un entero válido, sigue pidiendo. Si el usuario escribe <code>q</code>, sale del programa. Cuando finalmente escribe un número, lo acepta y sigue.</p>
+
+    <p>Hay algo interesante aquí: la condición del <code>while</code> usa <code>!scanner.hasNextInt()</code>. Es decir: <em>"mientras NO haya un entero disponible"</em>. Mientras esa condición sea verdadera, seguimos pidiendo. En cuanto el usuario escriba un número, <code>hasNextInt()</code> devuelve <code>true</code>, y <code>!true</code> es <code>false</code>, así que el ciclo termina.</p>
+
+    <p>Dentro del ciclo, leemos el valor inválido con <code>scanner.next()</code> (no <code>nextLine()</code>, porque <code>next()</code> es más adecuado para descartar tokens) y verificamos si el usuario quiere salir. Si no, mostramos un mensaje de error y volvemos a intentar.</p>
+
+    <h3>Variante: máximo de intentos</h3>
+
+    <p>A veces no quieres un ciclo infinito, sino un número limitado de intentos. Aquí está la variante:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> intentos = <span class="num">0</span>;
+<span class="kw">int</span> maxIntentos = <span class="num">3</span>;
+<span class="kw">int</span> numero = -<span class="num">1</span>;
+<span class="kw">boolean</span> valido = <span class="kw">false</span>;
+
+<span class="kw">while</span> (intentos &lt; maxIntentos &amp;&amp; !valido) {
+    <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa un número entero: "</span>);
+
+    <span class="kw">if</span> (scanner.<span class="mth">hasNextInt</span>()) {
+        numero = scanner.<span class="mth">nextInt</span>();
+        valido = <span class="kw">true</span>;
+    } <span class="kw">else</span> {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Eso no es un número."</span>);
+        scanner.<span class="mth">nextLine</span>();   <span class="cmt">// limpia el buffer</span>
+        intentos++;
+    }
+}
+
+<span class="kw">if</span> (valido) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Número aceptado: "</span> + numero);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Se agotaron los intentos"</span>);
+}</pre>
+    </div>
+
+    <p>Este patrón aparece muchísimo en programas reales (login, validación de tarjetas, etc.). Fíjate en la estructura:</p>
+
+    <ul>
+      <li>Un <code>while</code> que combina dos condiciones: <code>intentos &lt; maxIntentos</code> y <code>!valido</code>. Sale cuando se acaban los intentos o cuando se ingresa un valor válido.</li>
+      <li>Un <code>hasNextInt()</code> que verifica antes de leer.</li>
+      <li>Un <code>else</code> que limpia el buffer y suma un intento.</li>
+      <li>Después del ciclo, se consulta <code>valido</code> para saber qué pasó.</li>
+    </ul>
+
+    <p>Es un ejemplo completo de las piezas que has aprendido: <code>while</code>, <code>if</code>, bandera (<code>valido</code>), contador (<code>intentos</code>), y validación con <code>hasNext</code>.</p>
+
+    <h3>Una alternativa con parseo: try/catch</h3>
+
+    <p>Si prefieres el patrón de leer todo con <code>nextLine()</code> y parsear, puedes hacer la validación con <code>try/catch</code>. No hemos visto try/catch en este manual, pero lo menciono porque es la otra forma común:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">while</span> (<span class="kw">true</span>) {
+    <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa un número: "</span>);
+    <span class="cls">String</span> entrada = scanner.<span class="mth">nextLine</span>();
+
+    <span class="kw">try</span> {
+        <span class="kw">int</span> numero = <span class="cls">Integer</span>.<span class="mth">parseInt</span>(entrada);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Número aceptado: "</span> + numero);
+        <span class="kw">break</span>;
+    } <span class="kw">catch</span> (<span class="cls">NumberFormatException</span> e) {
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Eso no es un número. Intenta de nuevo."</span>);
+    }
+}</pre>
+    </div>
+
+    <p>Este patrón intenta parsear, y si falla, captura el error y vuelve a pedir. Es más limpio en cierto sentido, pero requiere entender <code>try/catch</code>, que no es parte de este manual. Si te sientes cómodo con él, úsalo. Si no, quédate con la versión de <code>hasNextInt()</code>.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejemplos-5">
+    <h2>Ejemplos progresivos con Scanner</h2>
+
+    <h3>Ejemplo 1 — Leer un número y mostrarlo</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">import</span> java.util.Scanner;
+
+<span class="kw">public class</span> <span class="cls">Ejemplo1</span> {
+    <span class="kw">public static void</span> <span class="mth">main</span>(<span class="cls">String</span>[] args) {
+        <span class="cls">Scanner</span> scanner = <span class="kw">new</span> <span class="cls">Scanner</span>(<span class="cls">System</span>.in);
+
+        <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa un número: "</span>);
+        <span class="kw">int</span> numero = <span class="cls">Integer</span>.<span class="mth">parseInt</span>(scanner.<span class="mth">nextLine</span>());
+
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"El doble es: "</span> + (numero * <span class="num">2</span>));
+    }
+}</pre>
+    </div>
+    <p>El ejemplo mínimo. Lee un número, lo usa. Fíjate en el patrón: <code>nextLine()</code> para leer, <code>parseInt</code> para convertir. Es la versión segura.</p>
+
+    <h3>Ejemplo 2 — Leer nombre y edad, saludar</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">import</span> java.util.Scanner;
+
+<span class="kw">public class</span> <span class="cls">Ejemplo2</span> {
+    <span class="kw">public static void</span> <span class="mth">main</span>(<span class="cls">String</span>[] args) {
+        <span class="cls">Scanner</span> scanner = <span class="kw">new</span> <span class="cls">Scanner</span>(<span class="cls">System</span>.in);
+
+        <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"¿Cómo te llamas? "</span>);
+        <span class="cls">String</span> nombre = scanner.<span class="mth">nextLine</span>();
+
+        <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"¿Cuántos años tienes? "</span>);
+        <span class="kw">int</span> edad = <span class="cls">Integer</span>.<span class="mth">parseInt</span>(scanner.<span class="mth">nextLine</span>());
+
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Hola "</span> + nombre + <span class="str">", tienes "</span> + edad + <span class="str">" años."</span>);
+    }
+}</pre>
+    </div>
+    <p>Aquí lees texto primero (<code>nextLine</code>) y después un número (<code>nextLine</code> + <code>parseInt</code>). Fíjate en el orden: el texto va primero, y el número después. Ese orden es natural y no tiene el problema del buffer, porque <code>nextLine()</code> limpia el buffer después de cada lectura.</p>
+
+    <h3>Ejemplo 3 — Leer dos números y sumarlos</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">import</span> java.util.Scanner;
+
+<span class="kw">public class</span> <span class="cls">Ejemplo3</span> {
+    <span class="kw">public static void</span> <span class="mth">main</span>(<span class="cls">String</span>[] args) {
+        <span class="cls">Scanner</span> scanner = <span class="kw">new</span> <span class="cls">Scanner</span>(<span class="cls">System</span>.in);
+
+        <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Primer número: "</span>);
+        <span class="kw">double</span> a = <span class="cls">Double</span>.<span class="mth">parseDouble</span>(scanner.<span class="mth">nextLine</span>());
+
+        <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Segundo número: "</span>);
+        <span class="kw">double</span> b = <span class="cls">Double</span>.<span class="mth">parseDouble</span>(scanner.<span class="mth">nextLine</span>());
+
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Suma: "</span> + (a + b));
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Resta: "</span> + (a - b));
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Producto: "</span> + (a * b));
+
+        <span class="kw">if</span> (b != <span class="num">0</span>) {
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"División: "</span> + (a / b));
+        } <span class="kw">else</span> {
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"No se puede dividir entre cero"</span>);
+        }
+    }
+}</pre>
+    </div>
+    <p>Una calculadora simple. Combina Scanner con lo que ya sabes de operadores y decisiones. Fíjate en el <code>if (b != 0)</code> antes de dividir: sin él, el programa lanzaría una excepción. Validar las entradas siempre es buena idea.</p>
+
+    <h3>Ejemplo 4 — Calcular descuento según el monto</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">import</span> java.util.Scanner;
+
+<span class="kw">public class</span> <span class="cls">Ejemplo4</span> {
+    <span class="kw">public static void</span> <span class="mth">main</span>(<span class="cls">String</span>[] args) {
+        <span class="cls">Scanner</span> scanner = <span class="kw">new</span> <span class="cls">Scanner</span>(<span class="cls">System</span>.in);
+
+        <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Total de la compra: "</span>);
+        <span class="kw">double</span> total = <span class="cls">Double</span>.<span class="mth">parseDouble</span>(scanner.<span class="mth">nextLine</span>());
+
+        <span class="kw">double</span> descuento = <span class="num">0.0</span>;
+
+        <span class="kw">if</span> (total &gt;= <span class="num">500</span>) {
+            descuento = <span class="num">0.20</span>;
+        } <span class="kw">else if</span> (total &gt;= <span class="num">200</span>) {
+            descuento = <span class="num">0.10</span>;
+        } <span class="kw">else if</span> (total &gt;= <span class="num">100</span>) {
+            descuento = <span class="num">0.05</span>;
+        }
+
+        <span class="kw">double</span> totalFinal = total - (total * descuento);
+
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Descuento aplicado: "</span> + (descuento * <span class="num">100</span>) + <span class="str">"%"</span>);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Total a pagar: "</span> + totalFinal);
+    }
+}</pre>
+    </div>
+    <p>Aquí se combinan Scanner con <code>if/else if</code>. Es la primera vez que ves un ejemplo donde el flujo del programa depende completamente del dato que ingresa el usuario. Eso es lo que hace que los programas interactivos sean útiles: el mismo código se comporta distinto según la entrada.</p>
+
+    <h3>Ejemplo 5 — Programa con menú y varias lecturas</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">import</span> java.util.Scanner;
+
+<span class="kw">public class</span> <span class="cls">Ejemplo5</span> {
+    <span class="kw">public static void</span> <span class="mth">main</span>(<span class="cls">String</span>[] args) {
+        <span class="cls">Scanner</span> scanner = <span class="kw">new</span> <span class="cls">Scanner</span>(<span class="cls">System</span>.in);
+
+        <span class="kw">int</span> opcion = <span class="num">0</span>;
+
+        <span class="kw">do</span> {
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"--- CALCULADORA ---"</span>);
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"1. Sumar"</span>);
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"2. Restar"</span>);
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"3. Salir"</span>);
+            <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Elige: "</span>);
+
+            opcion = <span class="cls">Integer</span>.<span class="mth">parseInt</span>(scanner.<span class="mth">nextLine</span>());
+
+            <span class="kw">switch</span> (opcion) {
+                <span class="kw">case</span> <span class="num">1</span>:
+                    <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Primer número: "</span>);
+                    <span class="kw">double</span> a = <span class="cls">Double</span>.<span class="mth">parseDouble</span>(scanner.<span class="mth">nextLine</span>());
+                    <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Segundo número: "</span>);
+                    <span class="kw">double</span> b = <span class="cls">Double</span>.<span class="mth">parseDouble</span>(scanner.<span class="mth">nextLine</span>());
+                    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Resultado: "</span> + (a + b));
+                    <span class="kw">break</span>;
+                <span class="kw">case</span> <span class="num">2</span>:
+                    <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Primer número: "</span>);
+                    a = <span class="cls">Double</span>.<span class="mth">parseDouble</span>(scanner.<span class="mth">nextLine</span>());
+                    <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Segundo número: "</span>);
+                    b = <span class="cls">Double</span>.<span class="mth">parseDouble</span>(scanner.<span class="mth">nextLine</span>());
+                    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Resultado: "</span> + (a - b));
+                    <span class="kw">break</span>;
+                <span class="kw">case</span> <span class="num">3</span>:
+                    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Adiós"</span>);
+                    <span class="kw">break</span>;
+                <span class="kw">default</span>:
+                    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Opción no válida"</span>);
+            }
+        } <span class="kw">while</span> (opcion != <span class="num">3</span>);
+    }
+}</pre>
+    </div>
+    <p>Este es el ejemplo más cercano a un programa real. Combina todo: <code>do while</code> para el menú, <code>switch</code> para las opciones, Scanner con parseo para cada lectura, y las piezas de los bloques anteriores. Si lo puedes escribir por tu cuenta después de verlo, ya tienes el manual casi dominado.</p>
+
+    <p>Nota: hay un problema con este ejemplo si intentas compilarlo tal cual, porque <code>a</code> y <code>b</code> están declaradas dentro del <code>case 1</code> y usadas también en el <code>case 2</code>. En Java, las variables declaradas dentro de un <code>case</code> tienen alcance limitado y no se pueden usar en otro <code>case</code>. Habría que declararlas afuera del <code>switch</code>. Lo menciono porque es un error clásico, y vale la pena que lo tengas en mente cuando escribas <code>switch</code> con lógica dentro.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejercicios-5">
+    <h2>Ejercicios de Scanner y parseo</h2>
+
+    <h3><span class="nivel nivel-reconocer">Reconocer</span></h3>
+    <p>Mira este fragmento y predice qué imprime, considerando que el usuario escribe <code>25</code> y presiona Enter, y después escribe <code>Ana</code> y presiona Enter.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Edad: "</span>);
+<span class="kw">int</span> edad = scanner.<span class="mth">nextInt</span>();
+
+<span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Nombre: "</span>);
+<span class="cls">String</span> nombre = scanner.<span class="mth">nextLine</span>();
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Hola "</span> + nombre + <span class="str">" ("</span> + edad + <span class="str">")"</span>);</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-2">Imprime: <code>Edad: Nombre: Hola  (25)</code>. El nombre queda vacío.</p>
+      <p class="mb-0">El <code>nextInt()</code> lee el 25 pero deja el <code>\n</code> en el buffer. Cuando el programa pide el nombre con <code>nextLine()</code>, este lee el <code>\n</code> pendiente y devuelve <code>""</code>. Es exactamente el error del buffer sucio. La solución: agregar un <code>scanner.nextLine();</code> después del <code>nextInt()</code>, o usar el patrón de leer con <code>nextLine()</code> y parsear.</p>
+    </details>
+
+    <h3><span class="nivel nivel-completar">Completar</span></h3>
+    <p>Completa el código para leer un número decimal del usuario y calcular su raíz cuadrada (asumiendo que existe el método <code>Math.sqrt</code>).</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa un número: "</span>);
+<span class="kw">double</span> numero = ____________;
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Raíz cuadrada: "</span> + <span class="cls">Math</span>.<span class="mth">sqrt</span>(numero));</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-0"><code>Double.parseDouble(scanner.nextLine())</code>. Este es el patrón recomendado: leer con <code>nextLine()</code> y convertir con parseo. También funcionaría <code>scanner.nextDouble()</code>, pero el patrón de parseo es más consistente.</p>
+    </details>
+
+    <h3><span class="nivel nivel-modificar">Modificar</span></h3>
+    <p>Este programa debería pedir primero un número, después una palabra, pero solo lee el número. Encuentra y corrige el error.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Número: "</span>);
+<span class="kw">int</span> n = scanner.<span class="mth">nextInt</span>();
+
+<span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Palabra: "</span>);
+<span class="cls">String</span> palabra = scanner.<span class="mth">nextLine</span>();
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Leí: "</span> + n + <span class="str">" y '"</span> + palabra + <span class="str">"'"</span>);</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-2">Hay dos formas de corregirlo. La más directa:</p>
+      <div class="bloque-codigo">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Número: "</span>);
+<span class="kw">int</span> n = scanner.<span class="mth">nextInt</span>();
+scanner.<span class="mth">nextLine</span>();   <span class="cmt">// limpia el buffer</span>
+
+<span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Palabra: "</span>);
+<span class="cls">String</span> palabra = scanner.<span class="mth">nextLine</span>();</pre>
+      </div>
+      <p class="mb-2">Otra forma, más consistente:</p>
+      <div class="bloque-codigo">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Número: "</span>);
+<span class="kw">int</span> n = <span class="cls">Integer</span>.<span class="mth">parseInt</span>(scanner.<span class="mth">nextLine</span>());
+
+<span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Palabra: "</span>);
+<span class="cls">String</span> palabra = scanner.<span class="mth">nextLine</span>();</pre>
+      </div>
+      <p class="mb-0">Cualquiera de las dos funciona. La primera es más pequeña; la segunda es más consistente y menos propensa a errores.</p>
+    </details>
+
+    <h3><span class="nivel nivel-construir">Construir</span></h3>
+    <p>Escribe un programa que le pida al usuario su nombre completo y su año de nacimiento, y calcule aproximadamente cuántos años tiene.</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">import</span> java.util.Scanner;
+
+<span class="kw">public class</span> <span class="cls">EdadAprox</span> {
+    <span class="kw">public static void</span> <span class="mth">main</span>(<span class="cls">String</span>[] args) {
+        <span class="cls">Scanner</span> scanner = <span class="kw">new</span> <span class="cls">Scanner</span>(<span class="cls">System</span>.in);
+
+        <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Nombre completo: "</span>);
+        <span class="cls">String</span> nombre = scanner.<span class="mth">nextLine</span>();
+
+        <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Año de nacimiento: "</span>);
+        <span class="kw">int</span> añoNac = <span class="cls">Integer</span>.<span class="mth">parseInt</span>(scanner.<span class="mth">nextLine</span>());
+
+        <span class="kw">int</span> añoActual = <span class="num">2025</span>;
+        <span class="kw">int</span> edad = añoActual - añoNac;
+
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Hola "</span> + nombre + <span class="str">", tienes aproximadamente "</span> + edad + <span class="str">" años."</span>);
+    }
+}</pre>
+      </div>
+      <p class="mb-0">Nota cómo el nombre se lee con <code>nextLine()</code> (permite espacios) y el año con <code>nextLine()</code> + <code>parseInt</code>. Nunca mezclamos <code>nextInt()</code> con <code>nextLine()</code>, evitando el problema del buffer.</p>
+    </details>
+
+    <h3><span class="nivel nivel-combinar">Combinar</span></h3>
+    <p>Escribe un programa que lea tres notas, calcule el promedio, y muestre si el estudiante aprobó (promedio ≥ 6) o reprobó. Usa el patrón de validación con <code>hasNextDouble()</code> para asegurarte de que el usuario escribe números válidos.</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">import</span> java.util.Scanner;
+
+<span class="kw">public class</span> <span class="cls">Promedio</span> {
+    <span class="kw">public static void</span> <span class="mth">main</span>(<span class="cls">String</span>[] args) {
+        <span class="cls">Scanner</span> scanner = <span class="kw">new</span> <span class="cls">Scanner</span>(<span class="cls">System</span>.in);
+
+        <span class="kw">double</span> suma = <span class="num">0</span>;
+
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= <span class="num">3</span>; i++) {
+            <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Nota "</span> + i + <span class="str">": "</span>);
+
+            <span class="kw">while</span> (!scanner.<span class="mth">hasNextDouble</span>()) {
+                <span class="cls">String</span> invalido = scanner.<span class="mth">next</span>();
+                <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"'"</span> + invalido + <span class="str">"' no es válido. Intenta de nuevo: "</span>);
+            }
+
+            suma += scanner.<span class="mth">nextDouble</span>();
+        }
+
+        <span class="kw">double</span> promedio = suma / <span class="num">3</span>;
+
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Promedio: "</span> + promedio);
+
+        <span class="kw">if</span> (promedio &gt;= <span class="num">6</span>) {
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Aprobado"</span>);
+        } <span class="kw">else</span> {
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Reprobado"</span>);
+        }
+    }
+}</pre>
+      </div>
+      <p class="mb-0">Este ejemplo combina <code>for</code>, <code>while</code> con <code>hasNextDouble</code>, <code>if/else</code>, y Scanner. Fíjate en el patrón de validación dentro del <code>for</code>: mientras el usuario no escriba un decimal válido, el <code>while</code> sigue pidiendo. Cuando lo escribe, sale del <code>while</code> y sigue con el <code>for</code>.</p>
+    </details>
+
+    <h3><span class="nivel nivel-crear">Crear</span></h3>
+    <p>Escribe un programa que simule un cajero automático interactivo. Debe:</p>
+
+    <ul>
+      <li>Pedir una contraseña de 4 dígitos (asume que la contraseña correcta es <code>"1234"</code>).</li>
+      <li>Si la contraseña es incorrecta, dar hasta 3 intentos. Si se agotan, mostrar "Cuenta bloqueada".</li>
+      <li>Si la contraseña es correcta, mostrar un menú con: 1) Consultar saldo, 2) Retirar, 3) Salir.</li>
+      <li>El saldo inicial es 1000. Para retirar, pedir un monto, verificar que sea múltiplo de 100 y que no exceda el saldo. Si no cumple, mostrar error sin modificar el saldo.</li>
+      <li>Repetir el menú hasta que el usuario elija salir.</li>
+    </ul>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">import</span> java.util.Scanner;
+
+<span class="kw">public class</span> <span class="cls">Cajero</span> {
+    <span class="kw">public static void</span> <span class="mth">main</span>(<span class="cls">String</span>[] args) {
+        <span class="cls">Scanner</span> scanner = <span class="kw">new</span> <span class="cls">Scanner</span>(<span class="cls">System</span>.in);
+
+        <span class="cls">String</span> contraseñaCorrecta = <span class="str">"1234"</span>;
+        <span class="kw">boolean</span> autenticado = <span class="kw">false</span>;
+        <span class="kw">int</span> intentos = <span class="num">0</span>;
+
+        <span class="cmt">// Autenticación</span>
+        <span class="kw">while</span> (intentos &lt; <span class="num">3</span> &amp;&amp; !autenticado) {
+            <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Contraseña (4 dígitos): "</span>);
+            <span class="cls">String</span> intento = scanner.<span class="mth">nextLine</span>();
+
+            <span class="kw">if</span> (intento.<span class="mth">equals</span>(contraseñaCorrecta)) {
+                autenticado = <span class="kw">true</span>;
+            } <span class="kw">else</span> {
+                intentos++;
+                <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Contraseña incorrecta. Intentos restantes: "</span> + (<span class="num">3</span> - intentos));
+            }
+        }
+
+        <span class="kw">if</span> (!autenticado) {
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Cuenta bloqueada"</span>);
+            <span class="kw">return</span>;   <span class="cmt">// termina el programa</span>
+        }
+
+        <span class="cmt">// Menú principal</span>
+        <span class="kw">int</span> saldo = <span class="num">1000</span>;
+        <span class="kw">int</span> opcion;
+
+        <span class="kw">do</span> {
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"--- CAJERO ---"</span>);
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"1) Consultar saldo"</span>);
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"2) Retirar"</span>);
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"3) Salir"</span>);
+            <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Elige: "</span>);
+
+            <span class="kw">while</span> (!scanner.<span class="mth">hasNextInt</span>()) {
+                scanner.<span class="mth">nextLine</span>();
+                <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Elige (1-3): "</span>);
+            }
+            opcion = scanner.<span class="mth">nextInt</span>();
+            scanner.<span class="mth">nextLine</span>();   <span class="cmt">// limpia el buffer</span>
+
+            <span class="kw">switch</span> (opcion) {
+                <span class="kw">case</span> <span class="num">1</span>:
+                    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Tu saldo es: $"</span> + saldo);
+                    <span class="kw">break</span>;
+                <span class="kw">case</span> <span class="num">2</span>:
+                    <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Monto a retirar: "</span>);
+
+                    <span class="kw">while</span> (!scanner.<span class="mth">hasNextInt</span>()) {
+                        scanner.<span class="mth">nextLine</span>();
+                        <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Monto a retirar (número): "</span>);
+                    }
+                    <span class="kw">int</span> monto = scanner.<span class="mth">nextInt</span>();
+                    scanner.<span class="mth">nextLine</span>();
+
+                    <span class="kw">if</span> (monto % <span class="num">100</span> != <span class="num">0</span>) {
+                        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"El monto debe ser múltiplo de 100"</span>);
+                    } <span class="kw">else if</span> (monto &gt; saldo) {
+                        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Saldo insuficiente"</span>);
+                    } <span class="kw">else</span> {
+                        saldo -= monto;
+                        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Retiro exitoso. Nuevo saldo: $"</span> + saldo);
+                    }
+                    <span class="kw">break</span>;
+                <span class="kw">case</span> <span class="num">3</span>:
+                    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Gracias por usar el cajero"</span>);
+                    <span class="kw">break</span>;
+                <span class="kw">default</span>:
+                    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Opción no válida"</span>);
+            }
+            <span class="cls">System</span>.out.<span class="mth">println</span>();
+        } <span class="kw">while</span> (opcion != <span class="num">3</span>);
+    }
+}</pre>
+      </div>
+      <p class="mb-0">Este reto es el más completo del manual hasta ahora. Combina:</p>
+      <ul class="mb-0">
+        <li><code>while</code> con dos condiciones (intentos y autenticado) para el login.</li>
+        <li>Bandera (<code>autenticado</code>), contador (<code>intentos</code>).</li>
+        <li><code>do while</code> con <code>switch</code> para el menú.</li>
+        <li>Validación con <code>hasNextInt</code> + <code>nextLine()</code> para limpiar el buffer.</li>
+        <li><code>if/else if/else</code> para la lógica de retiro.</li>
+        <li>Uso de <code>return</code> para salir del <code>main</code> si la autenticación falla.</li>
+      </ul>
+      <p class="mb-0 mt-2">Si puedes escribir esto por tu cuenta, ya tienes todas las piezas del manual (excepto arreglos) integradas. Es la prueba concreta de cuánto has construido.</p>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="reto-final-5">
+    <h2>Reto del Bloque 5</h2>
+
+    <p>Este reto pone a prueba todo lo aprendido con Scanner y parseo, integrando los bloques anteriores.</p>
+
+    <p><strong>Reto: registro de usuarios</strong></p>
+
+    <p>Escribe un programa que simule un registro simple de usuarios. El programa debe:</p>
+
+    <ol>
+      <li>Pedir cuántos usuarios se van a registrar (un número entre 1 y 10).</li>
+      <li>Para cada usuario, pedir:
+        <ul>
+          <li>Nombre completo (puede tener espacios).</li>
+          <li>Edad (entero entre 1 y 120).</li>
+          <li>Estatura en metros (decimal, entre 0.5 y 2.5).</li>
+          <li>Si está registrado como "premium" (sí/no).</li>
+        </ul>
+      </li>
+      <li>Al final, mostrar un resumen con:
+        <ul>
+          <li>Cantidad total de usuarios.</li>
+          <li>Edad promedio.</li>
+          <li>Estatura promedio.</li>
+          <li>Cantidad de usuarios premium.</li>
+          <li>Nombre del usuario de mayor edad.</li>
+        </ul>
+      </li>
+    </ol>
+
+    <p>Requisitos técnicos:</p>
+    <ul>
+      <li>Usa el patrón de leer con <code>nextLine()</code> y parsear para evitar el buffer sucio.</li>
+      <li>Valida cada dato antes de aceptarlo: la edad debe estar en rango, la estatura también, la respuesta premium debe ser interpretable como sí o no.</li>
+      <li>Si algún dato no es válido, pide de nuevo (sin salir del programa).</li>
+      <li>Usa un <code>for</code> para recorrer los usuarios.</li>
+      <li>Combina lo aprendido: <code>if</code>, <code>else if</code>, <code>while</code> para validación, contadores, acumuladores, etc.</li>
+    </ul>
+
+    <p>Antes de escribir el código, haz el análisis en español: ¿qué datos vas a guardar? ¿Cómo validas cada uno? ¿Cómo calculas los promedios? ¿Cómo encuentras el mayor? Escribe cada paso. Después tradúcelo a Java.</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">import</span> java.util.Scanner;
+
+<span class="kw">public class</span> <span class="cls">RegistroUsuarios</span> {
+    <span class="kw">public static void</span> <span class="mth">main</span>(<span class="cls">String</span>[] args) {
+        <span class="cls">Scanner</span> scanner = <span class="kw">new</span> <span class="cls">Scanner</span>(<span class="cls">System</span>.in);
+
+        <span class="cmt">// Cuántos usuarios (entre 1 y 10)</span>
+        <span class="kw">int</span> cantidad = <span class="num">0</span>;
+        <span class="kw">while</span> (cantidad &lt; <span class="num">1</span> || cantidad &gt; <span class="num">10</span>) {
+            <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"¿Cuántos usuarios (1-10)? "</span>);
+
+            <span class="kw">while</span> (!scanner.<span class="mth">hasNextInt</span>()) {
+                scanner.<span class="mth">nextLine</span>();
+                <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa un número (1-10): "</span>);
+            }
+            cantidad = scanner.<span class="mth">nextInt</span>();
+            scanner.<span class="mth">nextLine</span>();   <span class="cmt">// limpiar buffer</span>
+
+            <span class="kw">if</span> (cantidad &lt; <span class="num">1</span> || cantidad &gt; <span class="num">10</span>) {
+                <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Debe estar entre 1 y 10"</span>);
+            }
+        }
+
+        <span class="cmt">// Acumuladores</span>
+        <span class="kw">int</span> sumaEdades = <span class="num">0</span>;
+        <span class="kw">double</span> sumaEstaturas = <span class="num">0</span>;
+        <span class="kw">int</span> premium = <span class="num">0</span>;
+        <span class="kw">int</span> mayorEdad = -<span class="num">1</span>;
+        <span class="cls">String</span> nombreMayor = <span class="str">""</span>;
+
+        <span class="cmt">// Registro</span>
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= cantidad; i++) {
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"\n--- Usuario "</span> + i + <span class="str">" ---"</span>);
+
+            <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Nombre completo: "</span>);
+            <span class="cls">String</span> nombre = scanner.<span class="mth">nextLine</span>().<span class="mth">trim</span>();
+
+            <span class="kw">int</span> edad = <span class="num">0</span>;
+            <span class="kw">while</span> (edad &lt; <span class="num">1</span> || edad &gt; <span class="num">120</span>) {
+                <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Edad (1-120): "</span>);
+
+                <span class="kw">while</span> (!scanner.<span class="mth">hasNextInt</span>()) {
+                    scanner.<span class="mth">nextLine</span>();
+                    <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa un número: "</span>);
+                }
+                edad = scanner.<span class="mth">nextInt</span>();
+                scanner.<span class="mth">nextLine</span>();
+
+                <span class="kw">if</span> (edad &lt; <span class="num">1</span> || edad &gt; <span class="num">120</span>) {
+                    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Edad fuera de rango"</span>);
+                }
+            }
+
+            <span class="kw">double</span> estatura = <span class="num">0</span>;
+            <span class="kw">while</span> (estatura &lt; <span class="num">0.5</span> || estatura &gt; <span class="num">2.5</span>) {
+                <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Estatura en metros (0.5-2.5): "</span>);
+
+                <span class="kw">while</span> (!scanner.<span class="mth">hasNextDouble</span>()) {
+                    scanner.<span class="mth">nextLine</span>();
+                    <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa un decimal: "</span>);
+                }
+                estatura = scanner.<span class="mth">nextDouble</span>();
+                scanner.<span class="mth">nextLine</span>();
+
+                <span class="kw">if</span> (estatura &lt; <span class="num">0.5</span> || estatura &gt; <span class="num">2.5</span>) {
+                    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Estatura fuera de rango"</span>);
+                }
+            }
+
+            <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"¿Es premium? (si/no): "</span>);
+            <span class="cls">String</span> resp = scanner.<span class="mth">nextLine</span>().<span class="mth">trim</span>().<span class="mth">toLowerCase</span>();
+            <span class="kw">boolean</span> esPremium = resp.<span class="mth">equals</span>(<span class="str">"si"</span>) || resp.<span class="mth">equals</span>(<span class="str">"sí"</span>) || resp.<span class="mth">equals</span>(<span class="str">"s"</span>);
+
+            <span class="cmt">// Acumular</span>
+            sumaEdades += edad;
+            sumaEstaturas += estatura;
+            <span class="kw">if</span> (esPremium) premium++;
+            <span class="kw">if</span> (edad &gt; mayorEdad) {
+                mayorEdad = edad;
+                nombreMayor = nombre;
+            }
+        }
+
+        <span class="cmt">// Reporte</span>
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"\n--- RESUMEN ---"</span>);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Total de usuarios: "</span> + cantidad);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Edad promedio: "</span> + ((<span class="kw">double</span>) sumaEdades / cantidad));
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Estatura promedio: "</span> + (sumaEstaturas / cantidad));
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Usuarios premium: "</span> + premium);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Usuario de mayor edad: "</span> + nombreMayor + <span class="str">" ("</span> + mayorEdad + <span class="str">" años)"</span>);
+    }
+}</pre>
+      </div>
+      <p class="mb-0">Este programa combina todo lo del manual hasta ahora. Fíjate en cómo cada lectura crítica tiene su <code>while</code> de validación adentro (con <code>hasNextInt</code> o <code>hasNextDouble</code>), y cómo cada <code>nextAlgo()</code> va seguido de un <code>nextLine()</code> para limpiar el buffer. Es el patrón más robusto, y aunque parezca repetitivo, es el que menos sorpresas da cuando el usuario se equivoca.</p>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="resumen-5">
+    <h2>Lo que llevas construido</h2>
+
+    <p>Al terminar este bloque, tienes estas piezas nuevas:</p>
+
+    <ul>
+      <li><strong>Scanner</strong> — la pieza que le permite a tu programa leer datos del usuario.</li>
+      <li><strong>Crear un Scanner</strong> — <code>import</code>, <code>new Scanner(System.in)</code>.</li>
+      <li><strong>Métodos de lectura</strong> — <code>nextInt()</code>, <code>nextDouble()</code>, <code>nextLine()</code>, <code>next()</code>, <code>nextBoolean()</code>.</li>
+      <li><strong>El buffer de entrada</strong> — cómo funciona por dentro, y por qué <code>nextInt()</code> + <code>nextLine()</code> falla.</li>
+      <li><strong>Las tres soluciones al buffer sucio</strong> — <code>nextLine()</code> extra, leer todo con <code>nextLine()</code> + parsear, o usar <code>next()</code>.</li>
+      <li><strong>InputMismatchException</strong> — qué es, por qué ocurre, cómo evitarla.</li>
+      <li><strong>Parseo</strong> — <code>Integer.parseInt</code>, <code>Double.parseDouble</code>, <code>Boolean.parseBoolean</code>, y sus variantes.</li>
+      <li><strong>Scanner vs parseo</strong> — cuándo usar cada uno.</li>
+      <li><strong>Validación con hasNext</strong> — <code>hasNextInt()</code>, <code>hasNextDouble()</code>, y el patrón de pedir hasta que sea válido.</li>
+    </ul>
+
+    <p>Y estas son las piezas que ya tenías y ahora usas con la entrada del usuario:</p>
+
+    <ul>
+      <li>Variables, tipos, operadores (Bloque 1).</li>
+      <li><code>if</code>, <code>else</code>, <code>else if</code>, operadores lógicos (Bloque 2).</li>
+      <li><code>switch</code>, <code>while</code>, <code>do while</code> (Bloque 3).</li>
+      <li><code>for</code>, <code>break</code>, <code>continue</code>, ciclos anidados (Bloque 4).</li>
+    </ul>
+
+    <p>Con Scanner, tus programas ya no son solo cálculos fijos: son <em>interactivos</em>. Pueden responder a lo que el usuario escribe. Eso es un cambio enorme: es la diferencia entre un ejercicio de clase y una herramienta que alguien podría usar.</p>
+
+    <p>Un punto que quiero mencionar antes de cerrar el bloque: el error del buffer sucio (y todo lo que viste sobre cómo funciona) es <strong>el obstáculo más universal de Java</strong>. Prácticamente todo el que aprende Java se topa con él. La primera vez, parece magia negra. La segunda, lo reconoces. La tercera, lo esquivas sin pensar. Es un ejemplo perfecto de cómo las piezas se construyen con la práctica, no vienen de fábrica.</p>
+
+    <p>El siguiente bloque (y último) introduce <strong>arreglos</strong>. Es la pieza que te permite guardar muchos valores del mismo tipo en una sola variable, y combinarlos con los ciclos que ya sabes. Con arreglos, tu repertorio queda casi completo, y vas a poder escribir programas que manejan datos de verdad.</p>
+
+    <div class="caja caja-idea">
+      <p class="mb-0">Antes de pasar al Bloque 6, asegúrate de resolver al menos un ejercicio de cada nivel. Y si el error del buffer sucio te sigue pareciendo raro, escríbelo tú mismo varias veces hasta que se vuelva obvio. Es una pieza que vas a usar siempre, y vale la pena dominarla.</p>
+    </div>
+  </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.querySelectorAll('.bloque-codigo').forEach(function (bloque) {
+    var btn = bloque.querySelector('.btn-copiar');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var pre = bloque.querySelector('pre');
+      var texto = pre.innerText;
+      navigator.clipboard.writeText(texto).then(function () {
+        var original = btn.textContent;
+        btn.textContent = '¡Copiado!';
+        setTimeout(function () { btn.textContent = original; }, 1200);
+      });
+    });
+  });
+
+  var html = document.documentElement;
+  var btnTema = document.getElementById('btnTema');
+  var temaGuardado = localStorage.getItem('temaManual') || 'light';
+  aplicarTema(temaGuardado);
+
+  btnTema.addEventListener('click', function () {
+    var actual = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+    aplicarTema(actual);
+    localStorage.setItem('temaManual', actual);
+  });
+
+  function aplicarTema(tema) {
+    html.setAttribute('data-bs-theme', tema);
+    btnTema.innerHTML = tema === 'dark'
+      ? '<i class="bi bi-sun"></i>'
+      : '<i class="bi bi-moon-stars"></i>';
+  }
+
+  var sidebar = document.getElementById('sidebar');
+  var btnMenu = document.getElementById('btnMenu');
+  var btnCerrarMenu = document.getElementById('btnCerrarMenu');
+
+  function cerrarMenu() {
+    sidebar.classList.remove('abierto');
+    document.body.classList.remove('menu-abierto');
+    btnMenu.setAttribute('aria-expanded', 'false');
+  }
+
+  btnMenu.addEventListener('click', function () {
+    var abierto = sidebar.classList.toggle('abierto');
+    document.body.classList.toggle('menu-abierto', abierto);
+    btnMenu.setAttribute('aria-expanded', String(abierto));
+  });
+  btnCerrarMenu.addEventListener('click', cerrarMenu);
+  sidebar.querySelectorAll('a').forEach(function (enlace) {
+    enlace.addEventListener('click', cerrarMenu);
+  });
+
+  var enlaces = document.querySelectorAll('.sidebar .nav-link');
+  var secciones = [];
+  enlaces.forEach(function (a) {
+    var id = a.getAttribute('href');
+    if (id && id.startsWith('#')) {
+      var el = document.querySelector(id);
+      if (el) secciones.push({ el: el, link: a });
+    }
+  });
+
+  function actualizarActivo() {
+    var y = window.scrollY + 120;
+    var actual = null;
+    secciones.forEach(function (s) {
+      if (s.el.offsetTop <= y) actual = s;
+    });
+    enlaces.forEach(function (a) { a.classList.remove('active'); });
+    if (actual) actual.link.classList.add('active');
+  }
+  window.addEventListener('scroll', actualizarActivo);
+  window.addEventListener('load', actualizarActivo);
+</script>
+<script src="../../../public/java-manual.js"></script>
+</body>
+</html>

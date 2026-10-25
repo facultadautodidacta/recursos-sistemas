@@ -1,0 +1,1947 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual de Java — Bloque 6: Arreglos</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+  :root {
+    --acento: #f89820;
+    --acento-2: #5382a1;
+    --code-bg: #1e1e2e;
+    --code-fg: #cdd6f4;
+  }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.7;
+    scroll-behavior: smooth;
+  }
+  .sidebar {
+    position: fixed; top: 0; left: 0;
+    width: 280px; height: 100vh;
+    overflow-y: auto; padding: 1rem;
+    background: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+    z-index: 1030;
+  }
+  [data-bs-theme="dark"] .sidebar { background: #16181d; border-right-color: #2a2d34; }
+  .sidebar h6 {
+    text-transform: uppercase; font-size: .75rem;
+    letter-spacing: .05em; color: #6c757d; margin-top: 1.25rem;
+  }
+  .sidebar .nav-link {
+    padding: .35rem .6rem; border-radius: .35rem;
+    font-size: .92rem; color: inherit;
+  }
+  .sidebar .nav-link:hover { background: rgba(248,152,32,.12); }
+  .sidebar .nav-link.active { background: var(--acento); color: #fff !important; font-weight: 600; }
+  .contenido { margin-left: 280px; padding: 2.5rem 3rem 6rem; max-width: 900px; }
+  .btn-menu, .btn-cerrar-menu { display: none; }
+  @media (max-width: 991px) {
+    .btn-menu {
+      display: inline-flex; position: fixed; top: 1rem; left: 1rem;
+      z-index: 1040; align-items: center; gap: .4rem;
+    }
+    .sidebar {
+      position: fixed; top: 0; left: 0; width: min(88vw, 320px); height: 100vh;
+      transform: translateX(-100%); transition: transform .2s ease;
+      box-shadow: 0 0 1.5rem rgba(0, 0, 0, .2);
+    }
+    .sidebar.abierto { transform: translateX(0); }
+    .btn-cerrar-menu { display: inline-flex; float: right; margin-top: -.25rem; }
+    body.menu-abierto { overflow: hidden; }
+    .contenido { margin-left: 0; padding: 1.5rem; }
+  }
+  h1, h2, h3 { font-weight: 700; }
+  h2 { margin-top: 3.5rem; padding-bottom: .5rem; border-bottom: 3px solid var(--acento); }
+  h3 { margin-top: 2.2rem; color: var(--acento-2); }
+  [data-bs-theme="dark"] h3 { color: #8ab4d6; }
+
+  .bloque-codigo {
+    position: relative; margin: 1.25rem 0;
+    border-radius: .5rem; overflow: hidden;
+    background: var(--code-bg);
+  }
+  .bloque-codigo pre {
+    margin: 0; padding: 1rem 1rem .9rem;
+    color: var(--code-fg); font-size: .9rem; line-height: 1.55;
+    overflow-x: auto;
+    font-family: "JetBrains Mono", Consolas, Menlo, monospace;
+  }
+  .bloque-codigo .btn-copiar {
+    position: absolute; top: .5rem; right: .5rem;
+    background: rgba(255,255,255,.08); color: #cdd6f4;
+    border: 1px solid rgba(255,255,255,.15);
+    font-size: .75rem; padding: .2rem .55rem;
+    border-radius: .3rem; opacity: 0; transition: opacity .15s;
+  }
+  .bloque-codigo:hover .btn-copiar { opacity: 1; }
+  .bloque-codigo .btn-copiar:hover { background: rgba(248,152,32,.3); }
+  .kw  { color: #cba6f7; }
+  .str { color: #a6e3a1; }
+  .num { color: #fab387; }
+  .cmt { color: #6c7086; font-style: italic; }
+  .cls { color: #f9e2af; }
+  .mth { color: #89b4fa; }
+
+  .caja { border-radius: .5rem; padding: 1rem 1.15rem; margin: 1.25rem 0; border-left: 5px solid; }
+  .caja-detente   { background: #fff8e6; border-color: #f0ad4e; }
+  .caja-error     { background: #fdecec; border-color: #dc3545; }
+  .caja-protocolo { background: #eef5ff; border-color: #4a7cff; }
+  .caja-idea      { background: #eefaf1; border-color: #28a745; }
+  .caja-anticipa  { background: #f3e8ff; border-color: #a855f7; }
+  [data-bs-theme="dark"] .caja-detente   { background: #2e2612; }
+  [data-bs-theme="dark"] .caja-error     { background: #2e1618; }
+  [data-bs-theme="dark"] .caja-protocolo { background: #14202e; }
+  [data-bs-theme="dark"] .caja-idea      { background: #12291b; }
+  [data-bs-theme="dark"] .caja-anticipa  { background: #231531; }
+  .caja h5 { margin-top: 0; font-size: 1rem; font-weight: 700; }
+  .caja p:last-child, .caja ul:last-child, .caja ol:last-child { margin-bottom: 0; }
+
+  .nivel {
+    display: inline-block; padding: .15rem .55rem;
+    border-radius: 999px; font-size: .72rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .03em; margin-right: .4rem;
+  }
+  .nivel-reconocer { background:#dbeafe; color:#1e40af; }
+  .nivel-completar { background:#dcfce7; color:#166534; }
+  .nivel-modificar { background:#fef3c7; color:#92400e; }
+  .nivel-construir { background:#fae8ff; color:#86198f; }
+  .nivel-combinar  { background:#ffe4e6; color:#9f1239; }
+  .nivel-crear     { background:#e0e7ff; color:#3730a3; }
+
+  .simulacion table { font-size: .9rem; }
+  .simulacion th { background: #f1f3f5; }
+  [data-bs-theme="dark"] .simulacion th { background: #23262e; }
+
+  details.solucion {
+    margin: .75rem 0; border: 1px solid #dee2e6;
+    border-radius: .4rem; padding: .6rem .9rem; background: #fbfbfb;
+  }
+  [data-bs-theme="dark"] details.solucion { background: #16181d; border-color: #2a2d34; }
+  details.solucion summary { cursor: pointer; font-weight: 600; color: #495057; }
+  [data-bs-theme="dark"] details.solucion summary { color: #adb5bd; }
+
+  .btn-tema { position: fixed; top: 1rem; right: 1rem; z-index: 1040; }
+
+  .portada {
+    background: linear-gradient(135deg, var(--acento) 0%, var(--acento-2) 100%);
+    color: #fff; padding: 3rem 2rem; border-radius: 1rem; margin-bottom: 2rem;
+  }
+  .portada h1 { font-size: 2.2rem; }
+
+  .flujo {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: .5rem;
+    padding: 1rem 1.25rem;
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: .85rem;
+    line-height: 1.5;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  [data-bs-theme="dark"] .flujo { background: #16181d; border-color: #2a2d34; }
+
+  /* Casilleros visuales del arreglo */
+  .casilleros {
+    display: flex;
+    gap: .35rem;
+    margin: 1.25rem 0;
+    flex-wrap: wrap;
+  }
+  .casillero {
+    border: 2px solid var(--acento);
+    border-radius: .4rem;
+    padding: .5rem .8rem;
+    min-width: 60px;
+    text-align: center;
+    background: #fff8e6;
+    font-family: "JetBrains Mono", monospace;
+  }
+  .casillero .indice {
+    display: block;
+    font-size: .7rem;
+    color: #92400e;
+    margin-bottom: .2rem;
+  }
+  .casillero .valor {
+    display: block;
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+  [data-bs-theme="dark"] .casillero {
+    background: #2e2612;
+    border-color: var(--acento);
+  }
+  [data-bs-theme="dark"] .casillero .indice { color: #fab387; }
+
+  /* Mensaje de "no es el final" */
+  .aviso-continuidad {
+    background: #f3e8ff;
+    border-left: 5px solid #a855f7;
+    border-radius: .5rem;
+    padding: 1rem 1.15rem;
+    margin: 1.25rem 0;
+  }
+  [data-bs-theme="dark"] .aviso-continuidad { background: #231531; }
+</style>
+    <link rel="stylesheet" href="../../../public/java-manual.css">
+</head>
+<body class="java-manual">
+
+<button class="btn btn-outline-secondary btn-sm btn-tema" id="btnTema" title="Cambiar tema">
+  <i class="bi bi-moon-stars"></i>
+</button>
+
+<button class="btn btn-primary btn-sm btn-menu" id="btnMenu" type="button"
+        aria-controls="sidebar" aria-expanded="false">
+  <i class="bi bi-list"></i>
+  <span>Menú</span>
+</button>
+
+<nav class="sidebar" id="sidebar" aria-label="Navegación del bloque 6">
+  <div class="px-2 pb-2 border-bottom">
+    <button class="btn btn-outline-secondary btn-sm btn-cerrar-menu" id="btnCerrarMenu"
+            type="button" aria-label="Cerrar menú">
+      <i class="bi bi-x-lg"></i>
+    </button>
+    <strong style="color:var(--acento)">Manual Java</strong><br>
+    <small class="text-secondary">Bloque 6 · Arreglos</small>
+  </div>
+  <a class="nav-link mt-2" href="index.html">
+    <i class="bi bi-house-door me-1"></i> Volver al índice
+  </a>
+
+  <h6>Antes de empezar</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#bienvenida-6">Bienvenida al Bloque 6</a></li>
+    <li><a class="nav-link" href="#que-problema-resuelven">¿Qué problema resuelven los arreglos?</a></li>
+  </ul>
+
+  <h6>La pieza básica</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#declarar">Declarar y crear un arreglo</a></li>
+    <li><a class="nav-link" href="#acceso-indice">Acceder con índice</a></li>
+    <li><a class="nav-link" href="#indice-cero">El índice empieza en 0</a></li>
+    <li><a class="nav-link" href="#length">El tamaño: <code>.length</code></a></li>
+    <li><a class="nav-link" href="#inicializacion-directa">Inicialización directa</a></li>
+  </ul>
+
+  <h6>Recorrer un arreglo</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#recorrido-basico">Recorrido con <code>for</code></a></li>
+    <li><a class="nav-link" href="#simulacion-recorrido">Simulación paso a paso</a></li>
+    <li><a class="nav-link" href="#for-each">El <code>for-each</code> (opcional)</a></li>
+  </ul>
+
+  <h6>Operaciones comunes</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#sumar">Sumar y promediar</a></li>
+    <li><a class="nav-link" href="#maximo-minimo">Máximo y mínimo</a></li>
+    <li><a class="nav-link" href="#buscar">Buscar un valor</a></li>
+    <li><a class="nav-link" href="#contar">Contar los que cumplen algo</a></li>
+    <li><a class="nav-link" href="#invertir">Invertir y copiar</a></li>
+  </ul>
+
+  <h6>Errores clásicos</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#index-error">El error del "uno de más"</a></li>
+    <li><a class="nav-link" href="#otros-errores">Otros errores comunes</a></li>
+  </ul>
+
+  <h6>Arreglos y Scanner</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#arreglos-scanner">Leer N valores del usuario</a></li>
+    <li><a class="nav-link" href="#arreglos-scanner-validados">Con validación</a></li>
+  </ul>
+
+  <h6>Un paso más allá</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#arreglos-string">Arreglos de <code>String</code></a></li>
+    <li><a class="nav-link" href="#arreglos-bidimensionales">Arreglos bidimensionales (opcional)</a></li>
+  </ul>
+
+  <h6>Aplicación</h6>
+  <ul class="nav flex-column">
+    <li><a class="nav-link" href="#ejemplos-6">Ejemplos progresivos</a></li>
+    <li><a class="nav-link" href="#ejercicios-6">Ejercicios</a></li>
+    <li><a class="nav-link" href="#proyecto-integrador">Proyecto integrador</a></li>
+    <li><a class="nav-link" href="#piezas-construidas">Las piezas que construiste</a></li>
+    <li><a class="nav-link" href="#lo-que-sigue">Lo que sigue</a></li>
+  </ul>
+</nav>
+
+<main class="contenido">
+
+  <div class="portada">
+    <h1>Arreglos</h1>
+    <p class="mb-0 fs-5">Bloque 6 — Guardar varios valores del mismo tipo</p>
+    <p class="mb-0"><small>Hasta ahora cada variable guardaba un dato. Aquí aprendes a guardar muchos.</small></p>
+  </div>
+
+  <!-- ============================================================ -->
+  <section id="bienvenida-6">
+    <h2>Bienvenida al Bloque 6</h2>
+
+    <p>Hasta este punto del manual, cada variable ha guardado <strong>un solo valor</strong>. Cuando escribiste <code>int edad = 20;</code> o <code>String nombre = "Ana";</code>, esa variable tenía un único dato dentro. Si querías guardar cinco edades, tenías que declarar cinco variables distintas: <code>edad1</code>, <code>edad2</code>, <code>edad3</code>, <code>edad4</code>, <code>edad5</code>. Y si querías guardar cien, te tocaba escribir cien variables. Eso no escala.</p>
+
+    <p>Este bloque introduce la pieza que resuelve eso: los <strong>arreglos</strong>. Un arreglo es una variable que guarda <em>muchos valores del mismo tipo</em>, uno tras otro, con un número (un índice) para acceder a cada uno. Es como pasar de tener "una caja" a tener "una fila de casilleros numerados".</p>
+
+    <p>Vas a aprender:</p>
+
+    <ul>
+      <li>Cómo declarar, crear y recorrer arreglos.</li>
+      <li>El <strong>índice 0</strong>, que es el segundo obstáculo universal de Java para principiantes (junto con el buffer sucio del Bloque 5).</li>
+      <li>Las operaciones más comunes sobre arreglos: sumar, promediar, encontrar máximo y mínimo, buscar, contar.</li>
+      <li>Cómo combinar arreglos con <code>for</code> y con Scanner.</li>
+      <li>Los errores clásicos: el "uno de más", el acceso fuera de rango, olvidar el tamaño.</li>
+    </ul>
+
+    <p>Al final del bloque vas a escribir un <strong>proyecto integrador</strong> que combina todo lo aprendido en el manual hasta aquí: leer datos con Scanner, guardarlos en un arreglo, recorrerlos con <code>for</code>, tomar decisiones con <code>if</code>, calcular resultados. Es la primera vez que vas a escribir un programa que se parece a algo real.</p>
+
+    <p>Y al cerrar el bloque vas a hacer algo distinto a lo de bloques anteriores: vas a mirar hacia atrás y contar las piezas que construiste. No como ejercicio motivacional, sino como observación concreta de todo lo que tienes en la mano ahora.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="que-problema-resuelven">
+    <h2>¿Qué problema resuelven los arreglos?</h2>
+
+    <p>Antes de tocar sintaxis, quiero que sientas el problema. Supón que quieres guardar las notas de 5 estudiantes y después calcular el promedio. Con lo que sabes hasta ahora, escribirías algo así:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">double</span> nota1 = <span class="num">8.5</span>;
+<span class="kw">double</span> nota2 = <span class="num">7.0</span>;
+<span class="kw">double</span> nota3 = <span class="num">9.2</span>;
+<span class="kw">double</span> nota4 = <span class="num">6.5</span>;
+<span class="kw">double</span> nota5 = <span class="num">8.0</span>;
+
+<span class="kw">double</span> promedio = (nota1 + nota2 + nota3 + nota4 + nota5) / <span class="num">5</span>;</pre>
+    </div>
+
+    <p>Funciona. Pero ahora imagina que el profesor tiene 40 estudiantes. Tendrías que declarar 40 variables, y escribir una suma con 40 términos. Y si el número de estudiantes cambia cada semestre, tienes que reescribir todo. Eso no es una solución escalable.</p>
+
+    <p>La cosa empeora si los datos vienen del usuario. Si no sabes cuántos son hasta que el usuario te lo dice, no puedes declarar las variables de antemano. Necesitas <em>algo</em> que te permita guardar un número variable de datos del mismo tipo, sin tener que escribir una variable por cada uno.</p>
+
+    <p>Ese "algo" es el arreglo. En lugar de tener cinco variables separadas, tienes una sola variable que contiene cinco casilleros. En lugar de escribir <code>nota1 + nota2 + nota3 + nota4 + nota5</code>, escribes un <code>for</code> que recorra el arreglo y sume. En lugar de saber de antemano cuántos son, usas <code>.length</code> para saberlo cuando lo necesites.</p>
+
+    <h3>Antes de Java (situación cotidiana)</h3>
+
+    <p>Piensa en los casilleros de un gimnasio. Hay una fila de casilleros, todos del mismo tamaño, cada uno con un número (el índice). Tú abres el casillero 3 y encuentras lo que guardaste. Después abres el 5 y encuentras otra cosa. No importa qué haya dentro: lo importante es que hay un número único para cada casillero, y que todos los casilleros son iguales (mismo tamaño, mismo tipo de contenido).</p>
+
+    <p>Un arreglo es exactamente eso: una fila de casilleros numerados, todos del mismo tipo, con un índice para acceder a cada uno. El "tipo" es lo que le dice a Java cuánto espacio reservar y qué se puede guardar dentro. La "posición" es el índice, que va del 0 al tamaño menos uno.</p>
+
+    <h3>La idea en español</h3>
+
+    <p>Cuando necesites guardar <strong>muchos valores del mismo tipo</strong>, y el número no es enorme (no cientos de miles), probablemente quieras un arreglo. Si necesitas guardar valores de tipos distintos, o si el número cambia mucho durante la ejecución, los arreglos no son la herramienta adecuada (verías colecciones como <code>ArrayList</code>, que están fuera del alcance de esta primera parte del manual).</p>
+
+    <p>La idea central: <strong>un arreglo es una variable con muchos casilleros, todos del mismo tipo, accesibles por índice</strong>. Y esa estructura te permite recorrerlos, buscar en ellos, calcular cosas sobre ellos, etc., sin escribir código repetido por cada elemento.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="declarar">
+    <h2>Declarar y crear un arreglo</h2>
+
+    <p>Un arreglo en Java se declara indicando el <strong>tipo</strong> de sus elementos seguido de <strong>corchetes</strong> <code>[]</code>, y el nombre de la variable:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] edades;</pre>
+    </div>
+
+    <p>Eso declara una variable llamada <code>edades</code> que puede guardar un arreglo de enteros. Pero todavía no tiene elementos: es solo la declaración. Para crearlo con un tamaño específico, se usa <code>new</code>:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] edades = <span class="kw">new</span> <span class="kw">int</span>[<span class="num">5</span>];</pre>
+    </div>
+
+    <p>Esta línea hace tres cosas a la vez:</p>
+
+    <ul>
+      <li>Declara una variable <code>edades</code> que es un arreglo de <code>int</code>.</li>
+      <li>Crea un arreglo con espacio para 5 enteros.</li>
+      <li>Guarda la referencia al arreglo en la variable.</li>
+    </ul>
+
+    <p>Al crearlo, los 5 casilleros se inicializan automáticamente con el valor por defecto del tipo:</p>
+
+    <ul>
+      <li><code>int</code>, <code>long</code>, <code>short</code>, <code>byte</code> → <code>0</code></li>
+      <li><code>double</code>, <code>float</code> → <code>0.0</code></li>
+      <li><code>boolean</code> → <code>false</code></li>
+      <li><code>char</code> → <code>'\u0000'</code> (carácter nulo)</li>
+      <li>Cualquier objeto (incluyendo <code>String</code>) → <code>null</code></li>
+    </ul>
+
+    <p>Un arreglo de 5 enteros recién creado se ve así:</p>
+
+    <div class="casilleros">
+      <div class="casillero"><span class="indice">[0]</span><span class="valor">0</span></div>
+      <div class="casillero"><span class="indice">[1]</span><span class="valor">0</span></div>
+      <div class="casillero"><span class="indice">[2]</span><span class="valor">0</span></div>
+      <div class="casillero"><span class="indice">[3]</span><span class="valor">0</span></div>
+      <div class="casillero"><span class="indice">[4]</span><span class="valor">0</span></div>
+    </div>
+
+    <p>Cada casillero tiene un número, que va del 0 al 4. Y cada uno guarda un <code>0</code> mientras no le asignes otro valor.</p>
+
+    <h3>Forma alternativa de declaración</h3>
+
+    <p>Java también acepta los corchetes después del nombre, pero es menos común:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] edades;      <span class="cmt">// ← forma preferida</span>
+<span class="kw">int</span> edades[];      <span class="cmt">// ← funciona, pero menos común</span></pre>
+    </div>
+
+    <p>En este manual usamos siempre la primera forma (<code>int[]</code>), porque es más clara: dice "el tipo es <em>arreglo de int</em>". La segunda forma sugiere que el tipo es <code>int</code> y que la variable es un arreglo, lo cual es confuso.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="acceso-indice">
+    <h2>Acceder a un elemento con el índice</h2>
+
+    <p>Para leer o modificar un elemento del arreglo, se usa el nombre del arreglo seguido del <strong>índice entre corchetes</strong>:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] edades = <span class="kw">new</span> <span class="kw">int</span>[<span class="num">5</span>];
+
+edades[<span class="num">0</span>] = <span class="num">20</span>;   <span class="cmt">// guarda 20 en el primer casillero</span>
+edades[<span class="num">1</span>] = <span class="num">19</span>;   <span class="cmt">// guarda 19 en el segundo</span>
+edades[<span class="num">2</span>] = <span class="num">21</span>;
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(edades[<span class="num">0</span>]);   <span class="cmt">// muestra 20</span>
+<span class="cls">System</span>.out.<span class="mth">println</span>(edades[<span class="num">2</span>]);   <span class="cmt">// muestra 21</span>
+
+edades[<span class="num">0</span>] = <span class="num">25</span>;               <span class="cmt">// cambia el primer casillero</span>
+<span class="cls">System</span>.out.<span class="mth">println</span>(edades[<span class="num">0</span>]);   <span class="cmt">// ahora muestra 25</span></pre>
+    </div>
+
+    <p>Fíjate en que el <code>[]</code> después del nombre <em>no</em> es un tipo: es un acceso por índice. <code>edades[0]</code> significa "el casillero en la posición 0 del arreglo <code>edades</code>". Funciona tanto para leer (asignándolo a otra variable o usándolo en una expresión) como para escribir (asignándole un valor).</p>
+
+    <p>Después de las tres asignaciones del ejemplo, el arreglo se ve así:</p>
+
+    <div class="casilleros">
+      <div class="casillero"><span class="indice">[0]</span><span class="valor">20</span></div>
+      <div class="casillero"><span class="indice">[1]</span><span class="valor">19</span></div>
+      <div class="casillero"><span class="indice">[2]</span><span class="valor">21</span></div>
+      <div class="casillero"><span class="indice">[3]</span><span class="valor">0</span></div>
+      <div class="casillero"><span class="indice">[4]</span><span class="valor">0</span></div>
+    </div>
+
+    <p>Y después de la reasignación de <code>edades[0] = 25</code>:</p>
+
+    <div class="casilleros">
+      <div class="casillero"><span class="indice">[0]</span><span class="valor">25</span></div>
+      <div class="casillero"><span class="indice">[1]</span><span class="valor">19</span></div>
+      <div class="casillero"><span class="indice">[2]</span><span class="valor">21</span></div>
+      <div class="casillero"><span class="indice">[3]</span><span class="valor">0</span></div>
+      <div class="casillero"><span class="indice">[4]</span><span class="valor">0</span></div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="indice-cero">
+    <h2>El índice empieza en 0 (el segundo obstáculo universal)</h2>
+
+    <p>Aquí llegamos al detalle más importante del bloque, y al segundo obstáculo universal de Java para principiantes (después del buffer sucio del Bloque 5). El primer elemento de un arreglo está en el índice <strong>0</strong>, no en el 1.</p>
+
+    <p>Esto contradice la forma en que contamos en la vida cotidiana. Cuando cuentas casilleros, empiezas en "el primero", que intuitivamente asignarías al número 1. Cuando cuentas pisos de un edificio, empiezas en "el primer piso" o "la planta baja". En casi toda la vida diaria, el primer elemento tiene número 1.</p>
+
+    <p>En Java (y en la mayoría de los lenguajes de programación), el primer elemento de un arreglo tiene índice <strong>0</strong>. Un arreglo de tamaño 5 tiene elementos en las posiciones <code>0</code>, <code>1</code>, <code>2</code>, <code>3</code> y <code>4</code>. <strong>No hay posición 5</strong>.</p>
+
+    <p>Veamos un arreglo con valores concretos, para fijar la idea:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] numeros = <span class="kw">new</span> <span class="kw">int</span>[<span class="num">5</span>];
+numeros[<span class="num">0</span>] = <span class="num">10</span>;
+numeros[<span class="num">1</span>] = <span class="num">20</span>;
+numeros[<span class="num">2</span>] = <span class="num">30</span>;
+numeros[<span class="num">3</span>] = <span class="num">40</span>;
+numeros[<span class="num">4</span>] = <span class="num">50</span>;</pre>
+    </div>
+
+    <div class="casilleros">
+      <div class="casillero"><span class="indice">[0]</span><span class="valor">10</span></div>
+      <div class="casillero"><span class="indice">[1]</span><span class="valor">20</span></div>
+      <div class="casillero"><span class="indice">[2]</span><span class="valor">30</span></div>
+      <div class="casillero"><span class="indice">[3]</span><span class="valor">40</span></div>
+      <div class="casillero"><span class="indice">[4]</span><span class="valor">50</span></div>
+    </div>
+
+    <p>El "primer elemento" es <code>numeros[0]</code>, que vale 10. El "último elemento" es <code>numeros[4]</code>, que vale 50. El tamaño es 5, y la última posición válida es 4 (tamaño - 1).</p>
+
+    <div class="caja caja-anticipa">
+      <h5>Antes de que te pase: este error lo va a cometer todo el mundo</h5>
+      <p class="mb-0">Si estás pensando "¿por qué no empiezan en 1, no sería más simple?", la respuesta corta es: por razones históricas y matemáticas que no vale la pena discutir ahora. Lo que importa es que el índice empieza en 0, y eso hay que interiorizarlo. Que el primer elemento sea 0 y no 1 contradice un hábito de conteo que arrastramos desde la infancia, así que al principio vas a cometer errores de "uno de más" o "uno de menos". No es falta de atención: es literalmente <em>el tipo de cosa</em> que confunde al cerebro humano cuando se encuentra con una convención que contradice sus hábitos. A todos nos pasó. Con práctica, en algún momento deja de ser un problema. Mientras tanto, si te sale un error de índice fuera de rango, ya sabes por dónde buscar.</p>
+    </div>
+
+    <h3>El detalle que se vuelve trampa: <code>.length</code> no es el último índice</h3>
+
+    <p><code>.length</code> (que veremos en la siguiente sección) te dice <em>cuántos elementos hay</em>, no <em>cuál es el último índice</em>. Si <code>numeros.length</code> es 5, entonces el último índice válido es 4, no 5. Esa diferencia de 1 es el origen de la mayoría de los errores con arreglos.</p>
+
+    <div class="flujo">Si length = 5     → índices válidos: 0, 1, 2, 3, 4    → último índice: length - 1 = 4
+Si length = 10    → índices válidos: 0 a 9           → último índice: length - 1 = 9
+Si length = 100   → índices válidos: 0 a 99          → último índice: length - 1 = 99</div>
+
+    <p>Regla general: cuando recorras un arreglo con un <code>for</code>, la condición correcta casi siempre es <code>i &lt; arreglo.length</code>, <strong>no</strong> <code>i &lt;= arreglo.length</code>. Lo vas a ver en la sección de recorrido con más detalle.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="length">
+    <h2>El tamaño de un arreglo: <code>.length</code></h2>
+
+    <p>Todo arreglo en Java tiene un "atributo" llamado <code>length</code> que te dice cuántos elementos puede guardar. Se accede con un punto y sin paréntesis (importante: <em>sin paréntesis</em>, a diferencia de los métodos):</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] numeros = <span class="kw">new</span> <span class="kw">int</span>[<span class="num">5</span>];
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(numeros.length);   <span class="cmt">// 5</span></pre>
+    </div>
+
+    <p>El <code>.length</code> es <strong>de solo lectura</strong>: no se puede cambiar. Una vez que un arreglo se crea con un tamaño, ese tamaño es fijo. Si necesitas uno más grande, tienes que crear un arreglo nuevo y copiar los valores.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Esto NO compila: length es de solo lectura</span>
+numeros.length = <span class="num">10</span>;</pre>
+    </div>
+
+    <p>Este detalle es importante: en Java, los arreglos son <em>estáticos</em>. Tienen un tamaño fijo desde que se crean. Si necesitas una estructura que crezca y se encoja dinámicamente, usarías <code>ArrayList</code> (que está fuera del alcance de esta primera parte del manual, pero mencionamos que existe).</p>
+
+    <h3>Uso más común: recorrer con <code>for</code></h3>
+
+    <p>El <code>.length</code> aparece casi siempre en la condición de un <code>for</code> que recorre un arreglo:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; numeros.length; i++) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(numeros[i]);
+}</pre>
+    </div>
+
+    <p>Fíjate en la condición: <code>i &lt; numeros.length</code>, con <strong>menor estricto</strong>, no <code>&lt;=</code>. Como el último índice válido es <code>length - 1</code>, la condición <code>i &lt; length</code> deja a <code>i</code> llegar hasta <code>length - 1</code>. Si pusieras <code>&lt;=</code>, en la última vuelta intentarías acceder a <code>numeros[length]</code>, que no existe, y Java lanzaría un error. Esta es la trampa más común con arreglos, y volveremos a ella varias veces.</p>
+
+    <p>Ventaja de usar <code>.length</code> en lugar de un número fijo: si cambias el tamaño del arreglo, el <code>for</code> se adapta automáticamente. Es más seguro y más flexible.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="inicializacion-directa">
+    <h2>Inicialización directa (arreglos con valores concretos)</h2>
+
+    <p>Cuando ya sabes cuáles son los valores del arreglo al crearlo, hay una forma más compacta de declararlos:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] numeros = {<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>, <span class="num">50</span>};</pre>
+    </div>
+
+    <p>Esta línea hace lo mismo que las 6 líneas de la sección anterior (declarar y llenar), pero en una sola. El tamaño del arreglo queda determinado por la cantidad de elementos que pusiste entre las llaves. En este caso, 5.</p>
+
+    <p>El arreglo que resulta es idéntico al de antes:</p>
+
+    <div class="casilleros">
+      <div class="casillero"><span class="indice">[0]</span><span class="valor">10</span></div>
+      <div class="casillero"><span class="indice">[1]</span><span class="valor">20</span></div>
+      <div class="casillero"><span class="indice">[2]</span><span class="valor">30</span></div>
+      <div class="casillero"><span class="indice">[3]</span><span class="valor">40</span></div>
+      <div class="casillero"><span class="indice">[4]</span><span class="valor">50</span></div>
+    </div>
+
+    <p>La inicialización directa sirve también para otros tipos:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span>[] nombres = {<span class="str">"Ana"</span>, <span class="str">"Luis"</span>, <span class="str">"Pedro"</span>};
+<span class="kw">double</span>[] precios = {<span class="num">19.99</span>, <span class="num">25.50</span>, <span class="num">9.75</span>};
+<span class="kw">boolean</span>[] estados = {<span class="kw">true</span>, <span class="kw">false</span>, <span class="kw">true</span>, <span class="kw">false</span>};
+<span class="kw">char</span>[] letras = {<span class="str">'a'</span>, <span class="str">'b'</span>, <span class="str">'c'</span>};</pre>
+    </div>
+
+    <p>Los <code>String</code> van con comillas dobles, los <code>char</code> con comillas simples, los <code>double</code> con punto decimal. Las reglas son las mismas que para cualquier variable suelta.</p>
+
+    <p>Una nota importante: la inicialización directa <strong>solo se puede usar en la declaración</strong>. No puedes hacer esto más adelante:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] numeros;
+numeros = {<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>};   <span class="cmt">// ← esto NO compila</span>
+
+<span class="cmt">// Pero esto sí:</span>
+<span class="kw">int</span>[] numeros;
+numeros = <span class="kw">new</span> <span class="kw">int</span>[]{<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>};   <span class="cmt">// ← con new y el tipo</span></pre>
+    </div>
+
+    <p>Es un detalle sintáctico que no vas a usar mucho, pero conviene saberlo por si te topas con él.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="recorrido-basico">
+    <h2>Recorrer un arreglo con <code>for</code></h2>
+
+    <p>El <code>for</code> del Bloque 4 y los arreglos están hechos el uno para el otro. La mayoría de las operaciones sobre arreglos se escriben con un <code>for</code> que recorre todos los elementos. El patrón básico es este:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] numeros = {<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>, <span class="num">50</span>};
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; numeros.length; i++) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(numeros[i]);
+}</pre>
+    </div>
+
+    <p>Imprime 10, 20, 30, 40, 50, cada uno en su propia línea. Las tres partes del <code>for</code> están calibradas para arreglos:</p>
+
+    <ul>
+      <li><strong>Inicio en 0</strong>: <code>int i = 0</code>. Porque el primer índice del arreglo es 0.</li>
+      <li><strong>Condición con <code>&lt;</code></strong>: <code>i &lt; numeros.length</code>. Porque el último índice válido es <code>length - 1</code>, entonces <code>i</code> puede llegar hasta <code>length - 1</code> pero no más.</li>
+      <li><strong>Incremento de 1 en 1</strong>: <code>i++</code>. Porque queremos recorrer todas las posiciones sin saltarnos ninguna.</li>
+    </ul>
+
+    <p>Este patrón (<code>for (int i = 0; i &lt; arreglo.length; i++)</code>) es tan común que tu ojo lo va a reconocer al instante después de verlo unas cuantas veces. Es el "recorrido estándar" de un arreglo.</p>
+
+    <h3>Recorrido hacia atrás</h3>
+
+    <p>También puedes recorrer un arreglo en orden inverso:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> i = numeros.length - <span class="num">1</span>; i &gt;= <span class="num">0</span>; i--) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(numeros[i]);
+}</pre>
+    </div>
+
+    <p>El inicio es <code>numeros.length - 1</code> (el último índice válido), la condición es <code>i &gt;= 0</code> (mientras no llegue a cero), y el incremento es <code>i--</code> (decremento). Imprime 50, 40, 30, 20, 10.</p>
+
+    <p>Fíjate en <code>numeros.length - 1</code>: es la forma estándar de referirse al último índice de un arreglo. Es un detalle pequeño pero importante, y lo vas a escribir muchas veces.</p>
+
+    <h3>Recorrido parcial</h3>
+
+    <p>No siempre recorres todo el arreglo. A veces solo los primeros N elementos, o desde una posición hasta otra:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Solo los primeros 3</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; <span class="num">3</span>; i++) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(numeros[i]);
+}
+
+<span class="cmt">// Desde la posición 2 hasta el final</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">2</span>; i &lt; numeros.length; i++) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(numeros[i]);
+}</pre>
+    </div>
+
+    <p>El recorrido es la herramienta básica sobre arreglos. Casi todo lo que hagas con ellos va a pasar dentro de un <code>for</code> que los recorre.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="simulacion-recorrido">
+    <h2>Simulación paso a paso del recorrido</h2>
+
+    <p>Vamos a ejecutar mentalmente el recorrido estándar con un arreglo concreto, para que veas cómo se mueve <code>i</code> y qué se imprime en cada vuelta. Esto es la mejor forma de entender cómo se combinan <code>for</code> y arreglos.</p>
+
+    <h3>El programa</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] numeros = {<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>, <span class="num">50</span>};
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; numeros.length; i++) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(numeros[i]);
+}</pre>
+    </div>
+
+    <h3>Paso a paso</h3>
+
+    <div class="simulacion">
+      <table class="table table-bordered">
+        <thead>
+          <tr><th>#</th><th>Qué hace Java</th><th><code>i</code></th><th><code>numeros[i]</code></th><th>Salida</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>Init: <code>i = 0</code>. Condición <code>0 &lt; 5</code> → true</td><td>0</td><td>—</td><td>—</td></tr>
+          <tr><td>2</td><td>Imprime <code>numeros[0]</code></td><td>0</td><td>10</td><td>10</td></tr>
+          <tr><td>3</td><td>Incremento: <code>i++</code></td><td>1</td><td>—</td><td>—</td></tr>
+          <tr><td>4</td><td>Condición <code>1 &lt; 5</code> → true. Imprime <code>numeros[1]</code></td><td>1</td><td>20</td><td>20</td></tr>
+          <tr><td>5</td><td><code>i++</code></td><td>2</td><td>—</td><td>—</td></tr>
+          <tr><td>6</td><td>Condición <code>2 &lt; 5</code> → true. Imprime <code>numeros[2]</code></td><td>2</td><td>30</td><td>30</td></tr>
+          <tr><td>7</td><td><code>i++</code></td><td>3</td><td>—</td><td>—</td></tr>
+          <tr><td>8</td><td>Condición <code>3 &lt; 5</code> → true. Imprime <code>numeros[3]</code></td><td>3</td><td>40</td><td>40</td></tr>
+          <tr><td>9</td><td><code>i++</code></td><td>4</td><td>—</td><td>—</td></tr>
+          <tr><td>10</td><td>Condición <code>4 &lt; 5</code> → true. Imprime <code>numeros[4]</code></td><td>4</td><td>50</td><td>50</td></tr>
+          <tr><td>11</td><td><code>i++</code></td><td>5</td><td>—</td><td>—</td></tr>
+          <tr><td>12</td><td>Condición <code>5 &lt; 5</code> → false. Sale del ciclo.</td><td>5</td><td>—</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Salida completa:</p>
+    <div class="flujo">10
+20
+30
+40
+50</div>
+
+    <p>Fíjate en dos cosas:</p>
+
+    <ul>
+      <li><code>i</code> toma los valores <strong>0, 1, 2, 3, 4</strong> dentro del cuerpo del ciclo. Nunca llega a 5 dentro. La condición <code>i &lt; numeros.length</code> permite que <code>i</code> sea hasta 4 (que es <code>length - 1</code>), pero cuando <code>i</code> vale 5, la condición falla y el cuerpo no se ejecuta.</li>
+      <li>Todas las posiciones del arreglo quedan cubiertas: 0, 1, 2, 3, 4. Ninguna se salta. Ninguna se sale del rango.</li>
+    </ul>
+
+    <h3>Qué pasaría si la condición fuera <code>&lt;=</code></h3>
+
+    <p>Este es el error más común. Vamos a verlo porque vale la pena:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// MAL: la condición usa <=, va a fallar en la última vuelta</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt;= numeros.length; i++) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(numeros[i]);
+}</pre>
+    </div>
+
+    <p>Con esta condición, <code>i</code> va a llegar a 5 (<code>numeros.length</code>). Y <code>numeros[5]</code> no existe: el arreglo tiene elementos en las posiciones 0 a 4. Cuando Java intente acceder a <code>numeros[5]</code>, va a lanzar un error <code>ArrayIndexOutOfBoundsException</code>, y el programa termina abruptamente.</p>
+
+    <div class="flujo">10
+20
+30
+40
+50
+Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException:
+    Index 5 out of bounds for length 5
+    at Ejemplo.main(Ejemplo.java:4)</div>
+
+    <p>La lección: cuando recorres un arreglo, la condición correcta es <code>i &lt; arreglo.length</code>, con <strong>menor estricto</strong>. Es la causa número uno de errores con arreglos, y es la razón por la que insistimos tanto en la diferencia entre <code>.length</code> (cantidad) y el último índice (cantidad - 1).</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="for-each">
+    <h2>El <code>for-each</code> (opcional, para cuando lo veas)</h2>
+
+    <p>Java tiene una forma abreviada de recorrer arreglos y colecciones, que se llama <strong>for-each</strong>. Su sintaxis es:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> valor : numeros) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(valor);
+}</pre>
+    </div>
+
+    <p>Se lee: "para cada <code>valor</code> (de tipo <code>int</code>) en <code>numeros</code>, haz esto". El <code>:</code> significa "en". En cada vuelta, <code>valor</code> toma el valor de un elemento del arreglo, en orden. No hay que manejar índice.</p>
+
+    <p>Es más limpio cuando solo quieres <em>leer</em> los elementos y no necesitas saber en qué posición estás. Cuando necesitas el índice (por ejemplo, para modificar el arreglo o para imprimir la posición), tienes que usar el <code>for</code> clásico.</p>
+
+    <p>Comparación:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// for clásico: tienes el índice</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; numeros.length; i++) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Posición "</span> + i + <span class="str">": "</span> + numeros[i]);
+}
+
+<span class="cmt">// for-each: solo el valor</span>
+<span class="kw">for</span> (<span class="kw">int</span> valor : numeros) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(valor);
+}</pre>
+    </div>
+
+    <p>Ambos son válidos. En este manual usamos preferentemente el <code>for</code> clásico, porque el índice te da más información y te obliga a pensar en la posición. El for-each lo menciono porque lo vas a ver en código ajeno, y conviene reconocerlo. Cuando te sientas cómodo con el <code>for</code> clásico, puedes empezar a usar for-each en los casos donde el índice no importa.</p>
+
+    <p>Un detalle importante: el for-each <strong>no te permite modificar el arreglo</strong> (bueno, no directamente: <code>valor</code> es una copia del elemento, no una referencia). Si quieres cambiar los valores, tienes que usar el <code>for</code> clásico.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="sumar">
+    <h2>Sumar y promediar los elementos</h2>
+
+    <p>Una de las operaciones más comunes sobre un arreglo es sumar sus elementos. Se hace con un <strong>acumulador</strong> (patrón del Bloque 3) y un <code>for</code>:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] numeros = {<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>, <span class="num">50</span>};
+<span class="kw">int</span> suma = <span class="num">0</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; numeros.length; i++) {
+    suma += numeros[i];
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Suma: "</span> + suma);   <span class="cmt">// 150</span></pre>
+    </div>
+
+    <p>El acumulador <code>suma</code> empieza en 0 y va sumando cada elemento. Al final del recorrido, tiene la suma total.</p>
+
+    <p>Para el promedio, solo hay que dividir entre la cantidad de elementos (que es <code>numeros.length</code>):</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">double</span> promedio = (<span class="kw">double</span>) suma / numeros.length;
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Promedio: "</span> + promedio);   <span class="cmt">// 30.0</span></pre>
+    </div>
+
+    <p>El cast <code>(double)</code> es importante para que la división no sea entera. Sin él, <code>150 / 5</code> daría 30 (que aquí casualmente coincide), pero <code>151 / 5</code> daría 30 en vez de 30.2. Es el mismo detalle de la división entera del Bloque 1.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="maximo-minimo">
+    <h2>Encontrar el máximo y el mínimo</h2>
+
+    <p>Otro patrón muy útil: encontrar el valor más alto (o más bajo) de un arreglo.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] numeros = {<span class="num">45</span>, <span class="num">12</span>, <span class="num">78</span>, <span class="num">33</span>, <span class="num">60</span>, <span class="num">91</span>, <span class="num">5</span>};
+
+<span class="kw">int</span> mayor = numeros[<span class="num">0</span>];   <span class="cmt">// suponemos que el primero es el mayor</span>
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt; numeros.length; i++) {
+    <span class="kw">if</span> (numeros[i] &gt; mayor) {
+        mayor = numeros[i];
+    }
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"El mayor es: "</span> + mayor);   <span class="cmt">// 91</span></pre>
+    </div>
+
+    <p>La idea: empiezas suponiendo que el primero es el mayor. Después recorres el resto, y si encuentras uno más grande, lo actualizas. Al terminar el recorrido, <code>mayor</code> tiene el valor máximo. Fíjate en que el <code>for</code> empieza en <code>i = 1</code>, no en 0, porque el elemento en 0 ya lo usamos como valor inicial.</p>
+
+    <p>Para el mínimo, es igual pero con el signo contrario:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> menor = numeros[<span class="num">0</span>];
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt; numeros.length; i++) {
+    <span class="kw">if</span> (numeros[i] &lt; menor) {
+        menor = numeros[i];
+    }
+}</pre>
+    </div>
+
+    <p>Un detalle: hay que asegurarse de que el arreglo no esté vacío. Si <code>numeros.length</code> es 0, <code>numeros[0]</code> lanza una excepción. En programas reales, se verifica primero:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">if</span> (numeros.length == <span class="num">0</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"El arreglo está vacío"</span>);
+} <span class="kw">else</span> {
+    <span class="cmt">// buscar máximo o mínimo</span>
+}</pre>
+    </div>
+
+    <p>Por ahora, asume que los arreglos no están vacíos. Pero ten presente que, en código real, este tipo de chequeos son importantes.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="buscar">
+    <h2>Buscar un valor en el arreglo</h2>
+
+    <p>Otro patrón clásico: buscar si un valor está en el arreglo, y en qué posición.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] numeros = {<span class="num">45</span>, <span class="num">12</span>, <span class="num">78</span>, <span class="num">33</span>, <span class="num">60</span>, <span class="num">91</span>, <span class="num">5</span>};
+<span class="kw">int</span> buscado = <span class="num">33</span>;
+<span class="kw">int</span> posicion = -<span class="num">1</span>;   <span class="cmt">// -1 = no encontrado</span>
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; numeros.length; i++) {
+    <span class="kw">if</span> (numeros[i] == buscado) {
+        posicion = i;
+        <span class="kw">break</span>;   <span class="cmt">// ya lo encontré, no sigo buscando</span>
+    }
+}
+
+<span class="kw">if</span> (posicion != -<span class="num">1</span>) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(buscado + <span class="str">" está en la posición "</span> + posicion);
+} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(buscado + <span class="str">" no está en el arreglo"</span>);
+}</pre>
+    </div>
+
+    <p>Es el mismo patrón de búsqueda que viste con arreglos en el Bloque 4, ahora aplicado directamente. Los detalles:</p>
+
+    <ul>
+      <li><code>posicion = -1</code> como valor inicial significa "no encontrado". Como los índices válidos son 0 o más, -1 no puede ser una posición real.</li>
+      <li>El <code>break</code> sale del ciclo en cuanto se encuentra el valor. No tiene sentido seguir buscando.</li>
+      <li>Al final, se verifica <code>posicion != -1</code> para saber si se encontró.</li>
+    </ul>
+
+    <p>Si solo quieres saber <em>si</em> está (sin importar dónde), puedes usar un <code>boolean</code>:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">boolean</span> encontrado = <span class="kw">false</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; numeros.length; i++) {
+    <span class="kw">if</span> (numeros[i] == buscado) {
+        encontrado = <span class="kw">true</span>;
+        <span class="kw">break</span>;
+    }
+}</pre>
+    </div>
+
+    <p>Ambos patrones (con <code>posicion</code> o con <code>boolean</code>) son válidos, y dependen de si necesitas saber la ubicación o solo la existencia.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="contar">
+    <h2>Contar elementos que cumplen una condición</h2>
+
+    <p>Combinando <code>for</code> y <code>if</code> dentro del arreglo, puedes contar cuántos elementos cumplen algo:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] notas = {<span class="num">85</span>, <span class="num">45</span>, <span class="num">92</span>, <span class="num">78</span>, <span class="num">60</span>, <span class="num">30</span>, <span class="num">90</span>};
+<span class="kw">int</span> aprobados = <span class="num">0</span>;
+<span class="kw">int</span> reprobados = <span class="num">0</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; notas.length; i++) {
+    <span class="kw">if</span> (notas[i] &gt;= <span class="num">60</span>) {
+        aprobados++;
+    } <span class="kw">else</span> {
+        reprobados++;
+    }
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Aprobados: "</span> + aprobados);       <span class="cmt">// 5</span>
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Reprobados: "</span> + reprobados);     <span class="cmt">// 2</span></pre>
+    </div>
+
+    <p>Fíjate en la estructura: es un <code>for</code> con un <code>if / else</code> adentro. Cada elemento del arreglo se clasifica, y los contadores llevan la cuenta. Este patrón aparece muchísimo en análisis de datos.</p>
+
+    <p>Otra variante: contar los que cumplen una condición específica, sin importar los que no:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> pares = <span class="num">0</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; numeros.length; i++) {
+    <span class="kw">if</span> (numeros[i] % <span class="num">2</span> == <span class="num">0</span>) {
+        pares++;
+    }
+}</pre>
+    </div>
+
+    <p>Este patrón —recorrer, verificar, contar— es el esqueleto de la mayoría de los análisis que vas a hacer con arreglos.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="invertir">
+    <h2>Invertir y copiar</h2>
+
+    <p>Dos operaciones más que vale la pena conocer.</p>
+
+    <h3>Invertir un arreglo</h3>
+
+    <p>Para invertir los elementos de un arreglo (el primero pasa al final, el último al inicio), se recorre desde los dos extremos hacia el centro e intercambia:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] numeros = {<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>, <span class="num">50</span>};
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; numeros.length / <span class="num">2</span>; i++) {
+    <span class="kw">int</span> temp = numeros[i];
+    numeros[i] = numeros[numeros.length - <span class="num">1</span> - i];
+    numeros[numeros.length - <span class="num">1</span> - i] = temp;
+}</pre>
+    </div>
+
+    <p>Este patrón intercambia el elemento en <code>i</code> con el elemento en <code>length - 1 - i</code>. La variable <code>temp</code> es necesaria porque, si no, al asignar pierdes el valor original. El ciclo solo recorre la mitad del arreglo, porque cada iteración intercambia dos elementos a la vez.</p>
+
+    <p>Si te resulta complejo, no te preocupes: es un ejercicio avanzado. Lo incluimos porque saber que existe ayuda cuando lo veas en el futuro.</p>
+
+    <h3>Copiar un arreglo</h3>
+
+    <p>Si asignas un arreglo a otro con <code>=</code>, no estás copiando los valores: estás copiando la referencia. Los dos nombres apuntan al mismo arreglo, y modificar uno modifica el otro.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] a = {<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>};
+<span class="kw">int</span>[] b = a;   <span class="cmt">// b y a apuntan al MISMO arreglo</span>
+
+b[<span class="num">0</span>] = <span class="num">99</span>;
+<span class="cls">System</span>.out.<span class="mth">println</span>(a[<span class="num">0</span>]);   <span class="cmt">// imprime 99, porque a y b son el mismo arreglo</span></pre>
+    </div>
+
+    <p>Para copiar de verdad los valores, hay que crear un arreglo nuevo y copiar uno por uno:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] a = {<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>};
+<span class="kw">int</span>[] b = <span class="kw">new</span> <span class="kw">int</span>[a.length];
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; a.length; i++) {
+    b[i] = a[i];
+}
+
+b[<span class="num">0</span>] = <span class="num">99</span>;
+<span class="cls">System</span>.out.<span class="mth">println</span>(a[<span class="num">0</span>]);   <span class="cmt">// ahora sí imprime 10</span></pre>
+    </div>
+
+    <p>Este es un concepto importante que a veces sorprende: en Java, los arreglos son <em>objetos</em>, y las variables guardan referencias a ellos, no los valores. Es un detalle que profundizaremos más adelante si seguimos ampliando el manual, pero conviene saberlo desde ahora.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="index-error">
+    <h2>El error del "uno de más": <code>ArrayIndexOutOfBoundsException</code></h2>
+
+    <p>El error más común con arreglos. Ya lo mencionamos al hablar del índice 0, pero conviene dedicarle su propia sección porque es el obstáculo con el que más se van a topar.</p>
+
+    <p>Se lanza cuando intentas acceder a un índice que no existe. Por ejemplo:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] numeros = {<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>, <span class="num">50</span>};
+<span class="cls">System</span>.out.<span class="mth">println</span>(numeros[<span class="num">5</span>]);   <span class="cmt">// ← no existe, length es 5</span></pre>
+    </div>
+
+    <p>El mensaje que muestra Java es:</p>
+
+    <div class="flujo">Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException:
+    Index 5 out of bounds for length 5
+    at Ejemplo.main(Ejemplo.java:2)</div>
+
+    <p>Se lee: "índice 5 fuera de los límites para un arreglo de longitud 5". El arreglo tiene 5 elementos (índices 0 a 4), y le pediste el 5. Ese índice no existe.</p>
+
+    <h3>Causas típicas</h3>
+
+    <ul>
+      <li><strong>Condición con <code>&lt;=</code> en lugar de <code>&lt;</code></strong>: <code>for (int i = 0; i &lt;= numeros.length; i++)</code>. Ya lo vimos. Es la causa número uno.</li>
+      <li><strong>Confundir <code>.length</code> con el último índice</strong>: si <code>length</code> es 5, el último índice válido es 4. Usar <code>numeros[numeros.length]</code> en vez de <code>numeros[numeros.length - 1]</code> da error.</li>
+      <li><strong>Acceder a un índice negativo</strong>: <code>numeros[-1]</code>. Ocurre cuando un cálculo de índice sale mal (por ejemplo, si olvidas que <code>i - 1</code> cuando <code>i</code> es 0 da -1).</li>
+      <li><strong>Iterar sobre un arreglo cuyo tamaño no es el que creías</strong>: si declaras <code>int[] a = new int[5]</code> pero luego piensas que tiene más elementos, los accesos fuera de rango fallan.</li>
+    </ul>
+
+    <h3>El caso del "uno de más" en su forma más común</h3>
+
+    <p>Mira este fragmento y predice qué pasa:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] numeros = {<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>};
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt;= numeros.length; i++) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(numeros[i]);
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver respuesta</summary>
+      <p class="mt-2 mb-2">Imprime 10, 20, 30, y después lanza <code>ArrayIndexOutOfBoundsException</code>. Porque <code>length</code> es 3, y la condición <code>i &lt;= 3</code> permite que <code>i</code> llegue a 3. <code>numeros[3]</code> no existe (los índices válidos son 0, 1, 2).</p>
+      <p class="mb-0">El error es ese <code>&lt;=</code> en la condición. Debería ser <code>&lt;</code>: <code>for (int i = 0; i &lt; numeros.length; i++)</code>.</p>
+    </details>
+
+    <p>Este es el error del "uno de más". No es que el programa esté mal escrito: es que la condición usa el operador incorrecto. Y como se escribe rápido, es fácil de cometer. La buena noticia es que el mensaje de error <em>dice exactamente</em> el problema: "índice X fuera de límites para longitud Y". Es una de las pocas excepciones donde el mensaje es muy claro.</p>
+
+    <div class="caja caja-error">
+      <h5>Cuando te salga este error</h5>
+      <p class="mb-0">No significa que "no entiendas arreglos". Significa que un acceso específico está fuera de rango. Aplica el protocolo: mira el mensaje, ve a la línea que dice el error, verifica el valor del índice en esa línea y el tamaño del arreglo. Casi siempre es un <code>&lt;=</code> donde iba <code>&lt;</code>, o un <code>length</code> donde iba <code>length - 1</code>. Aislar la línea y pensar en esos dos detalles resuelve el 90% de los casos.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="otros-errores">
+    <h2>Otros errores comunes con arreglos</h2>
+
+    <h3>1. Olvidar el <code>new</code> al crear el arreglo</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// MAL</span>
+<span class="kw">int</span>[] numeros;
+numeros[<span class="num">0</span>] = <span class="num">10</span>;   <span class="cmt">// ← no se ha creado el arreglo</span>
+
+<span class="cmt">// BIEN</span>
+<span class="kw">int</span>[] numeros = <span class="kw">new</span> <span class="kw">int</span>[<span class="num">5</span>];
+numeros[<span class="num">0</span>] = <span class="num">10</span>;</pre>
+    </div>
+
+    <p>Declarar un arreglo no lo crea. Hay que usar <code>new int[tamaño]</code> o la inicialización directa con <code>{}</code>. Si no lo haces, Java te da un error de "variable might not have been initialized".</p>
+
+    <h3>2. Confundir el tamaño con el último índice</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] numeros = <span class="kw">new</span> <span class="kw">int</span>[<span class="num">5</span>];
+
+<span class="cmt">// MAL: 5 no es un índice válido</span>
+numeros[<span class="num">5</span>] = <span class="num">100</span>;
+
+<span class="cmt">// BIEN: el último índice es 4</span>
+numeros[<span class="num">4</span>] = <span class="num">100</span>;</pre>
+    </div>
+
+    <p>Esta es la misma idea que ya vimos. El tamaño es cuántos elementos hay. El último índice es tamaño - 1. Si <code>length</code> es 5, los índices van de 0 a 4, no de 0 a 5.</p>
+
+    <h3>3. Creer que <code>.length</code> es un método</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// MAL</span>
+numeros.length()   <span class="cmt">// ← en arreglos NO lleva paréntesis</span>
+
+<span class="cmt">// BIEN</span>
+numeros.length
+
+<span class="cmt">// OJO: para String SÍ lleva paréntesis</span>
+palabra.length()   <span class="cmt">// ← String.length() es método, sí lleva paréntesis</span></pre>
+    </div>
+
+    <p>Este es un detalle que confunde. En los arreglos, <code>length</code> es un <em>atributo</em>, no un método. En los <code>String</code>, <code>length()</code> <em>sí</em> es un método, con paréntesis. Es inconsistente, y no hay nada que hacer: hay que memorizar que arreglos van sin paréntesis y Strings con paréntesis.</p>
+
+    <h3>4. Modificar un arreglo mientras lo recorres de forma incorrecta</h3>
+
+    <p>Si dentro del <code>for</code> modificas el tamaño del arreglo (lo cual no se puede directamente, porque el tamaño es fijo), o si modificas la variable <code>i</code> dentro del cuerpo, el recorrido puede comportarse raro. Regla: <strong>no modifiques <code>i</code> dentro del cuerpo del <code>for</code></strong>, salvo en casos muy específicos.</p>
+
+    <h3>5. Olvidar que los arreglos son fijos</h3>
+
+    <p>Un arreglo tiene un tamaño fijo desde que se crea. No puedes agregar más elementos después. Si necesitas uno más grande, tienes que crear uno nuevo, copiar los elementos, y usar el nuevo:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] original = {<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>};
+<span class="kw">int</span>[] masGrande = <span class="kw">new</span> <span class="kw">int</span>[<span class="num">5</span>];
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; original.length; i++) {
+    masGrande[i] = original[i];
+}
+
+masGrande[<span class="num">3</span>] = <span class="num">40</span>;
+masGrande[<span class="num">4</span>] = <span class="num">50</span>;</pre>
+    </div>
+
+    <p>Esto es incómodo, y es una de las razones por las que existe <code>ArrayList</code>, que sí crece dinámicamente. No lo vamos a ver en esta primera parte del manual porque tiene bastante sintaxis propia, pero conviene saber que existe.</p>
+
+    <h3>6. Comparar arreglos con <code>==</code></h3>
+
+    <p>Esto sorprende. <code>a == b</code> compara si son el <em>mismo</em> arreglo (misma referencia), no si tienen el mismo contenido.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] a = {<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>};
+<span class="kw">int</span>[] b = {<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>};
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(a == b);   <span class="cmt">// false, son arreglos distintos</span></pre>
+    </div>
+
+    <p>Aunque tienen el mismo contenido, <code>a == b</code> es <code>false</code> porque son dos objetos distintos en memoria. Para comparar contenido, tienes que recorrer y comparar elemento por elemento, o usar <code>Arrays.equals(a, b)</code> (que requiere <code>import java.util.Arrays;</code>).</p>
+
+    <p>Este detalle es el mismo tipo de cosa que la diferencia entre <code>==</code> y <code>.equals</code> en <code>String</code> que viste en el Bloque 1. Es un concepto recurrente en Java, y vale la pena tenerlo presente.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="arreglos-scanner">
+    <h2>Arreglos y Scanner: leer N valores del usuario</h2>
+
+    <p>Aquí es donde las piezas se combinan. La situación: el usuario te dice cuántos valores quiere ingresar, y tú los guardas todos en un arreglo para procesarlos después.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">import</span> java.util.Scanner;
+
+<span class="kw">public class</span> <span class="cls">LeerArreglo</span> {
+    <span class="kw">public static void</span> <span class="mth">main</span>(<span class="cls">String</span>[] args) {
+        <span class="cls">Scanner</span> scanner = <span class="kw">new</span> <span class="cls">Scanner</span>(<span class="cls">System</span>.in);
+
+        <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"¿Cuántos números quieres ingresar? "</span>);
+        <span class="kw">int</span> n = <span class="cls">Integer</span>.<span class="mth">parseInt</span>(scanner.<span class="mth">nextLine</span>());
+
+        <span class="kw">int</span>[] numeros = <span class="kw">new</span> <span class="kw">int</span>[n];
+
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; n; i++) {
+            <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Número "</span> + (i + <span class="num">1</span>) + <span class="str">": "</span>);
+            numeros[i] = <span class="cls">Integer</span>.<span class="mth">parseInt</span>(scanner.<span class="mth">nextLine</span>());
+        }
+
+        <span class="cmt">// Mostrar los valores ingresados</span>
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Ingresaste:"</span>);
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; n; i++) {
+            <span class="cls">System</span>.out.<span class="mth">println</span>(numeros[i]);
+        }
+    }
+}</pre>
+    </div>
+
+    <p>Fíjate en la estructura:</p>
+
+    <ul>
+      <li>Se lee <code>n</code> (cuántos números).</li>
+      <li>Se crea un arreglo de tamaño <code>n</code> con <code>new int[n]</code>.</li>
+      <li>Se recorre con un <code>for</code>, pidiendo y guardando cada valor en <code>numeros[i]</code>.</li>
+      <li>Después, se recorre otra vez para mostrar los valores.</li>
+    </ul>
+
+    <p>Nota el uso de <code>Integer.parseInt(scanner.nextLine())</code> en lugar de <code>scanner.nextInt()</code>. Es el patrón que recomendamos en el Bloque 5: leer todo con <code>nextLine</code> y parsear. Evita el problema del buffer sucio y es consistente.</p>
+
+    <h3>Un detalle de la impresión: <code>i + 1</code></h3>
+
+    <p>En el mensaje <code>"Número " + (i + 1)</code>, se usa <code>i + 1</code> en lugar de <code>i</code> para mostrar al usuario. Porque el índice <code>i</code> va de 0 a <code>n - 1</code>, pero al usuario le resulta más natural ver "Número 1", "Número 2", etc. Es un detalle pequeño de UX (experiencia de usuario): el índice es 0, pero el mensaje dice 1.</p>
+
+    <p>Esta es una decisión común: internamente los índices van de 0, pero en los mensajes al usuario, sumas 1. Lo vas a ver mucho en programas reales.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="arreglos-scanner-validados">
+    <h2>Leer con validación</h2>
+
+    <p>El ejemplo anterior falla si el usuario escribe algo que no es un número. Para robustecerlo, se combina con el patrón de validación del Bloque 5:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">import</span> java.util.Scanner;
+
+<span class="kw">public class</span> <span class="cls">LeerArregloValidado</span> {
+    <span class="kw">public static void</span> <span class="mth">main</span>(<span class="cls">String</span>[] args) {
+        <span class="cls">Scanner</span> scanner = <span class="kw">new</span> <span class="cls">Scanner</span>(<span class="cls">System</span>.in);
+
+        <span class="kw">int</span> n = <span class="num">0</span>;
+        <span class="kw">while</span> (n &lt; <span class="num">1</span>) {
+            <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"¿Cuántos números? (al menos 1): "</span>);
+
+            <span class="kw">while</span> (!scanner.<span class="mth">hasNextInt</span>()) {
+                scanner.<span class="mth">nextLine</span>();
+                <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa un número entero: "</span>);
+            }
+            n = scanner.<span class="mth">nextInt</span>();
+            scanner.<span class="mth">nextLine</span>();   <span class="cmt">// limpiar el buffer</span>
+        }
+
+        <span class="kw">int</span>[] numeros = <span class="kw">new</span> <span class="kw">int</span>[n];
+
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; n; i++) {
+            <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Número "</span> + (i + <span class="num">1</span>) + <span class="str">": "</span>);
+
+            <span class="kw">while</span> (!scanner.<span class="mth">hasNextInt</span>()) {
+                scanner.<span class="mth">nextLine</span>();
+                <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa un número válido: "</span>);
+            }
+            numeros[i] = scanner.<span class="mth">nextInt</span>();
+            scanner.<span class="mth">nextLine</span>();
+        }
+
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Ingresaste:"</span>);
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; n; i++) {
+            <span class="cls">System</span>.out.<span class="mth">println</span>(numeros[i]);
+        }
+    }
+}</pre>
+    </div>
+
+    <p>Este programa es más robusto. Si el usuario escribe algo que no es un entero, el <code>while</code> interno pide de nuevo. Fíjate en los dos niveles del patrón de validación: uno para <code>n</code> (el tamaño), y otro para cada elemento dentro del <code>for</code>.</p>
+
+    <p>Es un poco más de código, pero es el tipo de código que se usa en programas reales. Los usuarios se equivocan, y un programa que no maneja eso es un programa frágil.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="arreglos-string">
+    <h2>Arreglos de <code>String</code></h2>
+
+    <p>Todo lo que has visto aplica también a arreglos de otros tipos. Veamos uno con <code>String</code>:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span>[] nombres = {<span class="str">"Ana"</span>, <span class="str">"Luis"</span>, <span class="str">"Pedro"</span>, <span class="str">"María"</span>, <span class="str">"Sofía"</span>};
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; nombres.length; i++) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(nombres[i]);
+}</pre>
+    </div>
+
+    <p>Funciona exactamente igual que con <code>int</code>. Los detalles adicionales aparecen cuando empiezas a hacer operaciones sobre los Strings:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cmt">// Buscar un nombre en el arreglo</span>
+<span class="cls">String</span> buscado = <span class="str">"Pedro"</span>;
+<span class="kw">boolean</span> encontrado = <span class="kw">false</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; nombres.length; i++) {
+    <span class="kw">if</span> (nombres[i].<span class="mth">equals</span>(buscado)) {   <span class="cmt">// ← .equals, no ==</span>
+        encontrado = <span class="kw">true</span>;
+        <span class="kw">break</span>;
+    }
+}
+
+<span class="cmt">// Convertir todos a mayúsculas</span>
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; nombres.length; i++) {
+    nombres[i] = nombres[i].<span class="mth">toUpperCase</span>();
+}</pre>
+    </div>
+
+    <p>El detalle importante: <code>.equals()</code> para comparar Strings (nunca <code>==</code>). Es el mismo detalle del Bloque 1, ahora aplicado a arreglos. Este tipo de "detalles recurrentes" son los que vale la pena tener siempre presentes.</p>
+
+    <p>Y otra cosa: los Strings son objetos, y los arreglos de Strings guardan referencias. Si un elemento del arreglo nunca se asigna, su valor es <code>null</code>, no <code>""</code>. Es una diferencia sutil pero importante cuando haces operaciones sobre ellos.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="arreglos-bidimensionales">
+    <h2>Arreglos bidimensionales (opcional)</h2>
+
+    <p>Hasta ahora, todos los arreglos han sido de una dimensión: una fila de elementos. Java también permite arreglos de dos dimensiones (como una tabla con filas y columnas), que se declaran con doble corchete:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[][] matriz = {
+    {<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>},
+    {<span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>},
+    {<span class="num">7</span>, <span class="num">8</span>, <span class="num">9</span>}
+};</pre>
+    </div>
+
+    <p>Esta es una matriz de 3×3. Se accede a los elementos con dos índices:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">System</span>.out.<span class="mth">println</span>(matriz[<span class="num">1</span>][<span class="num">2</span>]);   <span class="cmt">// 6 (fila 1, columna 2)</span>
+<span class="cls">System</span>.out.<span class="mth">println</span>(matriz[<span class="num">0</span>][<span class="num">0</span>]);   <span class="cmt">// 1</span></pre>
+    </div>
+
+    <p>Se recorren con dos <code>for</code> anidados, como en el Bloque 4:</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">for</span> (<span class="kw">int</span> fila = <span class="num">0</span>; fila &lt; matriz.length; fila++) {
+    <span class="kw">for</span> (<span class="kw">int</span> col = <span class="num">0</span>; col &lt; matriz[fila].length; col++) {
+        <span class="cls">System</span>.out.<span class="mth">print</span>(matriz[fila][col] + <span class="str">" "</span>);
+    }
+    <span class="cls">System</span>.out.<span class="mth">println</span>();
+}</pre>
+    </div>
+
+    <p>Fíjate en <code>matriz[fila].length</code>: cada fila es en sí misma un arreglo de una dimensión, y tiene su propio <code>length</code>. Esto permite que las filas tengan tamaños distintos (aunque en una matriz regular todas tienen el mismo tamaño).</p>
+
+    <p>Los arreglos bidimensionales son útiles para representar tablas, matrices matemáticas, tableros de juegos, etc. Los mencionamos aquí como opcional, porque van más allá de lo que se necesita para dominar los arreglos básicos. Cuando te sientas cómodo con arreglos de una dimensión, esto es un siguiente paso natural.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejemplos-6">
+    <h2>Ejemplos progresivos con arreglos</h2>
+
+    <h3>Ejemplo 1 — Crear y mostrar</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] numeros = {<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>, <span class="num">50</span>};
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; numeros.length; i++) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Posición "</span> + i + <span class="str">": "</span> + numeros[i]);
+}</pre>
+    </div>
+    <p>El ejemplo más básico. Declara un arreglo con valores, lo recorre con el patrón estándar, e imprime cada elemento con su posición.</p>
+
+    <h3>Ejemplo 2 — Suma y promedio</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">double</span>[] notas = {<span class="num">8.5</span>, <span class="num">7.0</span>, <span class="num">9.2</span>, <span class="num">6.5</span>, <span class="num">8.0</span>};
+<span class="kw">double</span> suma = <span class="num">0</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; notas.length; i++) {
+    suma += notas[i];
+}
+
+<span class="kw">double</span> promedio = suma / notas.length;
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Suma: "</span> + suma);
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Promedio: "</span> + promedio);</pre>
+    </div>
+    <p>Suma total 39.2, promedio 7.84. Fíjate en que <code>suma</code> es <code>double</code>, porque los elementos son <code>double</code>. Si la hubieras declarado como <code>int</code>, se perderían los decimales en cada suma.</p>
+
+    <h3>Ejemplo 3 — Encontrar el mayor</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] numeros = {<span class="num">45</span>, <span class="num">12</span>, <span class="num">78</span>, <span class="num">33</span>, <span class="num">60</span>, <span class="num">91</span>, <span class="num">5</span>};
+<span class="kw">int</span> mayor = numeros[<span class="num">0</span>];
+<span class="kw">int</span> posicionMayor = <span class="num">0</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt; numeros.length; i++) {
+    <span class="kw">if</span> (numeros[i] &gt; mayor) {
+        mayor = numeros[i];
+        posicionMayor = i;
+    }
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Mayor: "</span> + mayor + <span class="str">" en posición "</span> + posicionMayor);</pre>
+    </div>
+    <p>Imprime "Mayor: 91 en posición 5". Aquí no solo guardamos el mayor, también dónde estaba. Es útil cuando quieres saber no solo cuál es el mayor, sino en qué posición del arreglo está.</p>
+
+    <h3>Ejemplo 4 — Contar y clasificar</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] calificaciones = {<span class="num">85</span>, <span class="num">45</span>, <span class="num">92</span>, <span class="num">78</span>, <span class="num">60</span>, <span class="num">30</span>, <span class="num">90</span>, <span class="num">55</span>};
+
+<span class="kw">int</span> excelentes = <span class="num">0</span>;   <span class="cmt">// >= 90</span>
+<span class="kw">int</span> buenos = <span class="num">0</span>;      <span class="cmt">// 80-89</span>
+<span class="kw">int</span> regulares = <span class="num">0</span>;   <span class="cmt">// 60-79</span>
+<span class="kw">int</span> reprobados = <span class="num">0</span>;  <span class="cmt">// < 60</span>
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; calificaciones.length; i++) {
+    <span class="kw">int</span> nota = calificaciones[i];
+
+    <span class="kw">if</span> (nota &gt;= <span class="num">90</span>) {
+        excelentes++;
+    } <span class="kw">else if</span> (nota &gt;= <span class="num">80</span>) {
+        buenos++;
+    } <span class="kw">else if</span> (nota &gt;= <span class="num">60</span>) {
+        regulares++;
+    } <span class="kw">else</span> {
+        reprobados++;
+    }
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Excelentes: "</span> + excelentes);
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Buenos: "</span> + buenos);
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Regulares: "</span> + regulares);
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Reprobados: "</span> + reprobados);</pre>
+    </div>
+    <p>Recorrido + clasificación. Combina los patrones del Bloque 3 (contadores) con los arreglos. Es el patrón que vas a usar para casi cualquier análisis de datos.</p>
+
+    <h3>Ejemplo 5 — Arreglo con entrada del usuario, análisis completo</h3>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">import</span> java.util.Scanner;
+
+<span class="kw">public class</span> <span class="cls">AnalisisNotas</span> {
+    <span class="kw">public static void</span> <span class="mth">main</span>(<span class="cls">String</span>[] args) {
+        <span class="cls">Scanner</span> scanner = <span class="kw">new</span> <span class="cls">Scanner</span>(<span class="cls">System</span>.in);
+
+        <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"¿Cuántas notas vas a ingresar? "</span>);
+        <span class="kw">int</span> n = <span class="cls">Integer</span>.<span class="mth">parseInt</span>(scanner.<span class="mth">nextLine</span>());
+
+        <span class="kw">double</span>[] notas = <span class="kw">new</span> <span class="kw">double</span>[n];
+
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; n; i++) {
+            <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Nota "</span> + (i + <span class="num">1</span>) + <span class="str">": "</span>);
+            notas[i] = <span class="cls">Double</span>.<span class="mth">parseDouble</span>(scanner.<span class="mth">nextLine</span>());
+        }
+
+        <span class="cmt">// Cálculos</span>
+        <span class="kw">double</span> suma = <span class="num">0</span>;
+        <span class="kw">double</span> mayor = notas[<span class="num">0</span>];
+        <span class="kw">double</span> menor = notas[<span class="num">0</span>];
+        <span class="kw">int</span> aprobadas = <span class="num">0</span>;
+
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; n; i++) {
+            suma += notas[i];
+
+            <span class="kw">if</span> (notas[i] &gt; mayor) mayor = notas[i];
+            <span class="kw">if</span> (notas[i] &lt; menor) menor = notas[i];
+            <span class="kw">if</span> (notas[i] &gt;= <span class="num">6</span>) aprobadas++;
+        }
+
+        <span class="kw">double</span> promedio = suma / n;
+
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"\n--- Análisis ---"</span>);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Cantidad: "</span> + n);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Promedio: "</span> + promedio);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Mayor: "</span> + mayor);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Menor: "</span> + menor);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Aprobadas: "</span> + aprobadas + <span class="str">" de "</span> + n);
+    }
+}</pre>
+    </div>
+    <p>Este es el ejemplo más completo. Combina Scanner (Bloque 5), arreglos (este bloque), <code>for</code> (Bloque 4), <code>if</code> (Bloque 2), y todo lo demás. Es un mini-programa con entrada, procesamiento y salida. Todo lo que has aprendido hasta aquí está aquí.</p>
+
+    <p>Un detalle: los cálculos (suma, mayor, menor, aprobadas) se hacen <strong>en un solo <code>for</code></strong>, no en varios. Cada vez que recorres un arreglo, si puedes aprovechar para hacer varios cálculos, mejor. Recorrer un arreglo múltiples veces es ineficiente, y es una cosa que los programadores experimentados evitan cuando pueden.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="ejercicios-6">
+    <h2>Ejercicios de arreglos</h2>
+
+    <h3><span class="nivel nivel-reconocer">Reconocer</span></h3>
+    <p>¿Qué imprime este programa?</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] arr = {<span class="num">5</span>, <span class="num">10</span>, <span class="num">15</span>, <span class="num">20</span>};
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; arr.length; i++) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(arr[i] * <span class="num">2</span>);
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-0">Imprime 10, 20, 30, 40, cada uno en su línea. El <code>for</code> recorre el arreglo con el patrón estándar, y multiplica cada elemento por 2 antes de imprimirlo.</p>
+    </details>
+
+    <h3><span class="nivel nivel-completar">Completar</span></h3>
+    <p>Completa el código para que cree un arreglo de 10 enteros y lo recorra mostrando cada elemento.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] numeros = ______________;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; ______________; i++) {
+    <span class="cls">System</span>.out.<span class="mth">println</span>(numeros[i]);
+}</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-0">Primer espacio: <code>new int[10]</code>. Segundo espacio: <code>i &lt; numeros.length</code> (o <code>i &lt; 10</code>, aunque usar <code>.length</code> es más flexible).</p>
+    </details>
+
+    <h3><span class="nivel nivel-modificar">Modificar</span></h3>
+    <p>Este programa debería sumar todos los elementos del arreglo, pero siempre devuelve el último. Encuentra y corrige el error.</p>
+
+    <div class="bloque-codigo">
+      <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] numeros = {<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>};
+<span class="kw">int</span> suma = <span class="num">0</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; numeros.length; i++) {
+    suma = <span class="num">0</span>;               <span class="cmt">// ← bug</span>
+    suma += numeros[i];
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Suma: "</span> + suma);</pre>
+    </div>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <p class="mt-2 mb-2">El bug es que <code>suma = 0;</code> está <em>dentro</em> del <code>for</code>. En cada vuelta, se reinicia <code>suma</code> a 0, y después suma el elemento. Al final solo queda la suma del último elemento (40).</p>
+      <div class="bloque-codigo">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span> suma = <span class="num">0</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; numeros.length; i++) {
+    suma += numeros[i];   <span class="cmt">// sin reiniciar suma</span>
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Suma: "</span> + suma);   <span class="cmt">// 100</span></pre>
+      </div>
+      <p class="mb-0">Regla: el acumulador se inicializa <strong>antes</strong> del ciclo, no dentro. Dentro del ciclo, solo se actualiza. Es el mismo patrón que viste con acumuladores en el Bloque 3.</p>
+    </details>
+
+    <h3><span class="nivel nivel-construir">Construir</span></h3>
+    <p>Escribe un programa que tenga un arreglo de 8 números y muestre:</p>
+    <ul>
+      <li>La suma de todos</li>
+      <li>El promedio</li>
+      <li>Cuántos son mayores al promedio</li>
+    </ul>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">int</span>[] numeros = {<span class="num">45</span>, <span class="num">12</span>, <span class="num">78</span>, <span class="num">33</span>, <span class="num">60</span>, <span class="num">91</span>, <span class="num">5</span>, <span class="num">52</span>};
+
+<span class="kw">int</span> suma = <span class="num">0</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; numeros.length; i++) {
+    suma += numeros[i];
+}
+
+<span class="kw">double</span> promedio = (<span class="kw">double</span>) suma / numeros.length;
+
+<span class="kw">int</span> mayoresAlPromedio = <span class="num">0</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; numeros.length; i++) {
+    <span class="kw">if</span> (numeros[i] &gt; promedio) {
+        mayoresAlPromedio++;
+    }
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Suma: "</span> + suma);
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Promedio: "</span> + promedio);
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Mayores al promedio: "</span> + mayoresAlPromedio);</pre>
+      </div>
+      <p class="mb-0">Aquí se recorren dos veces: una para la suma, y otra para contar los mayores al promedio. Técnicamente, se puede hacer en un solo recorrido si se guarda primero la suma, después el promedio, después se recorre otra vez. Es lo mismo. La versión de dos recorridos es más clara; la de un recorrido es más eficiente pero más difícil de leer.</p>
+    </details>
+
+    <h3><span class="nivel nivel-combinar">Combinar</span></h3>
+    <p>Escribe un programa que tenga un arreglo de <code>String</code> con nombres, y cuente cuántos empiezan con una letra específica (por ejemplo, 'A').</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="cls">String</span>[] nombres = {<span class="str">"Ana"</span>, <span class="str">"Luis"</span>, <span class="str">"Alberto"</span>, <span class="str">"María"</span>, <span class="str">"Andrés"</span>, <span class="str">"Pedro"</span>};
+<span class="kw">char</span> letraBuscada = <span class="str">'A'</span>;
+<span class="kw">int</span> contador = <span class="num">0</span>;
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; nombres.length; i++) {
+    <span class="kw">if</span> (nombres[i].<span class="mth">charAt</span>(<span class="num">0</span>) == letraBuscada) {
+        contador++;
+    }
+}
+
+<span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Nombres que empiezan con '"</span> + letraBuscada + <span class="str">"': "</span> + contador);</pre>
+      </div>
+      <p class="mb-0">Imprime 3 (Ana, Alberto, Andrés). El detalle clave es <code>nombres[i].charAt(0)</code>: accede al primer carácter de cada String (que es la letra inicial). Fíjate en el uso de <code>charAt</code>, que ya viste brevemente. El índice 0 es la primera posición del String, igual que en los arreglos.</p>
+    </details>
+
+    <h3><span class="nivel nivel-crear">Crear</span></h3>
+    <p>Escribe un programa que lea N números del usuario, los guarde en un arreglo, y después:</p>
+    <ul>
+      <li>Los muestre en el orden en que se ingresaron.</li>
+      <li>Los muestre en orden inverso.</li>
+      <li>Muestre cuántos son positivos, cuántos negativos, y cuántos ceros.</li>
+    </ul>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">import</span> java.util.Scanner;
+
+<span class="kw">public class</span> <span class="cls">AnalizarNumeros</span> {
+    <span class="kw">public static void</span> <span class="mth">main</span>(<span class="cls">String</span>[] args) {
+        <span class="cls">Scanner</span> scanner = <span class="kw">new</span> <span class="cls">Scanner</span>(<span class="cls">System</span>.in);
+
+        <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"¿Cuántos números? "</span>);
+        <span class="kw">int</span> n = <span class="cls">Integer</span>.<span class="mth">parseInt</span>(scanner.<span class="mth">nextLine</span>());
+
+        <span class="kw">int</span>[] numeros = <span class="kw">new</span> <span class="kw">int</span>[n];
+
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; n; i++) {
+            <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Número "</span> + (i + <span class="num">1</span>) + <span class="str">": "</span>);
+            numeros[i] = <span class="cls">Integer</span>.<span class="mth">parseInt</span>(scanner.<span class="mth">nextLine</span>());
+        }
+
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"\nEn orden:"</span>);
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; n; i++) {
+            <span class="cls">System</span>.out.<span class="mth">println</span>(numeros[i]);
+        }
+
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"\nEn orden inverso:"</span>);
+        <span class="kw">for</span> (<span class="kw">int</span> i = n - <span class="num">1</span>; i &gt;= <span class="num">0</span>; i--) {
+            <span class="cls">System</span>.out.<span class="mth">println</span>(numeros[i]);
+        }
+
+        <span class="kw">int</span> positivos = <span class="num">0</span>, negativos = <span class="num">0</span>, ceros = <span class="num">0</span>;
+
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; n; i++) {
+            <span class="kw">if</span> (numeros[i] &gt; <span class="num">0</span>) positivos++;
+            <span class="kw">else if</span> (numeros[i] &lt; <span class="num">0</span>) negativos++;
+            <span class="kw">else</span> ceros++;
+        }
+
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"\nPositivos: "</span> + positivos);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Negativos: "</span> + negativos);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Ceros: "</span> + ceros);
+    }
+}</pre>
+      </div>
+      <p class="mb-0">Fíjate en el segundo <code>for</code>, el del recorrido inverso: empieza en <code>n - 1</code> (el último índice válido), va mientras <code>i &gt;= 0</code>, y decrece con <code>i--</code>. Es el patrón de recorrido inverso que viste antes, aplicado a un arreglo creado con datos del usuario.</p>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="proyecto-integrador">
+    <h2>Proyecto integrador</h2>
+
+    <p>Este es el proyecto más completo del manual hasta ahora. Combina <strong>todo</strong> lo que has aprendido: Scanner, arreglos, <code>for</code>, <code>if</code>, <code>while</code>, contadores, acumuladores, validación, y más.</p>
+
+    <p><strong>Proyecto: sistema de calificaciones</strong></p>
+
+    <p>Escribe un programa que:</p>
+
+    <ol>
+      <li>Pregunte al usuario cuántos estudiantes hay (entre 1 y 50, validado).</li>
+      <li>Para cada estudiante, pida:
+        <ul>
+          <li>Nombre (puede tener espacios).</li>
+          <li>Calificación (número entre 0 y 100, validado).</li>
+        </ul>
+      </li>
+      <li>Almacene todos los nombres en un arreglo de <code>String</code>, y todas las calificaciones en un arreglo de <code>double</code>.</li>
+      <li>Al final, muestre:
+        <ul>
+          <li>El listado completo (nombre y calificación).</li>
+          <li>El promedio del grupo.</li>
+          <li>La calificación más alta y quién la obtuvo.</li>
+          <li>La calificación más baja y quién la obtuvo.</li>
+          <li>Cuántos aprobaron (≥ 60) y cuántos reprobaron.</li>
+          <li>El nombre del estudiante con mejor calificación.</li>
+        </ul>
+      </li>
+    </ol>
+
+    <p>Requisitos técnicos:</p>
+    <ul>
+      <li>Usa el patrón de Scanner del Bloque 5 (leer con <code>nextLine</code>, parsear cuando haga falta).</li>
+      <li>Valida los datos: la cantidad, las calificaciones. Si algo no es válido, pide de nuevo.</li>
+      <li>Usa dos arreglos paralelos (uno para nombres, otro para calificaciones), coordinados por el mismo índice.</li>
+      <li>Recorre los arreglos con <code>for</code> para hacer los cálculos.</li>
+    </ul>
+
+    <p>Antes de escribir el código, <strong>haz el análisis en español</strong>. ¿Qué datos necesitas guardar? ¿Cómo validas cada uno? ¿Cuáles son los cálculos? Divide el problema en subproblemas, y después intégralos.</p>
+
+    <details class="solucion">
+      <summary>Ver solución</summary>
+      <div class="bloque-codigo mt-2">
+        <button class="btn-copiar">Copiar</button>
+<pre><span class="kw">import</span> java.util.Scanner;
+
+<span class="kw">public class</span> <span class="cls">SistemaCalificaciones</span> {
+    <span class="kw">public static void</span> <span class="mth">main</span>(<span class="cls">String</span>[] args) {
+        <span class="cls">Scanner</span> scanner = <span class="kw">new</span> <span class="cls">Scanner</span>(<span class="cls">System</span>.in);
+
+        <span class="cmt">// 1. Cantidad de estudiantes (validada)</span>
+        <span class="kw">int</span> cantidad = <span class="num">0</span>;
+        <span class="kw">while</span> (cantidad &lt; <span class="num">1</span> || cantidad &gt; <span class="num">50</span>) {
+            <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"¿Cuántos estudiantes? (1-50): "</span>);
+
+            <span class="kw">while</span> (!scanner.<span class="mth">hasNextInt</span>()) {
+                scanner.<span class="mth">nextLine</span>();
+                <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa un número entero: "</span>);
+            }
+            cantidad = scanner.<span class="mth">nextInt</span>();
+            scanner.<span class="mth">nextLine</span>();
+
+            <span class="kw">if</span> (cantidad &lt; <span class="num">1</span> || cantidad &gt; <span class="num">50</span>) {
+                <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Debe estar entre 1 y 50"</span>);
+            }
+        }
+
+        <span class="cmt">// 2. Arreglos paralelos</span>
+        <span class="cls">String</span>[] nombres = <span class="kw">new</span> <span class="cls">String</span>[cantidad];
+        <span class="kw">double</span>[] notas = <span class="kw">new</span> <span class="kw">double</span>[cantidad];
+
+        <span class="cmt">// 3. Leer datos</span>
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; cantidad; i++) {
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"\n--- Estudiante "</span> + (i + <span class="num">1</span>) + <span class="str">" ---"</span>);
+
+            <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Nombre: "</span>);
+            nombres[i] = scanner.<span class="mth">nextLine</span>().<span class="mth">trim</span>();
+
+            <span class="kw">double</span> nota = -<span class="num">1</span>;
+            <span class="kw">while</span> (nota &lt; <span class="num">0</span> || nota &gt; <span class="num">100</span>) {
+                <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Calificación (0-100): "</span>);
+
+                <span class="kw">while</span> (!scanner.<span class="mth">hasNextDouble</span>()) {
+                    scanner.<span class="mth">nextLine</span>();
+                    <span class="cls">System</span>.out.<span class="mth">print</span>(<span class="str">"Ingresa un número: "</span>);
+                }
+                nota = scanner.<span class="mth">nextDouble</span>();
+                scanner.<span class="mth">nextLine</span>();
+
+                <span class="kw">if</span> (nota &lt; <span class="num">0</span> || nota &gt; <span class="num">100</span>) {
+                    <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"La calificación debe estar entre 0 y 100"</span>);
+                }
+            }
+            notas[i] = nota;
+        }
+
+        <span class="cmt">// 4. Cálculos</span>
+        <span class="kw">double</span> suma = <span class="num">0</span>;
+        <span class="kw">double</span> mayor = notas[<span class="num">0</span>];
+        <span class="kw">double</span> menor = notas[<span class="num">0</span>];
+        <span class="kw">int</span> posMayor = <span class="num">0</span>;
+        <span class="kw">int</span> posMenor = <span class="num">0</span>;
+        <span class="kw">int</span> aprobados = <span class="num">0</span>;
+        <span class="kw">int</span> reprobados = <span class="num">0</span>;
+
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; cantidad; i++) {
+            suma += notas[i];
+
+            <span class="kw">if</span> (notas[i] &gt; mayor) {
+                mayor = notas[i];
+                posMayor = i;
+            }
+            <span class="kw">if</span> (notas[i] &lt; menor) {
+                menor = notas[i];
+                posMenor = i;
+            }
+            <span class="kw">if</span> (notas[i] &gt;= <span class="num">60</span>) {
+                aprobados++;
+            } <span class="kw">else</span> {
+                reprobados++;
+            }
+        }
+
+        <span class="kw">double</span> promedio = suma / cantidad;
+
+        <span class="cmt">// 5. Reporte</span>
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"\n========== REPORTE =========="</span>);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"Listado de estudiantes:"</span>);
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; cantidad; i++) {
+            <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"  "</span> + nombres[i] + <span class="str">" - "</span> + notas[i]);
+        }
+
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"\nEstadísticas:"</span>);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"  Cantidad: "</span> + cantidad);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"  Promedio: "</span> + promedio);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"  Mayor: "</span> + mayor + <span class="str">" ("</span> + nombres[posMayor] + <span class="str">")"</span>);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"  Menor: "</span> + menor + <span class="str">" ("</span> + nombres[posMenor] + <span class="str">")"</span>);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"  Aprobados: "</span> + aprobados);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"  Reprobados: "</span> + reprobados);
+        <span class="cls">System</span>.out.<span class="mth">println</span>(<span class="str">"  Mejor estudiante: "</span> + nombres[posMayor]);
+    }
+}</pre>
+      </div>
+      <p class="mb-0">Este programa integra todos los bloques del manual:</p>
+      <ul class="mb-0">
+        <li><strong>Bloque 1</strong>: variables, tipos, operadores, booleanos.</li>
+        <li><strong>Bloque 2</strong>: <code>if</code>, <code>else if</code>, <code>else</code>, operadores lógicos.</li>
+        <li><strong>Bloque 3</strong>: <code>while</code> con validación, contadores, acumuladores.</li>
+        <li><strong>Bloque 4</strong>: <code>for</code>, recorrido de arreglos con índice.</li>
+        <li><strong>Bloque 5</strong>: Scanner, parseo, validación con <code>hasNextAlgo</code>, buffer limpio con <code>nextLine</code>.</li>
+        <li><strong>Bloque 6</strong>: arreglos paralelos, recorrido, búsqueda del mayor/menor, conteo.</li>
+      </ul>
+      <p class="mb-0 mt-2">Si puedes escribir esto por tu cuenta, tienes todas las piezas fundamentales del manual. El siguiente paso natural serían métodos (que verás en un bloque futuro cuando ampliemos el manual), y después clases y objetos, pero eso ya es otra etapa.</p>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="piezas-construidas">
+    <h2>Las piezas que construiste</h2>
+
+    <p>Llegaste al final de este bloque. Quiero que mires atrás un momento, no como ejercicio motivacional, sino como observación concreta.</p>
+
+    <p>Cuando empezaste el manual, no sabías qué era una variable. Este bloque lo empezaste sabiendo ya: declarar variables, tipos, operadores, booleanos, <code>if / else if / else</code>, <code>switch</code>, <code>while</code>, <code>do while</code>, <code>for</code>, <code>break</code>, <code>continue</code>, ciclos anidados, Scanner, parseo, validación de entrada, y más. Ahora le agregaste arreglos.</p>
+
+    <p>Vamos a contar las piezas que tienes, por bloque:</p>
+
+    <ul>
+      <li><strong>Bloque 1</strong>: variables, tipos (<code>int</code>, <code>double</code>, <code>boolean</code>, <code>String</code>), <code>println</code>, operadores matemáticos (<code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>%</code>), operadores de comparación (<code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code>), operadores lógicos (<code>&amp;&amp;</code>, <code>||</code>, <code>!</code>), expresiones, simulación línea por línea.</li>
+      <li><strong>Bloque 2</strong>: <code>if</code>, <code>else</code>, <code>else if</code>, anidados, análisis "antes de programar".</li>
+      <li><strong>Bloque 3</strong>: <code>switch</code>, <code>while</code>, <code>do while</code>, contadores, acumuladores, bucles infinitos.</li>
+      <li><strong>Bloque 4</strong>: <code>for</code>, <code>break</code>, <code>continue</code>, ciclos anidados, cuatro patrones (recorrido con decisión, búsqueda con bandera, validación con repetición, menú con opciones).</li>
+      <li><strong>Bloque 5</strong>: Scanner, <code>nextInt</code>, <code>nextDouble</code>, <code>nextLine</code>, <code>next</code>, buffer de entrada, parseo (<code>Integer.parseInt</code>, <code>Double.parseDouble</code>), validación con <code>hasNext</code>.</li>
+      <li><strong>Bloque 6</strong>: arreglos, índice, <code>.length</code>, recorrido con <code>for</code>, <code>for-each</code>, búsqueda, máximo, mínimo, promedio, conteo, arreglos paralelos, arreglos de <code>String</code>, arreglos bidimensionales.</li>
+    </ul>
+
+    <p>Y no solo sabes cada pieza por separado. Sabes combinarlas. El proyecto integrador que acabas de ver combina todo esto en un solo programa, y si lo puedes escribir por tu cuenta, tienes una base de programación muy sólida.</p>
+
+    <p>Cada una de estas piezas fue construida paso a paso, con práctica dirigida. Ninguna vino de fábrica. Cuando alguien te dice que "sí sirves para programar" o "no sirves para programar", están asumiendo que hay algo dentro de ti que decide. Pero lo que hay es una acumulación de piezas construidas. Y tú las construiste, una por una.</p>
+
+    <p>Vas a volver a ver esta idea una vez más, cuando cierres formalmente esta primera parte del manual. Y cada vez que la veas, la lista de piezas va a ser más larga. Eso es, en el fondo, la respuesta a la pregunta que sí sirve: <em>¿qué piezas me faltan construir?</em> Cada vez menos. Cada vez más complejas. Pero todas se construyen igual.</p>
+
+    <div class="caja caja-idea">
+      <p class="mb-0">Si quieres una forma concreta de usar esto: cada vez que te sientas atorado, escribe en una hoja la lista de piezas que tienes. Es un recordatorio <strong>real</strong>, no motivacional, de que ya tienes una base con la que trabajar. Y las piezas que te faltan para resolver el problema específico que tienes enfrente, con frecuencia son pocas: una o dos.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section id="lo-que-sigue">
+    <h2>Lo que sigue</h2>
+
+    <p>Este es el bloque 6, y con él se cierra la <strong>primera parte</strong> del manual. Pero no es el final: es el punto donde termina el recorrido por las piezas básicas de la programación, y desde donde se puede empezar a construir más.</p>
+
+    <p>Con lo que has construido hasta aquí, tienes todas las piezas fundamentales: variables, decisiones, ciclos, entrada de datos, y ahora estructuras para guardar múltiples valores. Con esto ya puedes escribir programas útiles. Muchos problemas reales se resuelven con lo que tienes ahora.</p>
+
+    <p>Pero la programación tiene más piezas, y a medida que sigamos ampliando este manual, vamos a ir agregando las que hacen falta:</p>
+
+    <ul>
+      <li><strong>Métodos</strong> — cómo dividir un programa grande en partes más pequeñas y reutilizables. Es el siguiente paso natural después de los arreglos.</li>
+      <li><strong>Clases y objetos</strong> — la base de la programación orientada a objetos, que es lo que hace que Java sea Java.</li>
+      <li><strong>Excepciones</strong> — cómo manejar errores con gracia (<code>try/catch</code>), en lugar de dejar que el programa se caiga.</li>
+      <li><strong>Colecciones</strong> — <code>ArrayList</code> y otras estructuras que crecen dinámicamente, cuando los arreglos se quedan cortos.</li>
+      <li><strong>Archivos y datos</strong> — leer y escribir archivos, bases de datos simples.</li>
+      <li><strong>Y más</strong> — depuración avanzada, pruebas, algoritmos clásicos, estructuras de datos, etc.</li>
+    </ul>
+
+    <p>No tienes que aprender todo esto de una vez. Cada pieza se construye sobre las anteriores, igual que todas las que ya tienes. Y el principio es siempre el mismo: primero piensa en el problema, después busca la pieza. Primero español, después Java.</p>
+
+    <p>Por ahora, tienes una base sólida. La mejor forma de consolidarla no es pasar rápido a lo siguiente, sino <strong>practicar con lo que tienes</strong>: resolver los ejercicios, escribir tus propios programas, cometer errores, corregirlos, simular a mano, comparar con la realidad. La práctica es la única forma en que las piezas se vuelven automáticas.</p>
+
+    <div class="aviso-continuidad">
+      <p class="mb-0"><strong>Este manual sigue creciendo.</strong> El bloque 6 cierra la primera parte, no la colección. Cuando se agreguen los bloques de métodos, clases y objetos, excepciones, colecciones y archivos, van a aparecer aquí, en el índice, con su propio enlace. Puedes volver al <a href="index.html">índice principal</a> para ver la estructura completa cuando se actualice.</p>
+    </div>
+
+    <div class="caja caja-idea">
+      <p class="mb-0">Si terminas este bloque y sientes que "ya entiendes la mayoría de las cosas", es buena señal. Si sientes que "todavía hay cosas que no te salen", también es buena señal: significa que sabes dónde están las piezas que te faltan. Y eso, más que cualquier otra cosa, es lo que separa a quien sigue avanzando de quien se queda atorado.</p>
+    </div>
+
+    <p>Hasta el próximo bloque. Por ahora, a practicar.</p>
+  </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.querySelectorAll('.bloque-codigo').forEach(function (bloque) {
+    var btn = bloque.querySelector('.btn-copiar');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var pre = bloque.querySelector('pre');
+      var texto = pre.innerText;
+      navigator.clipboard.writeText(texto).then(function () {
+        var original = btn.textContent;
+        btn.textContent = '¡Copiado!';
+        setTimeout(function () { btn.textContent = original; }, 1200);
+      });
+    });
+  });
+
+  var html = document.documentElement;
+  var btnTema = document.getElementById('btnTema');
+  var temaGuardado = localStorage.getItem('temaManual') || 'light';
+  aplicarTema(temaGuardado);
+
+  btnTema.addEventListener('click', function () {
+    var actual = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+    aplicarTema(actual);
+    localStorage.setItem('temaManual', actual);
+  });
+
+  function aplicarTema(tema) {
+    html.setAttribute('data-bs-theme', tema);
+    btnTema.innerHTML = tema === 'dark'
+      ? '<i class="bi bi-sun"></i>'
+      : '<i class="bi bi-moon-stars"></i>';
+  }
+
+  var sidebar = document.getElementById('sidebar');
+  var btnMenu = document.getElementById('btnMenu');
+  var btnCerrarMenu = document.getElementById('btnCerrarMenu');
+
+  function cerrarMenu() {
+    sidebar.classList.remove('abierto');
+    document.body.classList.remove('menu-abierto');
+    btnMenu.setAttribute('aria-expanded', 'false');
+  }
+
+  btnMenu.addEventListener('click', function () {
+    var abierto = sidebar.classList.toggle('abierto');
+    document.body.classList.toggle('menu-abierto', abierto);
+    btnMenu.setAttribute('aria-expanded', String(abierto));
+  });
+  btnCerrarMenu.addEventListener('click', cerrarMenu);
+  sidebar.querySelectorAll('a').forEach(function (enlace) {
+    enlace.addEventListener('click', cerrarMenu);
+  });
+
+  var enlaces = document.querySelectorAll('.sidebar .nav-link');
+  var secciones = [];
+  enlaces.forEach(function (a) {
+    var id = a.getAttribute('href');
+    if (id && id.startsWith('#')) {
+      var el = document.querySelector(id);
+      if (el) secciones.push({ el: el, link: a });
+    }
+  });
+
+  function actualizarActivo() {
+    var y = window.scrollY + 120;
+    var actual = null;
+    secciones.forEach(function (s) {
+      if (s.el.offsetTop <= y) actual = s;
+    });
+    enlaces.forEach(function (a) { a.classList.remove('active'); });
+    if (actual) actual.link.classList.add('active');
+  }
+  window.addEventListener('scroll', actualizarActivo);
+  window.addEventListener('load', actualizarActivo);
+</script>
+<script src="../../../public/java-manual.js"></script>
+</body>
+</html>
