@@ -1,5 +1,15 @@
 export const resources = [
     {
+        id: "ubuntu-webtop",
+        title: "Ubuntu Webtop con Docker",
+        category: "Infraestructura",
+        filter: "infraestructura",
+        description: "Despliega un escritorio Ubuntu en un contenedor Docker y adminístralo desde el navegador.",
+        technologies: ["Ubuntu", "Docker", "LinuxServer.io"],
+        format: "Instalación y configuración",
+        href: "guias/infraestructura/ubuntu-webtop.html"
+    },
+    {
         id: "mongo-php-podman",
         title: "MongoDB con PHP y Podman",
         category: "Bases de datos",

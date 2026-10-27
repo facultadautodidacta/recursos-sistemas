@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Instala y administra un escritorio Ubuntu Webtop en Docker Compose y accede desde el navegador.">
+  <title>Ubuntu Webtop con Docker | Recursos de Sistemas</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/vs2015.min.css">
+  <link rel="stylesheet" href="../../public/style.css">
+  <style>
+    body { background-color: var(--paper); }
+    .guide-site-header { position: sticky; z-index: 10; top: 0; background: rgba(255, 250, 249, .94); border-bottom: 1px solid var(--line); backdrop-filter: blur(14px); }
+    .guide-header-inner { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .guide-brand { display: inline-flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 760; letter-spacing: -.55px; }
+    .guide-brand-mark { display: grid; width: 38px; height: 38px; place-items: center; color: white; background: var(--red); border-radius: 12px; }
+    .guide-brand-mark svg { width: 25px; height: 25px; }
+    .guide-brand-name span { color: var(--red); }
+    .guide-nav { color: var(--red); font-size: 13px; font-weight: 700; }
+    .guide-hero { padding: 3.5rem 0; margin-bottom: 2rem; background: linear-gradient(135deg, #fff2f0, #fffaf9); border-bottom: 1px solid #f8e5e2; }
+    .guide-hero h1 { color: var(--ink); font-weight: 790; letter-spacing: -1.5px; }
+    .guide-hero p { color: var(--muted); }
+    .text-primary { color: var(--red) !important; }
+    .step-badge { display: inline-flex; align-items: center; justify-content: center; width: 2.5rem; height: 2.5rem; border-radius: 50%; background-color: var(--red); color: white; font-weight: bold; font-size: 1.2rem; flex-shrink: 0; }
+    .card-step { border-left: 4px solid var(--red); margin-bottom: 1.5rem; }
+    .requisito-icon { font-size: 2rem; color: var(--red); }
+    .guide-footer { padding: 1.5rem 0; color: var(--muted); background: #fff2f0; border-top: 1px solid #f8e5e2; }
+    .guide-footer a { color: var(--red-dark); }
+    .alert-custom { border-left: 4px solid #ffc107; }
+    .table-code { font-family: 'Courier New', monospace; background-color: #f1f3f5; padding: 0.1rem 0.4rem; border-radius: 0.25rem; font-size: 0.9rem; }
+
+    /* ===== Estilo de bloque de código tipo editor ===== */
+    .code-block {
+      border-radius: 0.6rem;
+      overflow: hidden;
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #2d2d2d;
+      padding: 0.5rem 0.9rem;
+      border-bottom: 1px solid #3c3c3c;
+    }
+    .code-header .file-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #cccccc;
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 0.85rem;
+    }
+    .code-header .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .dot-red    { background-color: #ff5f56; }
+    .dot-yellow { background-color: #ffbd2e; }
+    .dot-green  { background-color: #27c93f; }
+    .code-header .lang-badge { background-color: #3c3c3c; color: #9cdcfe; font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 0.25rem; font-family: 'Courier New', monospace; }
+    .code-header .copy-btn { background: transparent; border: 1px solid #555; color: #cccccc; font-size: 0.8rem; padding: 0.2rem 0.6rem; border-radius: 0.3rem; transition: all 0.2s; }
+    .code-header .copy-btn:hover { background-color: #3c3c3c; color: #ffffff; border-color: #777; }
+    .code-header .copy-btn.copiado { background-color: #27c93f; border-color: #27c93f; color: white; }
+    .code-block pre { margin: 0; padding: 1rem 1.2rem; background-color: #1e1e1e !important; overflow-x: auto; font-size: 0.9rem; line-height: 1.5; }
+    .code-block pre code { font-family: 'Consolas', 'Courier New', monospace; background: transparent !important; padding: 0 !important; color: #d4d4d4; }
+    .code-block pre::-webkit-scrollbar { height: 8px; }
+    .code-block pre::-webkit-scrollbar-track { background: #1e1e1e; }
+    .code-block pre::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+    .code-block pre::-webkit-scrollbar-thumb:hover { background: #666; }
+
+    /* Estilo para las tarjetas de comandos de gestión */
+    .cmd-title { font-weight: 600; color: var(--red); font-size: 0.95rem; margin-bottom: 0.4rem; }
+    @media (max-width: 575.98px) {
+      .guide-header-inner { min-height: 66px; }
+      .guide-hero { padding: 2.5rem 0; }
+      .guide-hero h1 { font-size: 1.8rem; letter-spacing: -.8px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="guide-site-header">
+    <div class="container guide-header-inner">
+      <a class="guide-brand" href="../../index.html" aria-label="Recursos de Sistemas, inicio">
+        <span class="guide-brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none">
+            <path d="M6 8.5A2.5 2.5 0 0 1 8.5 6h15A2.5 2.5 0 0 1 26 8.5v15a2.5 2.5 0 0 1-2.5 2.5h-15A2.5 2.5 0 0 1 6 23.5v-15Z" stroke="currentColor" stroke-width="2"/>
+            <path d="m12 12-4 4 4 4m8-8 4 4-4 4m-2-10-4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="guide-brand-name">Recursos<span> de Sistemas</span></span>
+      </a>
+      <a class="guide-nav" href="../../index.html#recursos">← Volver a recursos</a>
+    </div>
+  </header>
+
+  <header class="guide-hero text-center">
+    <div class="container">
+      <h1><i class="bi bi-ubuntu"></i> Guía de Instalación de Ubuntu Webtop</h1>
+      <p class="lead mb-0">Ejecuta un escritorio Ubuntu completo dentro de un contenedor Docker y accede a él desde tu navegador.</p>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Introducción -->
+    <section class="mb-5">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="h4 mb-3"><i class="bi bi-info-circle text-primary"></i> ¿Qué es Ubuntu Webtop?</h2>
+          <p>Webtop es una solución que permite ejecutar un entorno de escritorio completo de Ubuntu dentro de un contenedor <strong>Docker</strong> y acceder a él a través de un navegador web. La implementación más popular es la imagen mantenida por <strong>LinuxServer.io</strong>.</p>
+          <p class="mb-0">No necesitas instalar un entorno gráfico pesado en tu servidor: solo Docker y un navegador.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Requisitos -->
+    <section class="mb-5">
+      <h2 class="h4 mb-3"><i class="bi bi-list-check text-primary"></i> Requisitos previos</h2>
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-3"><div class="card h-100 text-center shadow-sm"><div class="card-body"><i class="bi bi-pc-display requisito-icon"></i><h5 class="card-title mt-2">Sistema</h5><p class="card-text small">Ubuntu 24.04 (u otra distro Linux compatible con Docker).</p></div></div></div>
+        <div class="col-md-6 col-lg-3"><div class="card h-100 text-center shadow-sm"><div class="card-body"><i class="bi bi-box-seam requisito-icon"></i><h5 class="card-title mt-2">Docker</h5><p class="card-text small">Docker Engine y Docker Compose Plugin (V2).</p></div></div></div>
+        <div class="col-md-6 col-lg-3"><div class="card h-100 text-center shadow-sm"><div class="card-body"><i class="bi bi-cpu requisito-icon"></i><h5 class="card-title mt-2">Recursos</h5><p class="card-text small">Mínimo 2 GB de RAM (4 GB recomendado), 5 GB de disco y CPU de doble núcleo.</p></div></div></div>
+        <div class="col-md-6 col-lg-3"><div class="card h-100 text-center shadow-sm"><div class="card-body"><i class="bi bi-ethernet requisito-icon"></i><h5 class="card-title mt-2">Puertos</h5><p class="card-text small">Dos puertos libres (ej. <span class="table-code">3000</span> HTTP y <span class="table-code">3001</span> HTTPS).</p></div></div></div>
+      </div>
+    </section>
+
+    <!-- Paso 0: Docker -->
+    <section class="mb-5">
+      <h2 class="h4 mb-3"><i class="bi bi-box-seam text-primary"></i> Paso 0: Verificar e instalar Docker / Docker Compose</h2>
+
+      <div class="card card-step shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3">
+            <span class="step-badge me-3">0.1</span>
+            <h5 class="mb-0">Verificar si Docker y Docker Compose ya están instalados</h5>
+          </div>
+          <p>Ejecuta los siguientes comandos para comprobar. Si ambos muestran un número de versión, puedes <strong>omitir la sección 0.2</strong>.</p>
+          <div class="code-block">
+            <div class="code-header">
+              <div class="file-info"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="ms-2">terminal</span><span class="lang-badge">bash</span></div>
+              <button class="copy-btn" onclick="copiarCodigo(this)"><i class="bi bi-clipboard"></i> Copiar</button>
+            </div>
+            <pre><code class="language-bash">docker --version
+docker compose version</code></pre>
+          </div>
+          <p class="small text-muted mb-0">Salida esperada: <span class="table-code">Docker version 24.x.x</span> y <span class="table-code">Docker Compose version v2.x.x</span>.</p>
+        </div>
+      </div>
+
+      <div class="card card-step shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3">
+            <span class="step-badge me-3">0.2</span>
+            <h5 class="mb-0">Instalar Docker y Docker Compose (sistemas basados en Debian / Ubuntu)</h5>
+          </div>
+          <div class="alert alert-info"><i class="bi bi-info-circle"></i> Aplicable a <strong>Ubuntu, Debian</strong> y derivadas (Linux Mint, Pop!_OS, etc.). La instalación desde el repositorio oficial incluye automáticamente el plugin <span class="table-code">docker-compose-plugin</span>.</div>
+          <p>Si la verificación falló, ejecuta los siguientes comandos en orden:</p>
+          <div class="code-block">
+            <div class="code-header">
+              <div class="file-info"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="ms-2">instalar-docker.sh</span><span class="lang-badge">bash</span></div>
+              <button class="copy-btn" onclick="copiarCodigo(this)"><i class="bi bi-clipboard"></i> Copiar</button>
+            </div>
+            <pre><code class="language-bash"># 1. Actualizar e instalar dependencias básicas
+sudo apt update
+sudo apt install ca-certificates curl
+
+# 2. Añadir la clave GPG oficial de Docker
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# 3. Añadir el repositorio APT de Docker
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt update
+
+# 4. Instalar Docker Engine y Docker Compose plugin
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin</code></pre>
+          </div>
+          <p class="mt-3">Después de la instalación, verifica nuevamente:</p>
+          <div class="code-block">
+            <div class="code-header">
+              <div class="file-info"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="ms-2">verificar.sh</span><span class="lang-badge">bash</span></div>
+              <button class="copy-btn" onclick="copiarCodigo(this)"><i class="bi bi-clipboard"></i> Copiar</button>
+            </div>
+            <pre><code class="language-bash">sudo systemctl status docker
+docker compose version</code></pre>
+          </div>
+          <p class="small text-muted mb-0">Si aparece <span class="table-code">active (running)</span>, Docker se inició correctamente.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pasos Webtop -->
+    <section class="mb-5">
+      <h2 class="h4 mb-3"><i class="bi bi-gear text-primary"></i> Pasos de instalación de Webtop (Docker Compose)</h2>
+
+      <div class="card card-step shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3"><span class="step-badge me-3">1</span><h5 class="mb-0">Crear el directorio de trabajo</h5></div>
+          <div class="code-block">
+            <div class="code-header">
+              <div class="file-info"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="ms-2">terminal</span><span class="lang-badge">bash</span></div>
+              <button class="copy-btn" onclick="copiarCodigo(this)"><i class="bi bi-clipboard"></i> Copiar</button>
+            </div>
+            <pre><code class="language-bash">mkdir -p ~/webtop/config
+cd ~/webtop</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-step shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3"><span class="step-badge me-3">2</span><h5 class="mb-0">Crear el archivo <span class="table-code">docker-compose.yml</span></h5></div>
+          <p>Crea el archivo y pega el siguiente contenido (ejemplo con escritorio <strong>ubuntu-xfce</strong>):</p>
+          <div class="code-block">
+            <div class="code-header">
+              <div class="file-info"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="ms-2">docker-compose.yml</span><span class="lang-badge">yaml</span></div>
+              <button class="copy-btn" onclick="copiarCodigo(this)"><i class="bi bi-clipboard"></i> Copiar</button>
+            </div>
+            <pre><code class="language-yaml">services:
+  webtop:
+    image: lscr.io/linuxserver/webtop:ubuntu-xfce
+    container_name: webtop
+    security_opt:
+      - seccomp:unconfined
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Shanghai
+      - CUSTOM_USER=tu_nombre_de_usuario
+      - PASSWORD=tu_contraseña
+    volumes:
+      - ./config:/config
+    ports:
+      - 3000:3000
+      - 3001:3001
+    shm_size: "1gb"
+    restart: unless-stopped</code></pre>
+          </div>
+          <div class="alert alert-warning alert-custom mt-3 mb-0"><i class="bi bi-exclamation-triangle"></i> <strong>Importante:</strong> Modifica <span class="table-code">PUID</span> / <span class="table-code">PGID</span> (consulta con <span class="table-code">id -u</span> / <span class="table-code">id -g</span>) y <strong>establece una contraseña segura</strong>.</div>
+        </div>
+      </div>
+
+      <div class="card card-step shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3"><span class="step-badge me-3">3</span><h5 class="mb-0">Iniciar el contenedor</h5></div>
+          <div class="code-block">
+            <div class="code-header">
+              <div class="file-info"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="ms-2">terminal</span><span class="lang-badge">bash</span></div>
+              <button class="copy-btn" onclick="copiarCodigo(this)"><i class="bi bi-clipboard"></i> Copiar</button>
+            </div>
+            <pre><code class="language-bash">docker compose up -d</code></pre>
+          </div>
+          <p class="small text-muted mb-0">La primera ejecución descargará la imagen, puede tardar varios minutos.</p>
+        </div>
+      </div>
+
+      <div class="card card-step shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3"><span class="step-badge me-3">4</span><h5 class="mb-0">Acceder al escritorio</h5></div>
+          <p>Abre el navegador y visita:</p>
+          <div class="code-block">
+            <div class="code-header">
+              <div class="file-info"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="ms-2">url.txt</span><span class="lang-badge">text</span></div>
+              <button class="copy-btn" onclick="copiarCodigo(this)"><i class="bi bi-clipboard"></i> Copiar</button>
+            </div>
+            <pre><code class="language-plaintext">https://&lt;IP_de_tu_servidor_Ubuntu&gt;:3001</code></pre>
+          </div>
+          <div class="alert alert-info mt-3 mb-0"><i class="bi bi-info-circle"></i> Es HTTPS. Acepta la advertencia del certificado e ingresa el usuario y contraseña configurados.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= NUEVA SECCIÓN: Gestión del contenedor ================= -->
+    <section class="mb-5">
+      <h2 class="h4 mb-3"><i class="bi bi-tools text-primary"></i> Gestión del contenedor Webtop</h2>
+      <p class="text-muted">Una vez desplegado, es posible que necesites revisar su estado, detenerlo para liberar recursos, reiniciarlo tras un cambio de configuración o eliminarlo por completo. Aquí tienes los comandos esenciales, todos ejecutados desde el directorio donde está el <span class="table-code">docker-compose.yml</span> (es decir, <span class="table-code">~/webtop</span>).</p>
+
+      <div class="row g-4">
+
+        <!-- Ver estado -->
+        <div class="col-lg-6">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-activity text-success me-2 fs-5"></i>
+                <span class="cmd-title mb-0">Ver el estado del contenedor</span>
+              </div>
+              <p class="small text-muted mb-2">Comprueba si está en ejecución, su salud, puertos y uso de recursos.</p>
+              <div class="code-block">
+                <div class="code-header">
+                  <div class="file-info"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="ms-2">estado.sh</span><span class="lang-badge">bash</span></div>
+                  <button class="copy-btn" onclick="copiarCodigo(this)"><i class="bi bi-clipboard"></i> Copiar</button>
+                </div>
+                <pre><code class="language-bash"># Estado resumido de los servicios del compose
+docker compose ps
+
+# Estado detallado del contenedor "webtop"
+docker inspect --format='{{.State.Status}}' webtop
+
+# Uso de recursos en tiempo real (CPU, RAM, red)
+docker stats webtop</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ver logs -->
+        <div class="col-lg-6">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-file-text text-primary me-2 fs-5"></i>
+                <span class="cmd-title mb-0">Ver los logs</span>
+              </div>
+              <p class="small text-muted mb-2">Útil para diagnosticar errores de arranque o problemas de acceso.</p>
+              <div class="code-block">
+                <div class="code-header">
+                  <div class="file-info"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="ms-2">logs.sh</span><span class="lang-badge">bash</span></div>
+                  <button class="copy-btn" onclick="copiarCodigo(this)"><i class="bi bi-clipboard"></i> Copiar</button>
+                </div>
+                <pre><code class="language-bash"># Ver logs en tiempo real
+docker compose logs -f webtop
+
+# Ver las últimas 100 líneas y salir
+docker compose logs --tail=100 webtop</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detener -->
+        <div class="col-lg-6">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-pause-circle text-warning me-2 fs-5"></i>
+                <span class="cmd-title mb-0">Detener el contenedor</span>
+              </div>
+              <p class="small text-muted mb-2">Detiene el servicio sin eliminarlo. Los datos en <span class="table-code">./config</span> se conservan.</p>
+              <div class="code-block">
+                <div class="code-header">
+                  <div class="file-info"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="ms-2">detener.sh</span><span class="lang-badge">bash</span></div>
+                  <button class="copy-btn" onclick="copiarCodigo(this)"><i class="bi bi-clipboard"></i> Copiar</button>
+                </div>
+                <pre><code class="language-bash">docker compose stop</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reiniciar / Arrancar -->
+        <div class="col-lg-6">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-arrow-clockwise text-info me-2 fs-5"></i>
+                <span class="cmd-title mb-0">Reiniciar o volver a arrancar</span>
+              </div>
+              <p class="small text-muted mb-2">Reinicia el servicio (por ejemplo, tras editar el <span class="table-code">docker-compose.yml</span>).</p>
+              <div class="code-block">
+                <div class="code-header">
+                  <div class="file-info"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="ms-2">reiniciar.sh</span><span class="lang-badge">bash</span></div>
+                  <button class="copy-btn" onclick="copiarCodigo(this)"><i class="bi bi-clipboard"></i> Copiar</button>
+                </div>
+                <pre><code class="language-bash"># Reiniciar el servicio
+docker compose restart webtop
+
+# O simplemente volver a arrancarlo si estaba detenido
+docker compose start</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Eliminar contenedor -->
+        <div class="col-lg-6">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-trash text-danger me-2 fs-5"></i>
+                <span class="cmd-title mb-0">Eliminar el contenedor</span>
+              </div>
+              <p class="small text-muted mb-2">Detiene y elimina el contenedor y la red creada por Compose. <strong>Los datos en <span class="table-code">./config</span> no se borran</strong>.</p>
+              <div class="code-block">
+                <div class="code-header">
+                  <div class="file-info"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="ms-2">eliminar.sh</span><span class="lang-badge">bash</span></div>
+                  <button class="copy-btn" onclick="copiarCodigo(this)"><i class="bi bi-clipboard"></i> Copiar</button>
+                </div>
+                <pre><code class="language-bash">docker compose down</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Eliminar todo (incluye imagen y volúmenes) -->
+        <div class="col-lg-6">
+          <div class="card h-100 shadow-sm border-danger">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-exclamation-octagon text-danger me-2 fs-5"></i>
+                <span class="cmd-title mb-0">Eliminación completa (con imagen)</span>
+              </div>
+              <p class="small text-muted mb-2">Además de eliminar el contenedor, borra la imagen descargada (útil para liberar espacio o forzar una actualización limpia).</p>
+              <div class="code-block">
+                <div class="code-header">
+                  <div class="file-info"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="ms-2">eliminar-todo.sh</span><span class="lang-badge">bash</span></div>
+                  <button class="copy-btn" onclick="copiarCodigo(this)"><i class="bi bi-clipboard"></i> Copiar</button>
+                </div>
+                <pre><code class="language-bash">docker compose down --rmi all
+
+# Si además quieres borrar los datos persistidos manualmente:
+# rm -rf ~/webtop/config</code></pre>
+              </div>
+              <div class="alert alert-warning alert-custom mt-2 mb-0 small"><i class="bi bi-exclamation-triangle"></i> La segunda línea es <strong>irreversible</strong>: elimina toda la configuración y archivos del escritorio guardados en <span class="table-code">./config</span>.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="alert alert-info mt-4 mb-0">
+        <i class="bi bi-lightbulb"></i> <strong>Consejo:</strong> si solo quieres actualizar la imagen a la última versión, ejecuta <span class="table-code">docker compose pull</span> y luego <span class="table-code">docker compose up -d</span>. Docker recreará el contenedor con la nueva imagen manteniendo tus datos en <span class="table-code">./config</span>.
+      </div>
+    </section>
+
+    <!-- Multiplataforma -->
+    <section class="mb-5">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="h4 mb-3"><i class="bi bi-globe2 text-primary"></i> ¿Es multiplataforma?</h2>
+          <p><strong>Sí.</strong></p>
+          <ul class="mb-0">
+            <li class="mb-2"><strong>Lado del servidor:</strong> Cualquier dispositivo que pueda ejecutar Docker (Ubuntu, Debian, VPS, NAS ARM, etc.) puede ejecutar Webtop. La imagen oficial soporta <span class="table-code">amd64</span> y <span class="table-code">arm64</span>.</li>
+            <li><strong>Lado del cliente:</strong> <strong>No requiere instalar software cliente.</strong> Windows, macOS, Linux, ChromeOS, iPad o tablet Android, cualquier dispositivo con un navegador moderno puede conectarse.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Seguridad -->
+    <section class="mb-5">
+      <div class="alert alert-danger">
+        <h5 class="alert-heading"><i class="bi bi-shield-lock"></i> Recordatorio de seguridad</h5>
+        <p class="mb-0">Por defecto el contenedor no tiene contraseña. <strong>Asegúrate de configurar <span class="table-code">CUSTOM_USER</span> y <span class="table-code">PASSWORD</span></strong>, y no lo expongas directamente a Internet pública sin protección. Se recomienda usar solo en red local o a través de VPN.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="guide-footer text-center">
+    <div class="container">
+      <p class="mb-2 small">Guía de Ubuntu Webtop · Basada en la imagen oficial de <a href="https://www.linuxserver.io/" target="_blank" rel="noopener">LinuxServer.io</a></p>
+      <a class="small fw-semibold" href="../../index.html#recursos">Volver a la biblioteca de guías</a>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- highlight.js core + lenguajes -->
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/yaml.min.js"></script>
+  <script>
+    document.querySelectorAll('pre code').forEach((block) => { hljs.highlightElement(block); });
+
+    function copiarCodigo(boton) {
+      const codeBlock = boton.closest('.code-block');
+      const codigo = codeBlock.querySelector('code').innerText;
+      navigator.clipboard.writeText(codigo).then(() => {
+        const textoOriginal = boton.innerHTML;
+        boton.innerHTML = '<i class="bi bi-check-lg"></i> ¡Copiado!';
+        boton.classList.add('copiado');
+        setTimeout(() => {
+          boton.innerHTML = textoOriginal;
+          boton.classList.remove('copiado');
+        }, 2000);
+      }).catch(err => {
+        console.error('Error al copiar:', err);
+        alert('No se pudo copiar. Copia manualmente el texto.');
+      });
+    }
+  </script>
+</body>
+</html>
