@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Aprende qué es una cola FIFO y construye una cola enlazada en Java, paso a paso.">
+<title>Colas con Java, paso a paso | Recursos de Sistemas</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="../../public/guide.css">
+<link rel="stylesheet" href="../../public/structures-guide.css">
+</head>
+<body class="guide-page data-structure-guide-page">
+
+<!-- ===== HERO ===== -->
+<nav class="guide-site-header" aria-label="Navegación principal">
+    <a class="guide-brand" href="../../index.html">
+        <span class="guide-brand-mark" aria-hidden="true">RS</span>
+        <span>Recursos de Sistemas</span>
+    </a>
+    <a class="guide-back-link" href="../../index.html#recursos">← Volver al catálogo</a>
+</nav>
+<header class="hero">
+    <div class="container">
+        <span class="badge bg-light text-dark mb-3">ESTRUCTURAS DE DATOS · JAVA</span>
+        <h1 class="display-4">Colas en Java, paso a paso</h1>
+        <p class="lead">Comprende la regla FIFO y construye tu propia cola con nodos desde cero.</p>
+    </div>
+</header>
+
+<main class="guide-content">
+<nav class="toc" aria-label="Contenido de la guía">
+    <h2>En esta guía</h2>
+    <ol class="mb-0">
+        <li><a href="#parte1">¿Qué es una cola?</a></li>
+        <li><a href="#parte2">Cola vs. pila</a></li>
+        <li><a href="#parte3">Ventajas y desventajas</a></li>
+        <li><a href="#parte4">Nodo, clase y constructor</a></li>
+        <li><a href="#parte5">Construcción paso a paso y pruebas</a></li>
+        <li><a href="#parte6">Complejidades</a></li>
+        <li><a href="#parte7">Errores comunes</a></li>
+        <li><a href="#parte8">Siguientes pasos</a></li>
+    </ol>
+</nav>
+
+<!-- ===== 1. CONCEPTO ===== -->
+<section class="section-card" id="parte1">
+    <h2>1. ¿Qué es una Cola (Queue)?</h2>
+
+    <h3>Concepto básico</h3>
+    <p>Imagina una <strong>fila del banco</strong>. El primero que llegó es el primero que es atendido. Nadie se cuela.</p>
+    <p>Una cola es una estructura de datos lineal con la regla <strong>FIFO</strong> (<em>First In, First Out</em> — el primero en entrar es el primero en salir).</p>
+
+    <div class="callout callout-info">
+        <strong>La idea en una frase:</strong> se <strong>inserta por un extremo</strong> (el <strong>final</strong> o <em>rear</em>) y se <strong>extrae por el otro</strong> (el <strong>frente</strong> o <em>front</em>).
+    </div>
+
+    <p>Ejemplo: si encolas <code class="inline">10 → 20 → 30</code>, el frente es <code class="inline">10</code>. Al desencolar sale el <code class="inline">10</code>, luego el <code class="inline">20</code>, luego el <code class="inline">30</code>.</p>
+
+    <h3>Operaciones fundamentales</h3>
+    <div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr><th>Operación</th><th>¿Qué hace?</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code class="inline">encolar(dato)</code> / <em>enqueue</em></td><td>Añade un elemento al final</td></tr>
+            <tr><td><code class="inline">desencolar()</code> / <em>dequeue</em></td><td>Saca y devuelve el elemento del frente</td></tr>
+            <tr><td><code class="inline">frente()</code> / <em>front</em></td><td>Mira el frente sin sacarlo</td></tr>
+            <tr><td><code class="inline">estaVacia()</code></td><td>Indica si no hay elementos</td></tr>
+            <tr><td><code class="inline">tamaño()</code></td><td>Cuántos elementos hay</td></tr>
+        </tbody>
+    </table>
+    </div>
+
+    <h3>Analogía visual</h3>
+    <div class="visual-cola">frente                                  final
+  ↓                                       ↓
+┌──────┬──────┬──────┐        ┌──────┐
+│  10  │  20  │  30  │  ...   │  40  │  ← entra por aquí
+└──────┴──────┴──────┘        └──────┘
+  ↑
+sale por aquí</div>
+</section>
+
+<!-- ===== 2. COMPARACIÓN CON PILA ===== -->
+<section class="section-card" id="parte2">
+    <h2>2. Cola vs Pila: la diferencia clave</h2>
+    <div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr><th>Aspecto</th><th>Cola (Queue)</th><th>Pila (Stack)</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Regla</td><td>FIFO (primero en entrar, primero en salir)</td><td>LIFO (último en entrar, primero en salir)</td></tr>
+            <tr><td>Extremos de operación</td><td>Dos extremos (frente y final)</td><td>Solo un extremo (el tope)</td></tr>
+            <tr><td>Ejemplo real</td><td>Fila del banco, impresora</td><td><a href="pilas-java.html">Pila de platos, deshacer (Ctrl+Z)</a></td></tr>
+            <tr><td>Usos típicos</td><td>Planificación de procesos, BFS, buffers</td><td>Recursión, evaluación de expresiones, retroceso</td></tr>
+        </tbody>
+    </table>
+    </div>
+</section>
+
+<!-- ===== 3. VENTAJAS ===== -->
+<section class="section-card" id="parte3">
+    <h2>3. Ventajas y Desventajas</h2>
+
+    <div class="callout callout-ok">
+        <strong>✅ Ventajas:</strong>
+        <ul class="mb-0 mt-2">
+            <li>Operaciones <code class="inline">encolar</code> y <code class="inline">desencolar</code> en tiempo constante <strong>O(1)</strong> (con puntero al final).</li>
+            <li>Modela naturalmente problemas donde importa el orden de llegada.</li>
+            <li>Tamaño dinámico si se implementa con nodos.</li>
+        </ul>
+    </div>
+
+    <div class="callout callout-warn">
+        <strong>⚠️ Desventajas:</strong>
+        <ul class="mb-0 mt-2">
+            <li>No hay acceso aleatorio: solo puedes ver el frente.</li>
+            <li>Para llegar a un elemento del fondo hay que desencolar los de delante.</li>
+            <li>Si se implementa con array, hay que gestionar el avance circular de índices.</li>
+        </ul>
+    </div>
+</section>
+
+<!-- ===== 4. NODO ===== -->
+<section class="section-card" id="parte4">
+    <h2>4. Nodo, clase y constructor</h2>
+    <p>Para construir la cola necesitamos un <strong>nodo</strong>: una caja con un dato y una referencia al siguiente nodo (el que queda detrás en la cola).</p>
+
+    <h3>4.1 ¿Qué es una clase en Java?</h3>
+<pre><span class="kw">public class</span> <span class="type">Persona</span> {
+    <span class="type">String</span> nombre;
+    <span class="kw">int</span> edad;
+
+    <span class="kw">public</span> <span class="fn">Persona</span>(<span class="type">String</span> nombre, <span class="kw">int</span> edad) {
+        <span class="kw">this</span>.nombre = nombre;
+        <span class="kw">this</span>.edad = edad;
+    }
+}</pre>
+
+    <h3>4.2 ¿Qué es un constructor?</h3>
+    <ul>
+        <li>Tiene el mismo nombre que la clase.</li>
+        <li>No tiene tipo de retorno.</li>
+        <li>Sirve para dar valores iniciales a los atributos.</li>
+        <li>Si no lo declaras, Java proporciona uno por defecto sin parámetros.</li>
+    </ul>
+
+    <h3>4.3 La clase <code class="inline">Nodo</code> auto-referenciada</h3>
+<pre><span class="kw">private static class</span> <span class="type">Nodo</span> {
+    <span class="kw">int</span> dato;
+    <span class="type">Nodo</span> siguiente;
+
+    <span class="fn">Nodo</span>(<span class="kw">int</span> dato) {
+        <span class="kw">this</span>.dato = dato;
+        <span class="kw">this</span>.siguiente = <span class="kw">null</span>;
+    }
+}</pre>
+    <p><code class="inline">Nodo siguiente;</code> guarda una <strong>referencia</strong> a otro objeto <code class="inline">Nodo</code>, no un nodo completo dentro del nodo. La flecha apunta a otra caja o queda vacía (<code class="inline">null</code>).</p>
+</section>
+
+<!-- ===== 5. PRÁCTICA ===== -->
+<section class="section-card" id="parte5">
+    <h2>5. Práctica paso a paso en Java</h2>
+    <p>Construiremos una cola enlazada desde cero para entender cómo se conectan sus nodos y cambian sus referencias. En un programa real normalmente conviene usar la interfaz <code class="inline">Queue</code> con <code class="inline">ArrayDeque</code>.</p>
+
+    <h3>Estructura del proyecto</h3>
+    <pre>Cola.java    ← Gestiona la cola e incluye la clase Nodo
+Main.java    ← Crea la cola y prueba sus operaciones</pre>
+
+    <h3>PASO 1: Representar un nodo</h3>
+<pre><span class="kw">private static class</span> <span class="type">Nodo</span> {
+    <span class="cmt">// El valor que almacena este nodo.</span>
+    <span class="kw">int</span> dato;
+
+    <span class="cmt">// Referencia al SIGUIENTE nodo de la cola.</span>
+    <span class="cmt">// Si este es el último, 'siguiente' será null.</span>
+    <span class="type">Nodo</span> siguiente;
+
+    <span class="fn">Nodo</span>(<span class="kw">int</span> dato) {
+        <span class="kw">this</span>.dato = dato;
+        <span class="kw">this</span>.siguiente = <span class="kw">null</span>;
+    }
+}</pre>
+
+    <h3>PASO 2: Crear la clase <code class="inline">Cola</code></h3>
+    <p>Necesitamos <strong>dos referencias</strong>: <code class="inline">frente</code> para desencolar y <code class="inline">fin</code> para encolar en O(1). Sin <code class="inline">fin</code>, habría que recorrer la cola para encontrar el último nodo y encolar sería O(n).</p>
+<pre><span class="kw">public class</span> <span class="type">Cola</span> {
+
+    <span class="cmt">// 'frente' apunta al PRIMER nodo (por aquí se saca).</span>
+    <span class="cmt">// 'fin'    apunta al ÚLTIMO nodo (por aquí se inserta).</span>
+    <span class="kw">private</span> <span class="type">Nodo</span> frente;
+    <span class="kw">private</span> <span class="type">Nodo</span> fin;
+
+    <span class="kw">public</span> <span class="fn">Cola</span>() {
+        <span class="kw">this</span>.frente = <span class="kw">null</span>;
+        <span class="kw">this</span>.fin    = <span class="kw">null</span>;
+    }</pre>
+
+    <h3>PASO 3: Método <code class="inline">estaVacia()</code></h3>
+<pre><span class="kw">public boolean</span> <span class="fn">estaVacia</span>() {
+    <span class="kw">return</span> frente == <span class="kw">null</span>;
+}</pre>
+
+    <h3>PASO 4: Método <code class="inline">encolar(int dato)</code> — O(1)</h3>
+<pre><span class="kw">public void</span> <span class="fn">encolar</span>(<span class="kw">int</span> dato) {
+    <span class="type">Nodo</span> nuevo = <span class="kw">new</span> <span class="type">Nodo</span>(dato);
+
+    <span class="cmt">// Caso 1: cola vacía → el nuevo es frente y fin a la vez.</span>
+    <span class="kw">if</span> (estaVacia()) {
+        frente = nuevo;
+        fin    = nuevo;
+        <span class="kw">return</span>;
+    }
+
+    <span class="cmt">// Caso 2: ya hay elementos → lo enganchamos después del fin.</span>
+    fin.siguiente = nuevo;
+    fin = nuevo;
+}</pre>
+
+    <div class="trace">Traza visual. Cola 10 → 20 → null (frente = 10, fin = 20). encolar(30):
+
+Antes:  frente → [10|→] → [20|→] → null
+                            ↑
+                           fin
+Paso 1: nuevo = [30|→]
+Paso 2: fin.siguiente = nuevo  ⇒  [20|→] → [30|→] → null
+Paso 3: fin = nuevo            ⇒  fin apunta a [30]
+
+Después: frente → [10|→] → [20|→] → [30|→] → null
+                                      ↑
+                                     fin</div>
+
+    <h3>PASO 5: Método <code class="inline">desencolar()</code> — O(1)</h3>
+        <p>Desencolar una cola vacía no tiene un valor que devolver; esta implementación lo indica con <code class="inline">IllegalStateException</code>.</p>
+<pre><span class="kw">public int</span> <span class="fn">desencolar</span>() {
+    <span class="kw">if</span> (estaVacia()) <span class="kw">throw new</span> <span class="type">IllegalStateException</span>(<span class="str">"La cola está vacía"</span>);
+
+    <span class="kw">int</span> valor = frente.dato;
+    frente = frente.siguiente;   <span class="cmt">// el segundo pasa a ser el frente</span>
+
+    <span class="cmt">// Caso especial: si la cola quedó vacía, fin también debe ser null.</span>
+    <span class="kw">if</span> (frente == <span class="kw">null</span>) {
+        fin = <span class="kw">null</span>;
+    }
+    <span class="kw">return</span> valor;
+}</pre>
+
+    <div class="trace">Traza visual. Cola 10 → 20 → 30 → null. desencolar():
+
+Antes:  frente → [10|→] → [20|→] → [30|→] → null
+                                       ↑
+                                      fin
+valor = 10
+frente = frente.siguiente  ⇒  frente → [20|→] → [30|→] → null
+Devuelve 10. El nodo [10] queda sin referencias y el GC lo libera.</div>
+
+    <div class="callout callout-warn">
+        <strong>⚠️ Error común:</strong> olvidar <code class="inline">fin = null</code> cuando la cola queda vacía. Si no lo haces, <code class="inline">fin</code> sigue apuntando a un nodo "fantasma" y el siguiente <code class="inline">encolar</code> corrompe la cola.
+    </div>
+
+    <h3>PASO 6: Métodos <code class="inline">verFrente()</code>, <code class="inline">tamaño()</code> e <code class="inline">imprimir()</code></h3>
+<pre><span class="kw">public int</span> <span class="fn">verFrente</span>() {
+    <span class="kw">if</span> (estaVacia()) <span class="kw">throw new</span> <span class="type">IllegalStateException</span>(<span class="str">"La cola está vacía"</span>);
+    <span class="kw">return</span> frente.dato;
+}
+
+<span class="kw">public int</span> <span class="fn">tamaño</span>() {
+    <span class="kw">int</span> contador = <span class="num">0</span>;
+    <span class="type">Nodo</span> actual = frente;
+    <span class="kw">while</span> (actual != <span class="kw">null</span>) {
+        contador++;
+        actual = actual.siguiente;
+    }
+    <span class="kw">return</span> contador;
+}
+
+<span class="kw">public void</span> <span class="fn">imprimir</span>() {
+    <span class="kw">if</span> (estaVacia()) {
+        <span class="type">System</span>.out.println(<span class="str">"La cola está vacía."</span>);
+        <span class="kw">return</span>;
+    }
+    <span class="type">Nodo</span> actual = frente;
+    <span class="kw">while</span> (actual != <span class="kw">null</span>) {
+        <span class="type">System</span>.out.print(actual.dato);
+        <span class="kw">if</span> (actual.siguiente != <span class="kw">null</span>) <span class="type">System</span>.out.print(<span class="str">" → "</span>);
+        actual = actual.siguiente;
+    }
+    <span class="type">System</span>.out.println();
+}</pre>
+
+    <div class="callout callout-warn">
+        <strong>⚠️ Nunca muevas <code class="inline">frente</code> para recorrer.</strong> Usa siempre una variable auxiliar <code class="inline">Nodo actual = frente;</code>; si no, pierdes la cola.
+    </div>
+
+    <h3>🧱 Código completo — <code class="inline">Cola.java</code></h3>
+<pre><span class="kw">public class</span> <span class="type">Cola</span> {
+
+    <span class="kw">private static class</span> <span class="type">Nodo</span> {
+        <span class="kw">int</span> dato;
+        <span class="type">Nodo</span> siguiente;
+        <span class="fn">Nodo</span>(<span class="kw">int</span> dato) { <span class="kw">this</span>.dato = dato; <span class="kw">this</span>.siguiente = <span class="kw">null</span>; }
+    }
+
+    <span class="kw">private</span> <span class="type">Nodo</span> frente;
+    <span class="kw">private</span> <span class="type">Nodo</span> fin;
+
+    <span class="kw">public</span> <span class="fn">Cola</span>() { <span class="kw">this</span>.frente = <span class="kw">null</span>; <span class="kw">this</span>.fin = <span class="kw">null</span>; }
+
+    <span class="kw">public boolean</span> <span class="fn">estaVacia</span>() { <span class="kw">return</span> frente == <span class="kw">null</span>; }
+
+    <span class="kw">public void</span> <span class="fn">encolar</span>(<span class="kw">int</span> dato) {
+        <span class="type">Nodo</span> nuevo = <span class="kw">new</span> <span class="type">Nodo</span>(dato);
+        <span class="kw">if</span> (estaVacia()) {
+            frente = nuevo;
+            fin    = nuevo;
+            <span class="kw">return</span>;
+        }
+        fin.siguiente = nuevo;
+        fin = nuevo;
+    }
+
+    <span class="kw">public int</span> <span class="fn">desencolar</span>() {
+        <span class="kw">if</span> (estaVacia()) <span class="kw">throw new</span> <span class="type">IllegalStateException</span>(<span class="str">"La cola está vacía"</span>);
+        <span class="kw">int</span> valor = frente.dato;
+        frente = frente.siguiente;
+        <span class="kw">if</span> (frente == <span class="kw">null</span>) fin = <span class="kw">null</span>;
+        <span class="kw">return</span> valor;
+    }
+
+    <span class="kw">public int</span> <span class="fn">verFrente</span>() {
+        <span class="kw">if</span> (estaVacia()) <span class="kw">throw new</span> <span class="type">IllegalStateException</span>(<span class="str">"La cola está vacía"</span>);
+        <span class="kw">return</span> frente.dato;
+    }
+
+    <span class="kw">public int</span> <span class="fn">tamaño</span>() {
+        <span class="kw">int</span> contador = <span class="num">0</span>;
+        <span class="type">Nodo</span> actual = frente;
+        <span class="kw">while</span> (actual != <span class="kw">null</span>) { contador++; actual = actual.siguiente; }
+        <span class="kw">return</span> contador;
+    }
+
+    <span class="kw">public void</span> <span class="fn">imprimir</span>() {
+        <span class="kw">if</span> (estaVacia()) { <span class="type">System</span>.out.println(<span class="str">"La cola está vacía."</span>); <span class="kw">return</span>; }
+        <span class="type">Nodo</span> actual = frente;
+        <span class="kw">while</span> (actual != <span class="kw">null</span>) {
+            <span class="type">System</span>.out.print(actual.dato);
+            <span class="kw">if</span> (actual.siguiente != <span class="kw">null</span>) <span class="type">System</span>.out.print(<span class="str">" → "</span>);
+            actual = actual.siguiente;
+        }
+        <span class="type">System</span>.out.println();
+    }
+}</pre>
+
+    <h3>🧪 Pruebas — <code class="inline">Main.java</code></h3>
+<pre><span class="kw">public class</span> <span class="type">Main</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="type">String</span>[] args) {
+        <span class="type">Cola</span> cola = <span class="kw">new</span> <span class="type">Cola</span>();
+
+        <span class="type">System</span>.out.println(<span class="str">"¿Está vacía? "</span> + cola.estaVacia()); <span class="cmt">// true</span>
+
+        cola.encolar(<span class="num">10</span>);
+        cola.encolar(<span class="num">20</span>);
+        cola.encolar(<span class="num">30</span>);
+        <span class="type">System</span>.out.print(<span class="str">"Cola tras encolar 10, 20, 30: "</span>);
+        cola.imprimir();                                <span class="cmt">// 10 → 20 → 30</span>
+
+        <span class="type">System</span>.out.println(<span class="str">"verFrente():  "</span> + cola.verFrente());  <span class="cmt">// 10</span>
+        <span class="type">System</span>.out.println(<span class="str">"desencolar(): "</span> + cola.desencolar()); <span class="cmt">// 10</span>
+        <span class="type">System</span>.out.print(<span class="str">"Cola tras desencolar: "</span>);
+        cola.imprimir();                                <span class="cmt">// 20 → 30</span>
+
+        <span class="type">System</span>.out.println(<span class="str">"Tamaño: "</span> + cola.tamaño());        <span class="cmt">// 2</span>
+        <span class="type">System</span>.out.println(<span class="str">"desencolar(): "</span> + cola.desencolar()); <span class="cmt">// 20</span>
+        <span class="type">System</span>.out.println(<span class="str">"desencolar(): "</span> + cola.desencolar()); <span class="cmt">// 30</span>
+        <span class="type">System</span>.out.println(<span class="str">"¿Está vacía? "</span> + cola.estaVacia()); <span class="cmt">// true</span>
+    }
+}</pre>
+
+    <h4 class="mt-4">Salida esperada</h4>
+<pre>¿Está vacía? true
+Cola tras encolar 10, 20, 30: 10 → 20 → 30
+verFrente():  10
+desencolar(): 10
+Cola tras desencolar: 20 → 30
+Tamaño: 2
+desencolar(): 20
+desencolar(): 30
+¿Está vacía? true</pre>
+</section>
+
+<!-- ===== 6. COMPLEJIDADES ===== -->
+<section class="section-card" id="parte6">
+    <h2>6. Complejidades (Notación Big-O)</h2>
+
+    <h3>6.1 ¿Qué es la Notación Big-O?</h3>
+    <p>Es una forma matemática de describir cómo crece el tiempo de ejecución (o el uso de memoria) de un algoritmo a medida que crece el tamaño de la entrada. No mide segundos exactos, sino el orden de magnitud.</p>
+    <ul>
+        <li><strong>O(1)</strong> → trabajo constante: no aumenta al crecer <em>n</em>.</li>
+        <li><strong>O(n)</strong> → trabajo lineal: aumenta en proporción al número de elementos.</li>
+        <li><strong>O(log n)</strong> → trabajo logarítmico: crece despacio.</li>
+        <li><strong>O(n²)</strong> → trabajo cuadrático: crece rápidamente.</li>
+    </ul>
+
+    <h3>6.2 ¿Qué significa O(1) en una cola?</h3>
+    <p><code class="inline">encolar</code> y <code class="inline">desencolar</code> son O(1) porque solo se mueve una referencia. En el caso de <code class="inline">encolar</code>, la referencia <code class="inline">fin</code> nos ahorra recorrer la cola. Sin ella, encolar sería O(n).</p>
+    <p><strong>Ejemplo intuitivo:</strong> añadir una persona al final de una fila requiere el mismo trabajo tanto si hay 10 personas como si hay 1000.</p>
+
+    <h3>6.3 Tabla de complejidades de nuestra cola</h3>
+    <div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr><th>Operación</th><th>¿Qué hace?</th><th>Complejidad</th><th>¿Por qué?</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code class="inline">encolar</code></td><td>Añade un elemento al final</td><td><strong>O(1)</strong></td><td>Gracias a la referencia <code class="inline">fin</code>, no hay que recorrer.</td></tr>
+            <tr><td><code class="inline">desencolar</code></td><td>Saca el frente</td><td><strong>O(1)</strong></td><td>Solo se mueve <code class="inline">frente</code> al siguiente.</td></tr>
+            <tr><td><code class="inline">verFrente</code></td><td>Mira el frente</td><td><strong>O(1)</strong></td><td>Acceso directo a <code class="inline">frente.dato</code>.</td></tr>
+            <tr><td><code class="inline">estaVacia</code></td><td>¿Hay elementos?</td><td><strong>O(1)</strong></td><td>Solo comprueba <code class="inline">frente == null</code>.</td></tr>
+            <tr><td><code class="inline">tamaño</code></td><td>Cuenta elementos</td><td><strong>O(n)</strong></td><td>Recorre toda la cola.</td></tr>
+            <tr><td><code class="inline">imprimir</code></td><td>Muestra los elementos</td><td><strong>O(n)</strong></td><td>Visita cada nodo una vez.</td></tr>
+        </tbody>
+    </table>
+    </div>
+
+    <div class="callout callout-info">
+        <strong>💡 Truco:</strong> si guardas un atributo <code class="inline">int tamaño</code> y lo incrementas/decrementas en cada operación, <code class="inline">tamaño()</code> pasa a O(1).
+    </div>
+
+    <h3>6.4 Regla práctica para identificar la complejidad</h3>
+    <ul>
+        <li>¿El trabajo es siempre el mismo sin importar el tamaño? → <strong>O(1)</strong></li>
+        <li>¿Recorres todos los elementos una vez? → <strong>O(n)</strong></li>
+        <li>¿Recorres todos los elementos y por cada uno haces otro recorrido completo? → <strong>O(n²)</strong></li>
+        <li>¿Vas dividiendo el problema a la mitad en cada paso? → <strong>O(log n)</strong></li>
+    </ul>
+</section>
+
+<!-- ===== 7. ERRORES ===== -->
+<section class="section-card" id="parte7">
+    <h2>7. Errores Comunes a Evitar</h2>
+    <ul>
+        <li><strong>Mover <code class="inline">frente</code> para recorrer</strong> → pierdes la cola entera. Usa siempre <code class="inline">Nodo actual = frente;</code>.</li>
+        <li><strong>No comprobar si está vacía antes de <code class="inline">desencolar</code>/<code class="inline">verFrente</code></strong> → en esta implementación se lanza <code class="inline">IllegalStateException</code>.</li>
+        <li><strong>Olvidar <code class="inline">fin = null</code> cuando la cola queda vacía</strong> → <code class="inline">fin</code> apunta a un nodo huérfano y el siguiente <code class="inline">encolar</code> se corrompe.</li>
+        <li><strong>En <code class="inline">encolar</code> sobre cola vacía</strong>, olvidar asignar <code class="inline">frente = nuevo</code> → la cola queda inconsistente.</li>
+        <li><strong>Mover <code class="inline">frente = frente.siguiente</code> antes de leer el dato</strong> en <code class="inline">desencolar</code> → pierdes el valor que querías devolver.</li>
+        <li><strong>Confundir <code class="inline">actual != null</code> con <code class="inline">actual.siguiente != null</code></strong>: el primero recorre todos los nodos, el segundo se detiene en el último.</li>
+    </ul>
+</section>
+
+<!-- ===== 8. SIGUIENTES PASOS ===== -->
+<section class="section-card" id="parte8">
+    <h2>8. Siguientes Pasos Recomendados</h2>
+    <ul>
+        <li><strong>Genéricos:</strong> cambia <code class="inline">int</code> por <code class="inline">&lt;T&gt;</code> para colas de cualquier tipo.</li>
+        <li><strong>Cola circular con array:</strong> implementa una cola con un arreglo y dos índices (<code class="inline">frente</code>, <code class="inline">fin</code>) que "den la vuelta" para reutilizar espacio.</li>
+        <li><strong>Cola con dos pilas:</strong> ejercicio clásico de entrevistas.</li>
+        <li><strong>Cola de prioridad:</strong> usa un <em>heap</em> (montículo) para atender primero los elementos con mayor prioridad.</li>
+        <li><strong>Usar las clases de Java:</strong> prueba <code class="inline">java.util.ArrayDeque</code> (recomendada) y <code class="inline">java.util.LinkedList</code> (implementa <code class="inline">Queue</code>).</li>
+        <li><strong>Aplicaciones reales:</strong> planificación de procesos, BFS, buffers de impresión, sistemas de mensajería, colas de tareas.</li>
+    </ul>
+</section>
+
+</main>
+
+<footer class="footer text-center">
+    <div class="container">
+        <p class="mb-0">Guía de Colas en Java · Estructuras de Datos</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

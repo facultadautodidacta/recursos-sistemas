@@ -68,5 +68,25 @@ export const resources = [
         technologies: ["Java", "Listas enlazadas"],
         format: "Guía paso a paso",
         href: "guias/estructuras-de-datos/listas-enlazadas-java.html"
+    },
+    {
+        id: "java-queues",
+        title: "Colas con Java",
+        category: "Estructuras de datos",
+        filter: "estructuras",
+        description: "Comprende la regla FIFO y construye una cola enlazada con operaciones de encolar, desencolar y consultar el frente.",
+        technologies: ["Java", "Colas", "FIFO"],
+        format: "Guía paso a paso",
+        href: "guias/estructuras-de-datos/colas-java.html"
+    },
+    {
+        id: "java-stacks",
+        title: "Pilas con Java",
+        category: "Estructuras de datos",
+        filter: "estructuras",
+        description: "Comprende la regla LIFO y construye una pila enlazada con operaciones de apilar, desapilar y consultar el tope.",
+        technologies: ["Java", "Pilas", "LIFO"],
+        format: "Guía paso a paso",
+        href: "guias/estructuras-de-datos/pilas-java.html"
     }
 ];

@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Aprende qué es una pila LIFO y construye una pila enlazada en Java, paso a paso.">
+<title>Pilas con Java, paso a paso | Recursos de Sistemas</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="../../public/guide.css">
+<link rel="stylesheet" href="../../public/structures-guide.css">
+</head>
+<body class="guide-page data-structure-guide-page">
+
+<!-- ===== HERO ===== -->
+<nav class="guide-site-header" aria-label="Navegación principal">
+    <a class="guide-brand" href="../../index.html">
+        <span class="guide-brand-mark" aria-hidden="true">RS</span>
+        <span>Recursos de Sistemas</span>
+    </a>
+    <a class="guide-back-link" href="../../index.html#recursos">← Volver al catálogo</a>
+</nav>
+<header class="hero">
+    <div class="container">
+        <span class="badge bg-light text-dark mb-3">ESTRUCTURAS DE DATOS · JAVA</span>
+        <h1 class="display-4">Pilas en Java, paso a paso</h1>
+        <p class="lead">Comprende la regla LIFO y construye tu propia pila con nodos desde cero.</p>
+    </div>
+</header>
+
+<main class="guide-content">
+<nav class="toc" aria-label="Contenido de la guía">
+    <h2>En esta guía</h2>
+    <ol class="mb-0">
+        <li><a href="#parte1">¿Qué es una pila?</a></li>
+        <li><a href="#parte2">Ventajas y desventajas</a></li>
+        <li><a href="#parte3">Nodo, clase y constructor</a></li>
+        <li><a href="#parte4">Construcción paso a paso y pruebas</a></li>
+        <li><a href="#parte5">Complejidades</a></li>
+        <li><a href="#parte6">Errores comunes</a></li>
+        <li><a href="#parte7">Siguientes pasos</a></li>
+    </ol>
+</nav>
+
+<!-- ===== 1. CONCEPTO ===== -->
+<section class="section-card" id="parte1">
+    <h2>1. ¿Qué es una Pila (Stack)?</h2>
+
+    <h3>Concepto básico</h3>
+    <p>Imagina una <strong>pila de platos</strong>. Solo puedes poner un plato arriba y quitar el plato de arriba. No puedes sacar el plato de abajo sin antes quitar todos los de encima.</p>
+    <p>Una pila es una estructura de datos lineal con una regla muy simple: <strong>LIFO</strong> (<em>Last In, First Out</em> — el último en entrar es el primero en salir).</p>
+
+    <div class="callout callout-info">
+        <strong>La idea en una frase:</strong> solo se opera por un extremo (el <strong>tope</strong> o <em>top</em>). El último elemento que entró es el único al que puedes acceder.
+    </div>
+
+    <p>Ejemplo: si apilas <code class="inline">10 → 20 → 30</code>, el tope es <code class="inline">30</code>. Para sacar el <code class="inline">10</code>, primero debes sacar el <code class="inline">30</code> y luego el <code class="inline">20</code>.</p>
+
+    <h3>Operaciones fundamentales</h3>
+    <div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr><th>Operación</th><th>¿Qué hace?</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code class="inline">push(dato)</code></td><td>Apila un elemento arriba</td></tr>
+            <tr><td><code class="inline">pop()</code></td><td>Saca y devuelve el elemento del tope</td></tr>
+            <tr><td><code class="inline">peek()</code> o <code class="inline">top()</code></td><td>Mira el tope <strong>sin</strong> sacarlo</td></tr>
+            <tr><td><code class="inline">estaVacia()</code></td><td>Indica si no hay elementos</td></tr>
+            <tr><td><code class="inline">tamaño()</code></td><td>Cuántos elementos hay</td></tr>
+        </tbody>
+    </table>
+    </div>
+
+    <h3>Analogía visual</h3>
+    <div class="visual-pila">        ┌──────┐
+        │  30  │  ← tope (último en entrar, primero en salir)
+        ├──────┤
+        │  20  │
+        ├──────┤
+        │  10  │  ← base
+        └──────┘</div>
+    <p class="mt-3">Si haces <code class="inline">push(40)</code>, queda arriba del <code class="inline">30</code>. Si haces <code class="inline">pop()</code>, sale el <code class="inline">40</code> y vuelve a quedar <code class="inline">30</code> como tope.</p>
+</section>
+
+<!-- ===== 2. VENTAJAS ===== -->
+<section class="section-card" id="parte2">
+    <h2>2. Ventajas y Desventajas</h2>
+
+    <div class="callout callout-ok">
+        <strong>✅ Ventajas:</strong>
+        <ul class="mb-0 mt-2">
+            <li>Operaciones <code class="inline">push</code> y <code class="inline">pop</code> en tiempo constante <strong>O(1)</strong>.</li>
+            <li>Modela naturalmente problemas de retroceso (deshacer, recursión, evaluación de expresiones).</li>
+            <li>Tamaño dinámico si se implementa con nodos.</li>
+        </ul>
+    </div>
+
+    <div class="callout callout-warn">
+        <strong>⚠️ Desventajas:</strong>
+        <ul class="mb-0 mt-2">
+            <li>No hay acceso aleatorio: solo puedes ver el tope.</li>
+            <li>Para llegar a un elemento del fondo hay que desapilar los de arriba.</li>
+            <li>Si se implementa con un arreglo de tamaño fijo, la capacidad está limitada.</li>
+        </ul>
+    </div>
+</section>
+
+<!-- ===== 3. NODO ===== -->
+<section class="section-card" id="parte3">
+    <h2>3. Nodo, clase y constructor</h2>
+    <p>Para construir la pila necesitamos un <strong>nodo</strong>: una caja con un dato y una referencia al siguiente nodo (el que queda debajo).</p>
+
+    <h3>3.1 ¿Qué es una clase en Java?</h3>
+    <p>Una clase define un tipo de referencia y describe cómo serán los objetos creados a partir de ella. Puede tener <strong>atributos</strong>, <strong>métodos</strong> y <strong>constructores</strong>.</p>
+
+<pre><span class="kw">public class</span> <span class="type">Persona</span> {
+    <span class="type">String</span> nombre;   <span class="cmt">// atributo</span>
+    <span class="kw">int</span> edad;        <span class="cmt">// atributo</span>
+
+    <span class="kw">public</span> <span class="fn">Persona</span>(<span class="type">String</span> nombre, <span class="kw">int</span> edad) {  <span class="cmt">// constructor</span>
+        <span class="kw">this</span>.nombre = nombre;
+        <span class="kw">this</span>.edad = edad;
+    }
+}</pre>
+    <p><code class="inline">Persona</code> es un tipo que describe objetos; cuando escribes <code class="inline">new Persona("Ana", 25)</code> estás creando un objeto concreto.</p>
+
+    <h3>3.2 ¿Qué es un constructor?</h3>
+    <ul>
+        <li>Tiene el mismo nombre que la clase.</li>
+        <li>No tiene tipo de retorno (ni siquiera <code class="inline">void</code>).</li>
+        <li>Sirve para dar valores iniciales a los atributos del objeto.</li>
+        <li>Si no declaras ninguno, Java proporciona uno predeterminado sin parámetros.</li>
+    </ul>
+
+    <h3>3.3 ¿Por qué una clase <code class="inline">Nodo</code> puede referirse a sí misma?</h3>
+    <p>Al escribir <code class="inline">class Nodo { ... }</code> creas el tipo por referencia <code class="inline">Nodo</code>. Dentro de la clase puedes declarar <code class="inline">Nodo siguiente;</code>: esa variable guarda una <strong>referencia</strong> a otro objeto <code class="inline">Nodo</code>, no un nodo completo dentro del nodo. Este patrón se llama <strong>auto-referencia</strong>.</p>
+
+<pre><span class="kw">private static class</span> <span class="type">Nodo</span> {
+    <span class="kw">int</span> dato;
+    <span class="type">Nodo</span> siguiente;
+
+    <span class="fn">Nodo</span>(<span class="kw">int</span> dato) {
+        <span class="kw">this</span>.dato = dato;
+        <span class="kw">this</span>.siguiente = <span class="kw">null</span>;
+    }
+}</pre>
+
+    <div class="callout callout-info">
+        Piensa en cada nodo como una caja con un valor y una flecha. La flecha apunta a otra caja o queda vacía (<code class="inline">null</code>); no contiene otra caja dentro.
+    </div>
+</section>
+
+<!-- ===== 4. PRÁCTICA ===== -->
+<section class="section-card" id="parte4">
+    <h2>4. Práctica paso a paso en Java</h2>
+    <p>Construiremos una pila enlazada desde cero para entender cómo se conectan sus nodos y cambia el tope. En programas reales suele preferirse la interfaz <code class="inline">Deque</code> con <code class="inline">ArrayDeque</code>; <code class="inline">Stack</code> es una clase antigua.</p>
+
+    <h3>Estructura del proyecto</h3>
+    <pre>Pila.java    ← Gestiona la pila e incluye la clase Nodo
+Main.java    ← Crea la pila y prueba sus operaciones</pre>
+
+    <h3>PASO 1: Representar un nodo</h3>
+<pre><span class="kw">private static class</span> <span class="type">Nodo</span> {
+    <span class="cmt">// El valor que almacena este nodo.</span>
+    <span class="kw">int</span> dato;
+
+    <span class="cmt">// Referencia al nodo que queda DEBAJO en la pila.</span>
+    <span class="cmt">// Si este es el último (el fondo), 'siguiente' será null.</span>
+    <span class="type">Nodo</span> siguiente;
+
+    <span class="fn">Nodo</span>(<span class="kw">int</span> dato) {
+        <span class="kw">this</span>.dato = dato;
+        <span class="kw">this</span>.siguiente = <span class="kw">null</span>;
+    }
+}</pre>
+    <ul>
+        <li><code class="inline">int dato;</code> → guarda el valor. Para una pila de Strings sería <code class="inline">String dato;</code>.</li>
+        <li><code class="inline">Nodo siguiente;</code> → la "cadena" que une los nodos hacia abajo.</li>
+        <li>El constructor solo pide el dato: un nodo nuevo siempre nace suelto.</li>
+    </ul>
+
+    <h3>PASO 2: Crear la clase <code class="inline">Pila</code></h3>
+<pre><span class="kw">public class</span> <span class="type">Pila</span> {
+
+    <span class="cmt">// 'tope' apunta al nodo de ARRIBA.</span>
+    <span class="cmt">// Si la pila está vacía, tope == null.</span>
+    <span class="kw">private</span> <span class="type">Nodo</span> tope;
+
+    <span class="kw">public</span> <span class="fn">Pila</span>() {
+        <span class="kw">this</span>.tope = <span class="kw">null</span>;
+    }</pre>
+
+    <h3>PASO 3: Método <code class="inline">estaVacia()</code></h3>
+<pre><span class="kw">public boolean</span> <span class="fn">estaVacia</span>() {
+    <span class="kw">return</span> tope == <span class="kw">null</span>;
+}</pre>
+    <p>Si <code class="inline">tope</code> es <code class="inline">null</code>, no hay ni siquiera un primer nodo: la pila está vacía.</p>
+
+    <h3>PASO 4: Método <code class="inline">push(int dato)</code> — apilar</h3>
+    <p>Es la operación más eficiente de una pila: <strong>O(1)</strong>.</p>
+<pre><span class="kw">public void</span> <span class="fn">push</span>(<span class="kw">int</span> dato) {
+    <span class="cmt">// 1) Creamos el nuevo nodo.</span>
+    <span class="type">Nodo</span> nuevo = <span class="kw">new</span> <span class="type">Nodo</span>(dato);
+
+    <span class="cmt">// 2) El nuevo nodo apunta al viejo tope (queda "encima").</span>
+    nuevo.siguiente = tope;
+
+    <span class="cmt">// 3) Actualizamos 'tope' al nuevo nodo.</span>
+    tope = nuevo;
+}</pre>
+
+    <div class="trace">Traza visual. Pila 20 → 10 → null (tope = 20). push(30):
+
+Antes:  tope → [20|→] → [10|→] → null
+Paso 1: nuevo = [30|→]
+Paso 2: nuevo.siguiente = tope  ⇒  [30|→] → [20|→] → [10|→] → null
+Paso 3: tope = nuevo           ⇒  tope → [30|→] → [20|→] → [10|→] → null</div>
+
+    <div class="callout callout-warn">
+        <strong>⚠️ El orden importa:</strong> si haces <code class="inline">tope = nuevo</code> antes de <code class="inline">nuevo.siguiente = tope</code>, pierdes la pila entera.
+    </div>
+
+    <h3>PASO 5: Método <code class="inline">pop()</code> — desapilar</h3>
+        <p>Desapilar una pila vacía no tiene un valor que devolver; esta implementación lo indica con <code class="inline">IllegalStateException</code>.</p>
+<pre><span class="kw">public int</span> <span class="fn">pop</span>() {
+    <span class="kw">if</span> (estaVacia()) {
+        <span class="kw">throw new</span> <span class="type">IllegalStateException</span>(<span class="str">"La pila está vacía"</span>);
+    }
+    <span class="kw">int</span> valor = tope.dato;    <span class="cmt">// guardamos el dato del tope</span>
+    tope = tope.siguiente;     <span class="cmt">// el segundo pasa a ser el nuevo tope</span>
+    <span class="kw">return</span> valor;
+}</pre>
+
+    <div class="trace">Traza visual. Pila 30 → 20 → 10 → null. pop():
+
+Antes:  tope → [30|→] → [20|→] → [10|→] → null
+valor = 30
+tope = tope.siguiente  ⇒  tope → [20|→] → [10|→] → null
+Devuelve 30. El nodo [30] queda sin referencias y el GC lo libera.</div>
+
+    <h3>PASO 6: Métodos <code class="inline">peek()</code>, <code class="inline">tamaño()</code> e <code class="inline">imprimir()</code></h3>
+<pre><span class="kw">public int</span> <span class="fn">peek</span>() {
+    <span class="kw">if</span> (estaVacia()) <span class="kw">throw new</span> <span class="type">IllegalStateException</span>(<span class="str">"La pila está vacía"</span>);
+    <span class="kw">return</span> tope.dato;
+}
+
+<span class="kw">public int</span> <span class="fn">tamaño</span>() {
+    <span class="kw">int</span> contador = <span class="num">0</span>;
+    <span class="type">Nodo</span> actual = tope;
+    <span class="kw">while</span> (actual != <span class="kw">null</span>) {
+        contador++;
+        actual = actual.siguiente;
+    }
+    <span class="kw">return</span> contador;
+}
+
+<span class="kw">public void</span> <span class="fn">imprimir</span>() {
+    <span class="kw">if</span> (estaVacia()) {
+        <span class="type">System</span>.out.println(<span class="str">"La pila está vacía."</span>);
+        <span class="kw">return</span>;
+    }
+    <span class="type">Nodo</span> actual = tope;
+    <span class="kw">while</span> (actual != <span class="kw">null</span>) {
+        <span class="type">System</span>.out.print(actual.dato);
+        <span class="kw">if</span> (actual.siguiente != <span class="kw">null</span>) <span class="type">System</span>.out.print(<span class="str">" ↓ "</span>);
+        actual = actual.siguiente;
+    }
+    <span class="type">System</span>.out.println();
+}</pre>
+
+    <div class="callout callout-warn">
+        <strong>⚠️ Nunca muevas <code class="inline">tope</code> para recorrer.</strong> Usa siempre una variable auxiliar <code class="inline">Nodo actual = tope;</code>; si no, pierdes la pila.
+    </div>
+
+    <h3>🧱 Código completo — <code class="inline">Pila.java</code></h3>
+<pre><span class="kw">public class</span> <span class="type">Pila</span> {
+
+    <span class="kw">private static class</span> <span class="type">Nodo</span> {
+        <span class="kw">int</span> dato;
+        <span class="type">Nodo</span> siguiente;
+        <span class="fn">Nodo</span>(<span class="kw">int</span> dato) { <span class="kw">this</span>.dato = dato; <span class="kw">this</span>.siguiente = <span class="kw">null</span>; }
+    }
+
+    <span class="kw">private</span> <span class="type">Nodo</span> tope;
+
+    <span class="kw">public</span> <span class="fn">Pila</span>() { <span class="kw">this</span>.tope = <span class="kw">null</span>; }
+
+    <span class="kw">public boolean</span> <span class="fn">estaVacia</span>() { <span class="kw">return</span> tope == <span class="kw">null</span>; }
+
+    <span class="kw">public void</span> <span class="fn">push</span>(<span class="kw">int</span> dato) {
+        <span class="type">Nodo</span> nuevo = <span class="kw">new</span> <span class="type">Nodo</span>(dato);
+        nuevo.siguiente = tope;
+        tope = nuevo;
+    }
+
+    <span class="kw">public int</span> <span class="fn">pop</span>() {
+        <span class="kw">if</span> (estaVacia()) <span class="kw">throw new</span> <span class="type">IllegalStateException</span>(<span class="str">"La pila está vacía"</span>);
+        <span class="kw">int</span> valor = tope.dato;
+        tope = tope.siguiente;
+        <span class="kw">return</span> valor;
+    }
+
+    <span class="kw">public int</span> <span class="fn">peek</span>() {
+        <span class="kw">if</span> (estaVacia()) <span class="kw">throw new</span> <span class="type">IllegalStateException</span>(<span class="str">"La pila está vacía"</span>);
+        <span class="kw">return</span> tope.dato;
+    }
+
+    <span class="kw">public int</span> <span class="fn">tamaño</span>() {
+        <span class="kw">int</span> contador = <span class="num">0</span>;
+        <span class="type">Nodo</span> actual = tope;
+        <span class="kw">while</span> (actual != <span class="kw">null</span>) { contador++; actual = actual.siguiente; }
+        <span class="kw">return</span> contador;
+    }
+
+    <span class="kw">public void</span> <span class="fn">imprimir</span>() {
+        <span class="kw">if</span> (estaVacia()) { <span class="type">System</span>.out.println(<span class="str">"La pila está vacía."</span>); <span class="kw">return</span>; }
+        <span class="type">Nodo</span> actual = tope;
+        <span class="kw">while</span> (actual != <span class="kw">null</span>) {
+            <span class="type">System</span>.out.print(actual.dato);
+            <span class="kw">if</span> (actual.siguiente != <span class="kw">null</span>) <span class="type">System</span>.out.print(<span class="str">" ↓ "</span>);
+            actual = actual.siguiente;
+        }
+        <span class="type">System</span>.out.println();
+    }
+}</pre>
+
+    <h3>🧪 Pruebas — <code class="inline">Main.java</code></h3>
+<pre><span class="kw">public class</span> <span class="type">Main</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="type">String</span>[] args) {
+        <span class="type">Pila</span> pila = <span class="kw">new</span> <span class="type">Pila</span>();
+
+        <span class="type">System</span>.out.println(<span class="str">"¿Está vacía? "</span> + pila.estaVacia()); <span class="cmt">// true</span>
+
+        pila.push(<span class="num">10</span>);
+        pila.push(<span class="num">20</span>);
+        pila.push(<span class="num">30</span>);
+        <span class="type">System</span>.out.print(<span class="str">"Pila tras push 10, 20, 30: "</span>);
+        pila.imprimir();                                 <span class="cmt">// 30 ↓ 20 ↓ 10</span>
+
+        <span class="type">System</span>.out.println(<span class="str">"peek():  "</span> + pila.peek());     <span class="cmt">// 30</span>
+        <span class="type">System</span>.out.println(<span class="str">"pop():   "</span> + pila.pop());      <span class="cmt">// 30</span>
+        <span class="type">System</span>.out.print(<span class="str">"Pila tras pop: "</span>);
+        pila.imprimir();                                 <span class="cmt">// 20 ↓ 10</span>
+
+        <span class="type">System</span>.out.println(<span class="str">"Tamaño: "</span> + pila.tamaño());    <span class="cmt">// 2</span>
+        <span class="type">System</span>.out.println(<span class="str">"pop():   "</span> + pila.pop());      <span class="cmt">// 20</span>
+        <span class="type">System</span>.out.println(<span class="str">"pop():   "</span> + pila.pop());      <span class="cmt">// 10</span>
+        <span class="type">System</span>.out.println(<span class="str">"¿Está vacía? "</span> + pila.estaVacia()); <span class="cmt">// true</span>
+    }
+}</pre>
+
+    <h4 class="mt-4">Salida esperada</h4>
+<pre>¿Está vacía? true
+Pila tras push 10, 20, 30: 30 ↓ 20 ↓ 10
+peek():  30
+pop():   30
+Pila tras pop: 20 ↓ 10
+Tamaño: 2
+pop():   20
+pop():   10
+¿Está vacía? true</pre>
+</section>
+
+<!-- ===== 5. COMPLEJIDADES ===== -->
+<section class="section-card" id="parte5">
+    <h2>5. Complejidades (Notación Big-O)</h2>
+
+    <h3>5.1 ¿Qué es la Notación Big-O?</h3>
+    <p>Es una forma matemática de describir cómo crece el tiempo de ejecución (o el uso de memoria) de un algoritmo a medida que crece el tamaño de la entrada. No mide segundos exactos, sino el orden de magnitud.</p>
+    <ul>
+        <li><strong>O(1)</strong> → trabajo constante: no aumenta al crecer <em>n</em>.</li>
+        <li><strong>O(n)</strong> → trabajo lineal: aumenta en proporción al número de elementos.</li>
+        <li><strong>O(log n)</strong> → trabajo logarítmico: crece despacio.</li>
+        <li><strong>O(n²)</strong> → trabajo cuadrático: crece rápidamente.</li>
+    </ul>
+
+    <h3>5.2 ¿Qué significa O(1) en una pila?</h3>
+    <p><code class="inline">push</code> y <code class="inline">pop</code> son O(1) porque solo hacen un número fijo de operaciones: crear el nodo, mover una referencia y actualizar <code class="inline">tope</code>. Nada depende del tamaño de la pila.</p>
+    <p><strong>Ejemplo intuitivo:</strong> sacar el plato de arriba de una torre requiere un movimiento tanto si la torre tiene 10 platos como si tiene 1000.</p>
+
+    <h3>5.3 Tabla de complejidades de nuestra pila</h3>
+    <div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr><th>Operación</th><th>¿Qué hace?</th><th>Complejidad</th><th>¿Por qué?</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code class="inline">push</code></td><td>Apila un elemento</td><td><strong>O(1)</strong></td><td>El nuevo nodo se enlaza con el tope anterior.</td></tr>
+            <tr><td><code class="inline">pop</code></td><td>Saca el tope</td><td><strong>O(1)</strong></td><td>Solo se mueve <code class="inline">tope</code> al siguiente.</td></tr>
+            <tr><td><code class="inline">peek</code></td><td>Mira el tope</td><td><strong>O(1)</strong></td><td>Acceso directo a <code class="inline">tope.dato</code>.</td></tr>
+            <tr><td><code class="inline">estaVacia</code></td><td>¿Hay elementos?</td><td><strong>O(1)</strong></td><td>Solo comprueba <code class="inline">tope == null</code>.</td></tr>
+            <tr><td><code class="inline">tamaño</code></td><td>Cuenta elementos</td><td><strong>O(n)</strong></td><td>Recorre toda la pila.</td></tr>
+            <tr><td><code class="inline">imprimir</code></td><td>Muestra los elementos</td><td><strong>O(n)</strong></td><td>Visita cada nodo una vez.</td></tr>
+        </tbody>
+    </table>
+    </div>
+
+    <div class="callout callout-info">
+        <strong>💡 Truco:</strong> si guardas un atributo <code class="inline">int tamaño</code> y lo incrementas/decrementas en cada operación, <code class="inline">tamaño()</code> pasa a O(1).
+    </div>
+
+    <h3>5.4 Regla práctica para identificar la complejidad</h3>
+    <ul>
+        <li>¿El trabajo es siempre el mismo sin importar el tamaño? → <strong>O(1)</strong></li>
+        <li>¿Recorres todos los elementos una vez? → <strong>O(n)</strong></li>
+        <li>¿Recorres todos los elementos y por cada uno haces otro recorrido completo? → <strong>O(n²)</strong></li>
+        <li>¿Vas dividiendo el problema a la mitad en cada paso? → <strong>O(log n)</strong></li>
+    </ul>
+</section>
+
+<!-- ===== 6. ERRORES ===== -->
+<section class="section-card" id="parte6">
+    <h2>6. Errores Comunes a Evitar</h2>
+    <ul>
+        <li><strong>Mover <code class="inline">tope</code> para recorrer</strong> → pierdes la pila entera. Usa siempre <code class="inline">Nodo actual = tope;</code>.</li>
+        <li><strong>No comprobar si está vacía antes de <code class="inline">pop</code>/<code class="inline">peek</code></strong> → en esta implementación se lanza <code class="inline">IllegalStateException</code>.</li>
+        <li><strong>Mover <code class="inline">tope = tope.siguiente</code> antes de leer el dato</strong> en <code class="inline">pop</code> → pierdes el valor que querías devolver.</li>
+        <li><strong>Mal orden en <code class="inline">push</code></strong>: <code class="inline">nuevo.siguiente = tope;</code> debe ir <strong>antes</strong> de <code class="inline">tope = nuevo;</code>.</li>
+        <li><strong>Confundir <code class="inline">actual != null</code> con <code class="inline">actual.siguiente != null</code></strong>: el primero recorre todos los nodos, el segundo se detiene en el último.</li>
+    </ul>
+</section>
+
+<!-- ===== 7. SIGUIENTES PASOS ===== -->
+<section class="section-card" id="parte7">
+    <h2>7. Siguientes Pasos Recomendados</h2>
+    <ul>
+        <li><strong>Genéricos:</strong> cambia <code class="inline">int</code> por <code class="inline">&lt;T&gt;</code> para pilas de cualquier tipo.</li>
+        <li><strong>Pila con array:</strong> implementa una pila usando un <code class="inline">int[]</code> y un índice <code class="inline">tope</code> (más rápida y con mejor caché, capacidad fija).</li>
+        <li><strong>Pila que devuelve el mínimo en O(1):</strong> ejercicio de entrevistas usando una pila auxiliar.</li>
+        <li><strong><a href="colas-java.html">Cola con dos pilas</a>:</strong> ejercicio clásico de entrevistas.</li>
+        <li><strong>Usar las clases de Java:</strong> prueba <code class="inline">java.util.ArrayDeque</code> (recomendada) y <code class="inline">java.util.Stack</code> (legacy).</li>
+        <li><strong>Aplicaciones reales:</strong> deshacer/rehacer (Ctrl+Z), evaluación de expresiones, recorrido DFS, manejo de llamadas recursivas.</li>
+    </ul>
+</section>
+
+</main>
+
+<footer class="footer text-center">
+    <div class="container">
+        <p class="mb-0">Guía de Pilas en Java · Estructuras de Datos</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

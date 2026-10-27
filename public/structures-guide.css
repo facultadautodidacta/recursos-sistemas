@@ -1,0 +1,125 @@
+.data-structure-guide-page {
+    --guide-red: #c83b3e;
+    --guide-red-dark: #a92d31;
+    --guide-red-pale: #fff0ee;
+}
+
+.data-structure-guide-page .hero {
+    margin: 0;
+}
+
+.data-structure-guide-page .hero .container {
+    max-width: 960px;
+}
+
+.data-structure-guide-page .guide-content {
+    max-width: 960px;
+}
+
+.data-structure-guide-page .toc h2 {
+    margin-top: 0;
+    border: 0;
+}
+
+.data-structure-guide-page .toc ol {
+    columns: 2;
+    padding-left: 1.25rem;
+}
+
+.data-structure-guide-page .toc li {
+    padding: 3px 12px 3px 0;
+    break-inside: avoid;
+}
+
+.data-structure-guide-page .toc a {
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.data-structure-guide-page .toc a:hover {
+    text-decoration: underline;
+}
+
+.data-structure-guide-page .section-card h2 {
+    color: var(--guide-red-dark);
+    border-bottom-color: #f3d9d6;
+}
+
+.data-structure-guide-page .section-card h3 {
+    color: #514443;
+}
+
+.data-structure-guide-page pre .kw { color: #8ab4f8; }
+.data-structure-guide-page pre .type { color: #80cbc4; }
+.data-structure-guide-page pre .str { color: #ce9178; }
+.data-structure-guide-page pre .cmt { color: #8fbf8f; font-style: italic; }
+.data-structure-guide-page pre .num { color: #d7ba7d; }
+.data-structure-guide-page pre .fn { color: #dcdcaa; }
+
+.data-structure-guide-page .trace,
+.data-structure-guide-page .visual-cola,
+.data-structure-guide-page .visual-pila {
+    max-width: 100%;
+    padding: 16px 18px;
+    overflow-x: auto;
+    color: #e8e2e1;
+    background: #292526;
+    border: 1px solid #443c3d;
+    border-left: 4px solid var(--guide-red);
+    border-radius: 9px;
+    font: 13px/1.65 ui-monospace, SFMono-Regular, Consolas, monospace;
+    white-space: pre;
+}
+
+.data-structure-guide-page .visual-cola,
+.data-structure-guide-page .visual-pila {
+    text-align: left;
+}
+
+.data-structure-guide-page .callout {
+    margin: 18px 0;
+    padding: 15px 18px;
+    border-radius: 8px;
+}
+
+.data-structure-guide-page .callout-info {
+    color: #554c4b;
+    background: #f4f7fb;
+    border-left: 4px solid #7393bd;
+}
+
+.data-structure-guide-page .callout-warn {
+    color: #5d4841;
+    background: #fff4e8;
+    border-left: 4px solid #d28a44;
+}
+
+.data-structure-guide-page .callout-ok {
+    color: #3d5741;
+    background: #edf7ef;
+    border-left: 4px solid #68a16e;
+}
+
+.data-structure-guide-page .table thead th {
+    color: #fff;
+    background: var(--guide-red-dark);
+}
+
+.data-structure-guide-page .table-responsive {
+    margin: 16px 0 20px;
+}
+
+.data-structure-guide-page .inline {
+    color: var(--guide-red-dark);
+    background: var(--guide-red-pale);
+}
+
+@media (max-width: 600px) {
+    .data-structure-guide-page .toc ol {
+        columns: 1;
+    }
+
+    .data-structure-guide-page .hero {
+        padding-block: 34px;
+    }
+}
